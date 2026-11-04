@@ -196,11 +196,21 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     return () => window.clearInterval(interval);
   }, [loadMatches]);
 
-  // The API already returns live-only when sport === "LIVE". The client-side
-  // filter is a safety net: only matches whose normalized status is "live"
-  // are shown. Finished, scheduled, or cancelled manual matches never appear
-  // here, even if the API cache is stale.
-  const visibleMatches = matches;
+  // Finished and cancelled matches are NEVER shown on the customer site —
+  // the API already filters them, this is a client-side safety net so a
+  // stale cache can never leak a finished match into the UI.
+  const visibleMatches = matches.filter((match) => {
+    const raw = (match.status_text || match.status || "").trim().toLowerCase();
+    return !(
+      raw.includes("full time") ||
+      raw === "finished" ||
+      raw === "ft" ||
+      raw === "completed" ||
+      raw === "ended" ||
+      raw.includes("cancelled") ||
+      raw.includes("canceled")
+    );
+  });
   const options = marketOptions[market] || marketOptions["1X2"];
   const toggleBet = (key: string, match: SportScoreMatch, option: string, odds: string) => {
     // Anyone can select odds — the bet slip is a browsing tool. Sign-in is

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generatedMatches, normalizeStatus, isLiveMatch, isFinishedMatch, generateAllMarketOdds, generateFeaturedOdds, type SportsMatch } from "@/lib/sports-data";
+import { generatedMatches, normalizeStatus, isLiveMatch, isFinishedMatch, isShownOnSite, sortByBigness, generateAllMarketOdds, generateFeaturedOdds, type SportsMatch } from "@/lib/sports-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { settleOpenBets, FULL_TIME_MINUTE } from "@/lib/bets/settlement";
 
@@ -272,13 +272,20 @@ export async function GET(request: Request) {
       ? payload.matches.map((match) => normalizeMatch(match, sport))
       : [];
     const fallbackMatches = (generatedMatches[sport] || []).map(normalizeFallbackMatch);
-    const allMatches = [...databaseMatches, ...upstreamMatches, ...fallbackMatches];
+    // Hard rule: finished and cancelled matches are NEVER shown on the
+    // customer site. They only exist in the admin panel and settlement.
+    // This filter runs before featured/live slicing so a finished match
+    // can never leak into any view.
+    // Big fixtures rank first — the site showcases the marquee games.
+    const allMatches = sortByBigness(
+      [...databaseMatches, ...upstreamMatches, ...fallbackMatches]
+        .filter((match) => isShownOnSite(match.status, match.status_text))
+    );
     const featured = new URL(request.url).searchParams.get("featured") === "true";
     const liveOnly = new URL(request.url).searchParams.get("live") === "true";
 
     // Featured picks exclude anything currently live. Live filter keeps only
-    // matches whose normalized status is exactly "live" — finished, scheduled,
-    // and cancelled matches never appear in the live list.
+    // matches whose normalized status is exactly "live".
     let matches = allMatches;
     if (featured) {
       matches = matches.filter((match) => !isLiveMatch(match.status, match.status_text));
@@ -286,6 +293,7 @@ export async function GET(request: Request) {
     if (liveOnly) {
       matches = matches.filter((match) => isLiveMatch(match.status, match.status_text));
     }
+    matches = sortByBigness(matches);
 
     return NextResponse.json({
       matches: featured ? matches.slice(0, 3) : matches,

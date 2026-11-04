@@ -57,6 +57,52 @@ export function isFinishedMatch(status: string, status_text: string): boolean {
   return ["finished", "cancelled"].includes(normalizeStatus(status, status_text).status);
 }
 
+/** True when a match should be shown on the customer site. Finished/cancelled are hidden. */
+export function isShownOnSite(status: string, status_text: string): boolean {
+  return !isFinishedMatch(status, status_text);
+}
+
+/**
+ * Big-match fixtures — the marquee games shown big on the homepage.
+ * These are curated so the featured slider always shows the top leagues.
+ * When a real odds/fixture provider is connected, these keywords match
+ * against the feed's competition names.
+ */
+export const BIG_COMPETITIONS = [
+  "premier league",
+  "la liga",
+  "serie a",
+  "bundesliga",
+  "ligue 1",
+  "champions league",
+  "nba",
+  "atp finals",
+  "wta finals",
+  "wtt champions"
+];
+
+/** Score a match's "bigness" — big teams + big competitions rank highest. */
+export function isBigMatch(match: { competition?: string; home?: string; away?: string }): boolean {
+  const text = `${match.competition || ""} ${match.home || ""} ${match.away || ""}`.toLowerCase();
+  return BIG_COMPETITIONS.some((keyword) => text.includes(keyword));
+}
+
+/**
+ * Sort matches so big fixtures come first (then soonest kickoff).
+ * Live matches always rank ahead of scheduled ones.
+ */
+export function sortByBigness<T extends { competition?: string; home?: string; away?: string; status?: string; status_text?: string; time?: string }>(matches: T[]): T[] {
+  return [...matches].sort((a, b) => {
+    const aLive = isLiveMatch(a.status || "", a.status_text || "") ? 0 : 1;
+    const bLive = isLiveMatch(b.status || "", b.status_text || "") ? 0 : 1;
+    if (aLive !== bLive) return aLive - bLive;
+    const aBig = isBigMatch(a) ? 0 : 1;
+    const bBig = isBigMatch(b) ? 0 : 1;
+    if (aBig !== bBig) return aBig - bBig;
+    return new Date(a.time || 0).getTime() - new Date(b.time || 0).getTime();
+  });
+}
+
 /**
  * Display label for a match in the client UI — exactly what SportScore shows.
  * Manual (AlphaBet) matches use the same wording so there's no visual
