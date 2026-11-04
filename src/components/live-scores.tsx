@@ -166,6 +166,10 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     function isOutsideInteractive(target: HTMLElement | null) {
       if (!target) return false;
       if (target.closest(".betslip")) return false; // inside the slip
+      // The backdrop closes itself via its own onClick. Handled here too it
+      // would unmount on touchstart and the follow-up click could land on an
+      // odd behind it, silently adding a selection (ghost click).
+      if (target.closest(".betslip-backdrop")) return false;
       // Odds chips, tab strips and sliders keep the slip open.
       return !target.closest(
         ".sportscore-odds, .odds-row, .live-odds, .league-tabs, .sport-tabs, .market-tabs, .featured-track, .promo-strip, .shortcut-row"
@@ -440,6 +444,12 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       {authNotice && <div className="sportscore-auth-notice">{authNotice}</div>}
       {/* Bet slip is always available — guests can build a slip with no
           account. Sign-in is enforced when they tap "Place bet". */}
+      {/* Dimmed backdrop gives the slip a real "outside" to tap on mobile.
+          Without it the sheet hugs the screen edge and there's nowhere
+          obvious to press to dismiss it. */}
+      {authenticated !== null && slipOpen && (
+        <div className="betslip-backdrop" onClick={() => setSlipOpen(false)} aria-hidden="true" />
+      )}
       {authenticated !== null && (
         <aside className={`betslip ${slipOpen ? "is-open" : "is-collapsed"}`}>
           {!slipOpen && (
