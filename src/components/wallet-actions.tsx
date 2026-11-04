@@ -94,7 +94,7 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
         // Manual-review withdrawal: funds are reserved, staff will contact the user.
         setNotice({
           kind: "success",
-          text: data.message || `Withdrawal of ${money(value)} requested. Our team will contact you to process it. New balance: ${balance}.`
+          text: data.message || `Withdrawal of ${money(value)} requested. New balance: ${balance}.`
         });
       } else {
         setNotice({ kind: "success", text: `Withdrawal of ${money(value)} completed. New balance: ${balance}.` });
@@ -117,9 +117,7 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
 
   const helper = isDeposit
     ? "Secure checkout — card, bank transfer and mobile money."
-    : layout === "wallet"
-      ? null // the wallet page already shows the manual-review note below
-      : "Withdrawals are reviewed manually — our team will contact you.";
+    : null;
 
   return (
     <div className={shellClass}>

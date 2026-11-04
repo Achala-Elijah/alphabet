@@ -44,7 +44,6 @@ export default function CustomerWallet({
         <small>Wallet funds available for betting</small>
       </div>
       <WalletActions mode="customer" currency={currency} layout="wallet" />
-      <p className="wallet-review-note">Withdrawals are reviewed manually — our team will contact you to process your payout. Pending requests show in your history below.</p>
       <div className="wallet-history-heading"><span><Clock3 size={16} /> Transaction History</span></div>
       {initialTransactions.length === 0 ? <div className="wallet-empty">No transactions yet.</div> : <div className="wallet-transactions">
         {initialTransactions.map((transaction) => <div className="wallet-transaction" key={transaction.id}>

@@ -13,8 +13,7 @@ export type BetSlipState = {
 
 /**
  * Booking code — a short, human-readable reference that lets anyone reload
- * a bet slip. Format: AB + 6 chars from a safe alphabet (no 0/O/1/I to
- * avoid transcription errors). Example: ABX7K2P
+ * a bet slip. Format: 5 alphanumeric characters (e.g. X7K2P).
  */
 export type BookingCode = string;
 
@@ -22,11 +21,11 @@ export const BET_SLIP_STORAGE_KEY = "alphabet_bet_slip";
 const LEGACY_STORAGE_KEY = "betkiing_bet_slip";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const CODE_LENGTH = 6;
+export const CODE_LENGTH = 5;
 
 export function generateBookingCode(): BookingCode {
-  // AB + 6 chars from the safe alphabet (no 0/O/1/I).
-  let code = "AB";
+  // 5 chars from the safe alphabet (no 0/O/1/I).
+  let code = "";
   for (let i = 0; i < CODE_LENGTH; i++) {
     code += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
   }
@@ -39,19 +38,13 @@ export function normalizeBookingCode(input: string): BookingCode {
 
 export function isValidBookingCode(input: string): boolean {
   const normalized = normalizeBookingCode(input);
-  if (!normalized.startsWith("AB") || normalized.length !== "AB".length + CODE_LENGTH) return false;
-  const body = normalized.slice(2);
-  return body.split("").every((ch) => CODE_ALPHABET.includes(ch));
+  if (normalized.length !== CODE_LENGTH) return false;
+  return normalized.split("").every((ch) => CODE_ALPHABET.includes(ch));
 }
 
-/**
- * Human-friendly view of a code: ABX7K2P → "AB X7K2P" (prefix + body).
- * Used in the boxed-input UI (8 boxes, gap after the "AB" prefix).
- */
+/** Human-friendly view of a code (currently just normalized). */
 export function formatBookingCode(code: string): string {
-  const normalized = normalizeBookingCode(code);
-  if (normalized.length <= 2) return normalized;
-  return `${normalized.slice(0, 2)} ${normalized.slice(2)}`;
+  return normalizeBookingCode(code);
 }
 
 export function readBetSlip(): BetSlipState {

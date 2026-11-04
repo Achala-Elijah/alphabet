@@ -144,8 +144,7 @@ export async function POST(request: Request) {
     balance: nextBalance,
     reference,
     status: "pending",
-    // No automatic payout — staff review is required.
-    message: `Your withdrawal request of ${formatCustomerAmount(rounded, currency)} is pending. Our team will process it and contact you.`
+    message: `Your withdrawal request of ${formatCustomerAmount(rounded, currency)} is pending.`
   });
 }
 

@@ -17,7 +17,7 @@ function writerClient() {
  * Body: { selections: BetSlipSelection[], stake: string }
  *
  * Creates a shareable booking code for the current bet slip. Returns the
- * code (e.g. ABX7K2P). Codes expire after 7 days.
+ * 5-character code (e.g. X7K2P). Codes expire after 7 days.
  */
 export async function POST(request: Request) {
   try {
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     const writer = writerClient();
 
     // Generate a unique code (retry on the tiny chance of a collision).
+  // Codes are 5 alphanumeric characters (see src/lib/bet-slip.ts).
     let code = "";
     for (let attempt = 0; attempt < 5; attempt++) {
       code = generateBookingCode();
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
 }
 
 /**
- * GET /api/booking-codes?code=ABX7K2P
+ * GET /api/booking-codes?code=X7K2P
  *
  * Loads a bet slip by its booking code. Expired or unknown codes return 404.
  * Does not require sign-in — the code is the authorization.
@@ -82,7 +83,7 @@ export async function GET(request: Request) {
   try {
     const rawCode = new URL(request.url).searchParams.get("code") || "";
     if (!isValidBookingCode(rawCode)) {
-      return NextResponse.json({ error: "Enter a valid booking code (e.g. ABX7K2P)." }, { status: 400 });
+      return NextResponse.json({ error: "Enter a valid 5-character booking code (e.g. X7K2P)." }, { status: 400 });
     }
     const code = normalizeBookingCode(rawCode);
     const writer = writerClient();

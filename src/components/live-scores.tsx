@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, RefreshCw, Ticket, X, Share2, Copy, CheckCheck } from "lucide-react";
-import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, type BetSlipSelection } from "@/lib/bet-slip";
+import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, normalizeBookingCode, isValidBookingCode, formatBookingCode, CODE_LENGTH, type BetSlipSelection } from "@/lib/bet-slip";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
 import { minStake, minStakeLabel, normalizeCurrency } from "@/lib/limits";
 
@@ -111,6 +111,10 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   const [generatingCode, setGeneratingCode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [codeNotice, setCodeNotice] = useState("");
+  const [codeChars, setCodeChars] = useState<string[]>(Array(CODE_LENGTH).fill(""));
+  const [loadingCode, setLoadingCode] = useState(false);
+  const codeInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const codeValue = codeChars.join("");
 
   const loadMatches = useCallback(async () => {
     const apiSport = sport === "LIVE" ? "football" : sportNames[sport] || "football";
@@ -147,6 +151,29 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     const saved = readBetSlip();
     setSelectedBets(saved.selections);
     setStake(saved.stake);
+
+    // Booking codes are loaded inside the slip — a shared link like
+    // /?code=X7K2P auto-loads that slip here, SportyBet style.
+    const shared = new URLSearchParams(window.location.search).get("code");
+    if (shared) {
+      const normalized = normalizeBookingCode(shared).split("").slice(0, CODE_LENGTH);
+      setCodeChars([...normalized, ...Array(CODE_LENGTH - normalized.length).fill("")]);
+      setSlipOpen(true);
+    }
+  }, []);
+
+  // Paste a booking code anywhere on the page (SportyBet style).
+  useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      const pasted = event.clipboardData?.getData("text") || "";
+      if (pasted && isValidBookingCode(pasted)) {
+        event.preventDefault();
+        fillCodeBoxes(pasted);
+        setSlipOpen(true);
+      }
+    };
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
   }, []);
 
   useEffect(() => {
@@ -265,20 +292,22 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     );
   });
   const options = marketOptions[market] || marketOptions["1X2"];
+  // Selecting an odd never opens the slip by itself — it only updates the
+  // floating bubble count. The sheet opens exclusively when the user taps
+  // the bubble (SportyBet style).
   const toggleBet = (key: string, match: SportScoreMatch, option: string, odds: string) => {
-    // Anyone can select odds — the bet slip is a browsing tool. Sign-in is
-    // only needed when placing the bet (enforced in placeBet below).
     setAuthNotice("");
     setSelectedBets((current) => {
       const next = { ...current };
       if (next[key]) delete next[key];
       else {
         next[key] = { match: `${match.home || "Home"} v ${match.away || "Away"}`, matchId: match.slug || key, option, odds, market };
-        setSlipOpen(true);
+        // NOTE: no setSlipOpen(true) here — the slip stays put.
       }
       return next;
     });
   };
+
   const betslipItems = Object.entries(selectedBets);
   const combinedOdds = betslipItems.reduce((total, [, bet]) => total * Number(bet.odds), 1);
   const potentialReturn = Number(stake || 0) * combinedOdds;
@@ -363,6 +392,64 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       setCodeNotice("Could not copy — select the code and copy it manually.");
     }
   };
+
+  function fillCodeBoxes(text: string) {
+    const chars = normalizeBookingCode(text).split("").slice(0, CODE_LENGTH);
+    setCodeChars([...chars, ...Array(CODE_LENGTH - chars.length).fill("")]);
+  }
+
+  async function loadBookingCode() {
+    const code = normalizeBookingCode(codeValue);
+    if (!isValidBookingCode(code)) {
+      setCodeNotice(`Enter a valid ${CODE_LENGTH}-character booking code (e.g. X7K2P).`);
+      return;
+    }
+    setLoadingCode(true);
+    setCodeNotice("");
+    try {
+      const response = await fetch(`/api/booking-codes?code=${encodeURIComponent(code)}`, { cache: "no-store" });
+      const data = await response.json() as { selections?: BetSlipSelection[]; stake?: string; error?: string };
+      if (!response.ok) throw new Error(data.error || "Could not load this booking code.");
+      const state = deserializeBetSlipFromCode({
+        selections: (data.selections || []).map((sel) => ({ ...sel, odds: String(sel.odds) })),
+        stake: data.stake || "150"
+      });
+      setSelectedBets(state.selections);
+      setStake(state.stake);
+      setCodeNotice(`Loaded ${Object.keys(state.selections).length} selection${Object.keys(state.selections).length === 1 ? "" : "s"} from ${formatBookingCode(code)}.`);
+      // Toast-free, SportyBet-style: the slip just reflects the loaded state.
+      setCodeChars(Array(CODE_LENGTH).fill(""));
+    } catch (error) {
+      setCodeNotice(error instanceof Error ? error.message : "Could not load this booking code.");
+    } finally {
+      setLoadingCode(false);
+    }
+  }
+
+  function handleCodeCharChange(index: number, value: string) {
+    // Pasting all 5 chars into one box spreads across the boxes.
+    if (value.length > 1) {
+      fillCodeBoxes(value);
+      return;
+    }
+    const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    setCodeChars((current) => {
+      const next = [...current];
+      next[index] = cleaned;
+      return next;
+    });
+    if (cleaned && index < CODE_LENGTH - 1) codeInputRefs.current[index + 1]?.focus();
+  }
+
+  function handleCodeKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Backspace" && !codeChars[index] && index > 0) {
+      codeInputRefs.current[index - 1]?.focus();
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      void loadBookingCode();
+    }
+  }
 
   return (
     <section className="sportscore-panel" aria-live="polite">
@@ -459,58 +546,106 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
             </button>
           )}
           {slipOpen && <>
-          <div className="betslip-heading">
-            <span><Ticket size={18} /> BET SLIP <b>{betslipItems.length}</b></span>
-            <button className="betslip-collapse" onClick={() => setSlipOpen(false)} aria-label="Minimize bet slip">−</button>
-            <button onClick={() => setSlipOpen(false)} aria-label="Close bet slip"><X size={16} /></button>
-          </div>
-          <div className="betslip-selections">
-            {betslipItems.map(([key, bet]) => (
-              <div className="betslip-selection" key={key}>
-                <span><strong>{bet.option} @ {bet.odds}</strong><small>{bet.match}</small></span>
-                <button onClick={() => setSelectedBets((current) => { const next = { ...current }; delete next[key]; return next; })} aria-label={`Remove ${bet.match}`}><X size={14} /></button>
-              </div>
-            ))}
-            {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
-          </div>
-          {betslipItems.length > 0 && (
-            <button type="button" className="betslip-clear" onClick={() => setSelectedBets({})}>Clear all selections</button>
-          )}
-          <label className="betslip-stake">Stake ({currencySymbol(slipCurrency)})<input type="number" min={stakeMinimum} step="0.01" inputMode="decimal" value={stake} onChange={(event) => setStake(event.target.value)} aria-label={`Stake in ${slipCurrency}`} /></label>
-          {/* Minimum stake is always visible above the action button so the
-              user knows the floor before tapping "Place bet". */}
-          <p className={`betslip-min-stake ${stakeBelowMinimum ? "is-below" : ""}`}>
-            {stakeBelowMinimum ? `Minimum stake is ${formatCustomerAmount(stakeMinimum, slipCurrency)} — enter at least that amount.` : `${minStakeLabel(slipCurrency)}`}
-          </p>
-          <div className="betslip-footer"><span>Potential return <small>{betslipItems.length} selection{betslipItems.length === 1 ? "" : "s"}</small></span><strong>{formatCustomerAmount(potentialReturn, slipCurrency)}</strong></div>
-          <div className="betslip-booking-code">
-            <div className="betslip-booking-code-head">
-              <Share2 size={13} />
-              <span>Share this slip</span>
+          {/* The sheet itself scrolls — dragging anywhere on it moves through the
+              selections, stake, booking code and actions. The navbar and the
+              closed-state bubble are the only elements that stay put. */}
+          <div className="betslip-head">
+            <div className="betslip-heading">
+              <span><Ticket size={18} /> BET SLIP <b>{betslipItems.length}</b></span>
+              <button className="betslip-collapse" onClick={() => setSlipOpen(false)} aria-label="Minimize bet slip">−</button>
+              <button onClick={() => setSlipOpen(false)} aria-label="Close bet slip"><X size={16} /></button>
             </div>
-            <button type="button" className="booking-code-button" onClick={() => void shareBetSlip()} disabled={generatingCode || betslipItems.length === 0}>
-              {generatingCode ? "Generating code…" : bookingCode ? "Regenerate code" : "Get booking code"}
-            </button>
-            {bookingCode && (
-              <div className="booking-code-display">
-                <div className="booking-code-display-top">
-                  <code>{bookingCode.slice(0, 2)} {bookingCode.slice(2)}</code>
-                  <button type="button" onClick={() => void copyBookingCode()} aria-label="Copy booking code">
-                    {copied ? <CheckCheck size={14} /> : <Copy size={14} />}
-                  </button>
+            <div className="betslip-selections">
+              {betslipItems.map(([key, bet]) => (
+                <div className="betslip-selection" key={key}>
+                  <span><strong>{bet.option} @ {bet.odds}</strong><small>{bet.match}</small></span>
+                  <button onClick={() => setSelectedBets((current) => { const next = { ...current }; delete next[key]; return next; })} aria-label={`Remove ${bet.match}`}><X size={14} /></button>
                 </div>
-                <small>{copied ? "Copied — paste it anywhere" : "Expires in 7 days · anyone with the code can load this slip"}</small>
-              </div>
-            )}
-            {codeNotice && <p className="betslip-notice">{codeNotice}</p>}
-            <div className="betslip-load-code-row">
-              <span>Got a code from a friend?</span>
-              <a href="/load-code" className="load-code-link">Load it →</a>
+              ))}
+              {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
             </div>
+            {betslipItems.length > 0 && (
+              <button
+                type="button"
+                className="betslip-clear"
+                onClick={() => {
+                  setSelectedBets({});
+                  setBookingCode(null);
+                  setCodeChars(Array(CODE_LENGTH).fill(""));
+                  setCodeNotice("");
+                  setBetNotice("");
+                }}
+              >Clear all selections</button>
+            )}
+            <label className="betslip-stake">Stake ({currencySymbol(slipCurrency)})<input type="number" min={stakeMinimum} step="0.01" inputMode="decimal" value={stake} onChange={(event) => setStake(event.target.value)} aria-label={`Stake in ${slipCurrency}`} /></label>
+            {/* Minimum stake is always visible above the action button so the
+                user knows the floor before tapping "Place bet". */}
+            <p className={`betslip-min-stake ${stakeBelowMinimum ? "is-below" : ""}`}>
+              {stakeBelowMinimum ? `Minimum stake is ${formatCustomerAmount(stakeMinimum, slipCurrency)} — enter at least that amount.` : `${minStakeLabel(slipCurrency)}`}
+            </p>
+            <div className="betslip-footer"><span>Potential return <small>{betslipItems.length} selection{betslipItems.length === 1 ? "" : "s"}</small></span><strong>{formatCustomerAmount(potentialReturn, slipCurrency)}</strong></div>
+            {/* Booking code — SportyBet style, entirely inside the slip:
+                generate (share) and load (enter a code) live here, no
+                separate page. */}
+            <div className="betslip-booking-code">
+              <div className="betslip-booking-code-head">
+                <Share2 size={13} />
+                <span>Share this slip</span>
+              </div>
+              <button type="button" className="booking-code-button" onClick={() => void shareBetSlip()} disabled={generatingCode || betslipItems.length === 0}>
+                {generatingCode ? "Generating code…" : bookingCode ? "Regenerate code" : "Get booking code"}
+              </button>
+              {bookingCode && (
+                <div className="booking-code-display">
+                  <div className="booking-code-display-top">
+                    <code>{formatBookingCode(bookingCode)}</code>
+                    <button type="button" onClick={() => void copyBookingCode()} aria-label="Copy booking code">
+                      {copied ? <CheckCheck size={14} /> : <Copy size={14} />}
+                    </button>
+                  </div>
+                  <small>{copied ? "Copied — paste it anywhere" : "Expires in 7 days · anyone with the code can load this slip"}</small>
+                </div>
+              )}
+              <div className="betslip-load-code">
+                <span className="betslip-load-code-label">Or load a code from a friend</span>
+                <div className="betslip-code-input">
+                  {codeChars.map((char, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => { codeInputRefs.current[index] = el; }}
+                      value={char}
+                      onChange={(event) => handleCodeCharChange(index, event.target.value)}
+                      onKeyDown={(event) => handleCodeKeyDown(index, event)}
+                      onPaste={(event) => {
+                        const pasted = event.clipboardData.getData("text");
+                        if (pasted) { event.preventDefault(); fillCodeBoxes(pasted); }
+                      }}
+                      maxLength={1}
+                      inputMode="text"
+                      autoComplete="off"
+                      autoCapitalize="characters"
+                      spellCheck={false}
+                      className="betslip-code-char"
+                      disabled={loadingCode}
+                      aria-label={`Booking code character ${index + 1}`}
+                      placeholder="·"
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="betslip-load-code-button"
+                  onClick={() => void loadBookingCode()}
+                  disabled={loadingCode || !isValidBookingCode(codeValue)}
+                >
+                  {loadingCode ? "Loading slip…" : "Load slip"}
+                </button>
+              </div>
+              {codeNotice && <p className="betslip-notice">{codeNotice}</p>}
+            </div>
+            {betNotice && <p className="betslip-notice">{betNotice}</p>}
+            <button className="place-bet-button" onClick={() => void placeBet()} disabled={placing || betslipItems.length === 0 || !stake || Number(stake) <= 0 || stakeBelowMinimum}>{placing ? "Placing bet..." : stakeBelowMinimum ? `Min stake ${formatCustomerAmount(stakeMinimum, slipCurrency)}` : "Place bet"}</button>
           </div>
-          <a href="/load-code" className="load-code-link">Have a booking code? Load it →</a>
-          {betNotice && <p className="betslip-notice">{betNotice}</p>}
-          <button className="place-bet-button" onClick={() => void placeBet()} disabled={placing || betslipItems.length === 0 || !stake || Number(stake) <= 0 || stakeBelowMinimum}>{placing ? "Placing bet..." : stakeBelowMinimum ? `Min stake ${formatCustomerAmount(stakeMinimum, slipCurrency)}` : "Place bet"}</button>
           </>}
         </aside>
       )}

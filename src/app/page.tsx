@@ -17,7 +17,7 @@ const promos = [
   { title: "Casino Cashback", sub: "MORE REWARDS", art: "🎰", style: "promo-purple" }
 ];
 const shortcuts = [
-  { label: "All Sports", Icon: Trophy }, { label: "Live", Icon: Tv }, { label: "Load Code", Icon: Share2, href: "/load-code" },
+  { label: "All Sports", Icon: Trophy }, { label: "Live", Icon: Tv }, { label: "Share Slip", Icon: Share2 },
   { label: "Aviator", Icon: Plane }, { label: "Virtuals", Icon: Sparkles }, { label: "Verify Bet", Icon: Search }
 ];
 const sports = ["LIVE", "Football", "Table Tennis", "Tennis", "Basketball"];

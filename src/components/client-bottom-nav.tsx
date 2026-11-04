@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { House, Ticket, Gamepad2, CircleDollarSign, UserRound } from "lucide-react";
+import { House, Gamepad2, CircleDollarSign, UserRound } from "lucide-react";
 
 const items = [
   { label: "Home", href: "/", Icon: House, route: "/", nav: "" },
-  { label: "Load Code", href: "/load-code", Icon: Ticket, route: "/load-code", nav: "" },
   { label: "Games", href: "/?nav=games", Icon: Gamepad2, route: "/", nav: "games" },
   { label: "Open Bets", href: "/account?nav=bets", Icon: CircleDollarSign, route: "/account", nav: "bets" },
   { label: "Me", href: "/account", Icon: UserRound, route: "/account", nav: "" }
