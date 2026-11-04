@@ -157,13 +157,11 @@ a{color:inherit;text-decoration:none}
 .load-code-link{display:inline-flex;align-items:center;gap:4px;color:#6ee7a0;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
 .load-code-link:hover{text-decoration:underline}
 
-/* Load Code — boxed code entry (page) */
-.load-code-page{min-height:100vh;background:var(--bg);color:#f6f6f7;display:flex;flex-direction:column}
-.load-code-header{height:68px;background:var(--red);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px #0004}
-.load-code-back{display:inline-flex;align-items:center;gap:7px;color:#fff;font-size:13px;font-weight:600}
-.load-code-logo{font-size:24px;font-weight:900;letter-spacing:-1.5px;color:#fff}
-.load-code-logo span{font-weight:500}
-.load-code-main{flex:1 0 auto;display:grid;place-items:center;padding:28px 16px 60px}
+/* Load Code — boxed code entry (page)
+   Uses the same client-app shell as Home/Games: shared .client-header +
+   .client-main + bottom nav, so the page fits phones identically. */
+.load-code-page{min-height:100vh;background:#191a1e;color:#f6f6f7}
+.load-code-main{display:flex;flex-direction:column;align-items:center}
 .load-code-card{width:min(560px,100%);background:#24252b;border:1px solid #3a3b42;border-radius:18px;padding:28px 22px;box-shadow:0 20px 50px #0006}
 .load-code-hero{text-align:center}
 .load-code-icon{width:62px;height:62px;margin:0 auto 14px;border-radius:18px;background:#3a2029;border:1px solid #5a2a38;color:#ff7188;display:grid;place-items:center;box-shadow:0 0 0 8px #ff718814}
@@ -362,6 +360,70 @@ tbody tr:last-child td{border-bottom:0}
 .account-wallet-actions input::placeholder{color:#858791}
 .account-wallet-actions input:disabled{opacity:.6}
 .account-wallet-actions button:disabled{opacity:.6;cursor:wait}
+
+/* ── Cashier-style Deposit / Withdraw (all three wallet layouts) ──
+   Standard sportsbook pattern: Deposit/Withdraw tab switcher, quick-amount
+   chips, one labelled amount field, single full-width CTA. */
+.wallet-shell{margin:14px 0 0}
+.wallet-tabs{display:flex;gap:8px;background:#1b1c21;border:1px solid #34353d;border-radius:11px;padding:5px;margin-bottom:12px}
+.wallet-tab{flex:1;min-height:44px;border:0;border-radius:8px;background:transparent;color:#a8a9b0;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;transition:background .15s,color .15s}
+.wallet-tab:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.wallet-tab:disabled{opacity:.6;cursor:wait}
+.wallet-tab.is-active{background:var(--green);color:#082212}
+.wallet-tab:not(.is-active):hover{color:#fff;background:#26272e}
+.wallet-field{display:flex;flex-direction:column;gap:7px}
+.wallet-field-label{font-size:11px;font-weight:700;color:#c5c6cb;letter-spacing:.3px}
+.wallet-input-wrap{display:flex;align-items:center;gap:2px;height:52px;border:1px solid #4a4b54;border-radius:10px;background:#1b1c21;padding:0 14px;transition:border-color .15s,box-shadow .15s}
+.wallet-input-wrap:focus-within{border-color:var(--green);box-shadow:0 0 0 3px #42bd7030}
+.wallet-currency{color:#999ba4;font-size:15px;font-weight:800;white-space:nowrap}
+.wallet-input-wrap input{flex:1;min-width:0;height:100%;border:0;background:transparent;color:#fff;font-size:18px;font-weight:700;padding:0 6px;outline:none;-moz-appearance:textfield;appearance:textfield}
+.wallet-input-wrap input::-webkit-outer-spin-button,.wallet-input-wrap input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.wallet-input-wrap input::placeholder{color:#666873;font-weight:500}
+.wallet-input-wrap input:disabled{opacity:.6}
+.wallet-chips{display:flex;gap:8px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.wallet-chips::-webkit-scrollbar{display:none}
+.wallet-chip{flex:1 1 0;min-width:0;min-height:38px;border:1px solid #3a3b42;border-radius:8px;background:#24252b;color:#c5c6cb;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;padding:6px 4px;transition:border-color .15s,background .15s,color .15s}
+.wallet-chip:hover:not(:disabled){border-color:var(--green);color:#6ee7a0}
+.wallet-chip.is-active{border-color:var(--green);background:#193b29;color:#6ee7a0}
+.wallet-chip:disabled{opacity:.6;cursor:wait}
+.wallet-meta{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin:10px 0 0;color:#c5c6cb;font-size:11px;line-height:1.5;text-align:center}
+.wallet-meta-sep{color:#55565e}
+.wallet-meta-soft{color:#858791}
+.wallet-cta{width:100%;min-height:50px;margin-top:12px;border:0;border-radius:10px;background:var(--green);color:#082212;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:filter .15s}
+.wallet-cta:hover:not(:disabled){filter:brightness(1.06)}
+.wallet-cta:disabled{opacity:.6;cursor:wait}
+.wallet-helper{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 0 0;color:#858791;font-size:11px;line-height:1.5;text-align:center}
+.wallet-helper svg{flex-shrink:0;color:#68dc94}
+.wallet-banner{margin:12px 0 0;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;text-align:center}
+.wallet-banner.success{background:#193b29;color:#68dc94}
+.wallet-banner.error{background:#43232c;color:#ff8194}
+/* Compact variant inside the account summary card. */
+.wallet-shell.is-summary{margin:18px 0 0}
+.wallet-shell.is-summary .wallet-input-wrap{height:46px}
+.wallet-shell.is-summary .wallet-input-wrap input{font-size:16px}
+.wallet-shell.is-summary .wallet-cta{min-height:46px}
+.wallet-shell.is-summary .wallet-tab{min-height:40px}
+/* Light admin theme for the sub-admin wallet. */
+.wallet-shell.is-admin{margin:0}
+.wallet-shell.is-admin .wallet-tabs{background:#f5f6f8;border-color:#e1e2e7}
+.wallet-shell.is-admin .wallet-tab{color:#70727b}
+.wallet-shell.is-admin .wallet-tab.is-active{background:var(--green);color:#082212}
+.wallet-shell.is-admin .wallet-tab:not(.is-active):hover{background:#eceef2;color:#22242c}
+.wallet-shell.is-admin .wallet-field-label{color:#555762}
+.wallet-shell.is-admin .wallet-input-wrap{border-color:#e1e2e7;background:#fff}
+.wallet-shell.is-admin .wallet-input-wrap:focus-within{border-color:var(--green);box-shadow:0 0 0 3px #42bd7020}
+.wallet-shell.is-admin .wallet-currency{color:#70727b}
+.wallet-shell.is-admin .wallet-input-wrap input{color:#22242c}
+.wallet-shell.is-admin .wallet-input-wrap input::placeholder{color:#999ba3}
+.wallet-shell.is-admin .wallet-chip{border-color:#e1e2e7;background:#fff;color:#555762}
+.wallet-shell.is-admin .wallet-chip:hover:not(:disabled){border-color:var(--green);color:#12864a}
+.wallet-shell.is-admin .wallet-chip.is-active{border-color:var(--green);background:#e7f8ee;color:#12864a}
+.wallet-shell.is-admin .wallet-meta{color:#555762}
+.wallet-shell.is-admin .wallet-meta-soft{color:#70727b}
+.wallet-shell.is-admin .wallet-helper{color:#70727b}
+.wallet-shell.is-admin .wallet-helper svg{color:#12864a}
+.wallet-shell.is-admin .wallet-banner.success{background:#e7f8ee;color:#12864a}
+.wallet-shell.is-admin .wallet-banner.error{background:#ffeaed;color:#c3344d}
 .user-cell{display:flex;align-items:center;gap:9px}.mini-avatar{width:29px;height:29px;background:#fce9ed;color:#d73352;font-size:9px}.user-cell>div{display:flex;flex-direction:column;gap:4px}.user-cell strong{font-size:10px;color:#33343d}.user-cell small{font-size:9px;color:#999ba3}
 .win-celebration{position:fixed;inset:0;z-index:140;display:grid;place-items:center;padding:20px;background:rgba(9,9,12,.8);animation:win-fade .18s ease}
 .win-celebration-card{position:relative;overflow:hidden;width:min(350px,100%);padding:32px 22px 24px;border:1px solid #ffcf5a;border-radius:18px;background:linear-gradient(160deg,#2f2129,#1a1b20);box-shadow:0 24px 60px rgba(0,0,0,.55);text-align:center;color:#fff;animation:win-pop .35s cubic-bezier(.2,1.5,.4,1)}
@@ -1314,9 +1376,6 @@ video {
   .customer-account-settings button { height: 48px; font-size: 14px; }
 
   /* ── Load Code page ─────────────────────────────────────────── */
-  .load-code-header { height: 60px; padding: 0 12px; }
-  .load-code-logo { font-size: 21px; }
-  .load-code-main { padding: 20px 12px 60px; align-items: start; }
   .load-code-card { padding: 24px 16px; border-radius: 16px; }
   .load-code-hero h1 { font-size: 21px; }
   .load-code-hero p { font-size: 12px; }

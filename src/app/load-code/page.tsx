@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { ArrowLeft, LoaderCircle, Ticket, CheckCircle2, AlertCircle, Search, Trash2, Copy, CheckCheck, Share2 } from "lucide-react";
+import ClientHeader from "@/components/client-header";
+import ClientBottomNav from "@/components/client-bottom-nav";
 import { normalizeBookingCode, isValidBookingCode, deserializeBetSlipFromCode, writeBetSlip } from "@/lib/bet-slip";
 
 type LoadedSlip = {
@@ -129,13 +131,9 @@ export default function LoadCodePage() {
   }
 
   return (
-    <div className="load-code-page">
-      <header className="load-code-header">
-        <a href="/" className="load-code-back"><ArrowLeft size={17} /> Back to sportsbook</a>
-        <span className="load-code-logo">Alpha<span>Bet</span></span>
-      </header>
-
-      <main className="load-code-main">
+    <div className="client-app load-code-page">
+      <ClientHeader />
+      <main className="client-main load-code-main">
         <section className="load-code-card">
           <div className="load-code-hero">
             <div className="load-code-icon"><Ticket size={26} /></div>
@@ -231,6 +229,7 @@ export default function LoadCodePage() {
           </div>
         </section>
       </main>
+      <Suspense fallback={null}><ClientBottomNav /></Suspense>
     </div>
   );
 }

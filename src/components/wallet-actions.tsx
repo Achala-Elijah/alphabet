@@ -1,34 +1,55 @@
 "use client";
 
-import { ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, ShieldCheck, Clock3 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatCustomerAmount } from "@/lib/currency";
-import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, minStakeLabel, normalizeCurrency } from "@/lib/limits";
+import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
+import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, normalizeCurrency } from "@/lib/limits";
 
 /**
- * The single Deposit/Withdraw control used everywhere a wallet button appears:
+ * The single Deposit/Withdraw control used everywhere a wallet appears:
  *   layout="wallet"   -> customer wallet page (dark theme)
- *   layout="summary"  -> account page balance card
- *   layout="admin"    -> sub-admin wallet page (admin theme)
+ *   layout="summary"  -> account page balance card (dark theme)
+ *   layout="admin"    -> sub-admin wallet page (light admin theme)
+ *
+ * Shaped like a standard sportsbook cashier: a Deposit / Withdraw tab
+ * switcher, quick-amount chips, one labelled amount field and a single
+ * full-width call-to-action — instead of two competing buttons beside a
+ * bare input.
  *
  * mode="customer" withdraws through /api/wallet/withdraw,
  * mode="staff"    withdraws through /api/staff/wallet.
  * Deposits always go through /api/payments/deposit (gateway-agnostic).
  */
 type Layout = "wallet" | "summary" | "admin";
+type Action = "deposit" | "withdrawal";
 
 export default function WalletActions({ mode, currency, layout = "wallet" }: { mode: "customer" | "staff"; currency?: string | null; layout?: Layout }) {
   const router = useRouter();
+  const [action, setAction] = useState<Action>("deposit");
   const [amount, setAmount] = useState("");
-  const [busy, setBusy] = useState<"deposit" | "withdrawal" | null>(null);
+  const [busy, setBusy] = useState<Action | null>(null);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
   const isAdmin = layout === "admin";
   const normalized = normalizeCurrency(currency);
+  const limitsCurrency = isAdmin ? "GHS" : normalized;
+  const symbol = currencySymbol(limitsCurrency);
   const money = (value: number) => (isAdmin ? `GH₵ ${value.toFixed(2)}` : formatCustomerAmount(value, normalized));
 
-  async function run(action: "deposit" | "withdrawal") {
+  const floor = action === "deposit" ? minDeposit(limitsCurrency) : minWithdrawal(limitsCurrency);
+  // 50 / 100 / 200 / 500 / 1000 for cedi wallets, 5000 … 100000 for naira —
+  // all derived from the real minimum so the chips can never contradict it.
+  const quickAmounts = [1, 2, 4, 10, 20].map((multiplier) => minDeposit(limitsCurrency) * multiplier);
+
+  function switchAction(next: Action) {
+    if (next === action || busy) return;
+    setAction(next);
+    setAmount("");
+    setNotice(null);
+  }
+
+  async function run() {
     const parsed = Number(amount);
     if (!amount.trim() || !Number.isFinite(parsed) || parsed <= 0) {
       setNotice({ kind: "error", text: "Enter an amount greater than zero." });
@@ -39,18 +60,12 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
     setBusy(action);
     setNotice(null);
     try {
-      if (isDeposit) {
-        const minimum = minDeposit(isAdmin ? "GHS" : normalized);
-        if (value < minimum) {
-          setNotice({ kind: "error", text: `The minimum deposit is ${money(minimum)}.` });
-          return;
-        }
-      } else {
-        const minimum = minWithdrawal(isAdmin ? "GHS" : normalized);
-        if (value < minimum) {
-          setNotice({ kind: "error", text: `The minimum withdrawal is ${money(minimum)}.` });
-          return;
-        }
+      if (value < floor) {
+        setNotice({
+          kind: "error",
+          text: `The minimum ${isDeposit ? "deposit" : "withdrawal"} is ${money(floor)}.`
+        });
+        return;
       }
       const url = isDeposit ? "/api/payments/deposit" : mode === "staff" ? "/api/staff/wallet" : "/api/wallet/withdraw";
       const body = isDeposit || mode === "customer" ? { amount: value } : { action: "withdrawal", amount: value };
@@ -90,29 +105,94 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
     }
   }
 
-  const rowClass = isAdmin ? "staff-wallet-actions" : layout === "summary" ? "account-wallet-actions" : "wallet-actions";
-  const noticeClass = isAdmin && notice ? `wallet-action-notice ${notice.kind}` : "wallet-notice";
-  const depositClass = isAdmin ? "wallet-action-button deposit" : undefined;
-  const withdrawClass = isAdmin ? "wallet-action-button withdraw" : undefined;
-  const iconSize = isAdmin ? 15 : 17;
+  const shellClass = `wallet-shell${isAdmin ? " is-admin" : ""}${layout === "summary" ? " is-summary" : ""}`;
+  const isDeposit = action === "deposit";
+  const ctaLabel = isDeposit
+    ? (busy === "deposit" ? "Processing…" : `Deposit ${amount ? money(Number(amount) || 0) : ""}`)
+    : (busy === "withdrawal" ? "Processing…" : `Withdraw ${amount ? money(Number(amount) || 0) : ""}`);
 
-  // Shown directly under every Deposit/Withdraw control so the floor is
-  // visible before the user types anything. Rendered in the wallet's own
-  // currency — a naira account sees ₦5,000, a cedi account sees GH₵50.
-  const limitsCurrency = isAdmin ? "GHS" : normalized;
-  const minHint = isAdmin
-    ? `${minDepositLabel("GHS")} · ${minWithdrawalLabel("GHS")}`
-    : `${minDepositLabel(limitsCurrency)} · ${minWithdrawalLabel(limitsCurrency)}`;
+  const helper = isDeposit
+    ? "Secure checkout — card, bank transfer and mobile money."
+    : layout === "wallet"
+      ? null // the wallet page already shows the manual-review note below
+      : "Withdrawals are reviewed manually — our team will contact you.";
 
   return (
-    <>
-      <div className={rowClass}>
-        <input inputMode="decimal" aria-label="Amount" min={minDeposit(limitsCurrency)} placeholder={`Amount — min ${formatCustomerAmount(minDeposit(limitsCurrency), limitsCurrency)}`} value={amount} onChange={(event) => setAmount(event.target.value)} disabled={busy !== null} />
-        <button type="button" className={depositClass} onClick={() => void run("deposit")} disabled={busy !== null}>{busy === "deposit" ? "Processing..." : <><ArrowDownToLine size={iconSize} /> Deposit</>}</button>
-        <button type="button" className={withdrawClass} onClick={() => void run("withdrawal")} disabled={busy !== null}>{busy === "withdrawal" ? "Processing..." : <><ArrowUpFromLine size={iconSize} /> Withdraw</>}</button>
+    <div className={shellClass}>
+      {/* Cashier-style switcher: pick the direction first, then the amount. */}
+      <div className="wallet-tabs" role="tablist" aria-label="Wallet action">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={isDeposit}
+          className={`wallet-tab ${isDeposit ? "is-active" : ""}`}
+          onClick={() => switchAction("deposit")}
+          disabled={busy !== null}
+        >
+          <ArrowDownToLine size={15} /> Deposit
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={!isDeposit}
+          className={`wallet-tab ${!isDeposit ? "is-active" : ""}`}
+          onClick={() => switchAction("withdrawal")}
+          disabled={busy !== null}
+        >
+          <ArrowUpFromLine size={15} /> Withdraw
+        </button>
       </div>
-      <p className="wallet-limits">{minHint}</p>
-      {notice && <p className={noticeClass}>{notice.text}</p>}
-    </>
+
+      <label className="wallet-field">
+        <span className="wallet-field-label">Amount</span>
+        <span className="wallet-input-wrap">
+          <b className="wallet-currency" aria-hidden="true">{symbol}</b>
+          <input
+            inputMode="decimal"
+            aria-label={`Amount in ${limitsCurrency}`}
+            min={floor}
+            placeholder="0.00"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            disabled={busy !== null}
+          />
+        </span>
+      </label>
+
+      {/* One-tap amounts — the pattern every sportsbook cashier uses. */}
+      <div className="wallet-chips" role="group" aria-label="Quick amounts">
+        {quickAmounts.map((quick) => (
+          <button
+            key={quick}
+            type="button"
+            className={`wallet-chip ${Number(amount) === quick ? "is-active" : ""}`}
+            onClick={() => { setAmount(String(quick)); setNotice(null); }}
+            disabled={busy !== null}
+          >
+            {formatCustomerAmount(quick, limitsCurrency)}
+          </button>
+        ))}
+      </div>
+
+      <p className="wallet-meta">
+        {isDeposit ? minDepositLabel(limitsCurrency) : minWithdrawalLabel(limitsCurrency)}
+        <span className="wallet-meta-sep">·</span>
+        <span className="wallet-meta-soft">Max {formatCustomerAmount(1_000_000, limitsCurrency)}</span>
+      </p>
+
+      <button type="button" className="wallet-cta" onClick={() => void run()} disabled={busy !== null}>
+        {isDeposit ? <ArrowDownToLine size={17} /> : <ArrowUpFromLine size={17} />}
+        {ctaLabel}
+      </button>
+
+      {helper && (
+        <p className="wallet-helper">
+          {isDeposit ? <ShieldCheck size={13} /> : <Clock3 size={13} />}
+          {helper}
+        </p>
+      )}
+
+      {notice && <p className={`wallet-banner ${notice.kind}`}>{notice.text}</p>}
+    </div>
   );
 }
