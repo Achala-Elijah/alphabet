@@ -11,6 +11,7 @@ import MyMatches from "@/components/my-matches";
 import CustomerAccount from "@/components/customer-account";
 import WalletActions from "@/components/wallet-actions";
 import { formatCustomerAmount } from "@/lib/currency";
+import { minDeposit } from "@/lib/limits";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type StaffSession = { username: string; balance: number; role: "admin" | "sub_admin" };
@@ -106,7 +107,14 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
     </section>}
     <div className="account-list">
       {staff && <Link href="/sub-admin" className="account-item"><ShieldCheck size={31} strokeWidth={1.8} /><span className="account-label">{staff.role === "admin" ? "Admin Dashboard" : "Sub-admin Dashboard"}</span><small>Staff workspace</small><ChevronRight size={23} className="chevron" /></Link>}
-      {menu.map(({ label, detail, Icon, href }) => <Link href={href || (label === "My Matches" ? "/account?nav=matches" : label === "My Wallet" ? "/account?nav=wallet" : label === "My Account" ? "/account?nav=account" : label === "Transaction History" ? "/account?nav=transactions" : "#")} key={label} className="account-item"><Icon size={31} strokeWidth={1.8} /><span className="account-label">{label}</span>{detail && <small>{detail}</small>}<ChevronRight size={23} className="chevron" /></Link>)}
+      {menu.map(({ label, detail, Icon, href }) => {
+        // "My Wallet" advertises the deposit floor right on the menu row so
+        // the limit is visible before the user even opens the wallet.
+        const rowDetail = label === "My Wallet"
+          ? `Min deposit ${formatCustomerAmount(minDeposit(customer?.currency), customer?.currency)}`
+          : detail;
+        return <Link href={href || (label === "My Matches" ? "/account?nav=matches" : label === "My Wallet" ? "/account?nav=wallet" : label === "My Account" ? "/account?nav=account" : label === "Transaction History" ? "/account?nav=transactions" : "#")} key={label} className="account-item"><Icon size={31} strokeWidth={1.8} /><span className="account-label">{label}</span>{rowDetail && <small>{rowDetail}</small>}<ChevronRight size={23} className="chevron" /></Link>;
+      })}
       {customer ? <CustomerLogoutButton /> : null}
     </div>
     <footer className="client-footer">18+ &nbsp; • &nbsp; Play Responsibly<br />© 2026 AlphaBet. All rights reserved.</footer>

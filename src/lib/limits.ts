@@ -1,3 +1,5 @@
+import { formatCustomerAmount } from "./currency";
+
 /**
  * Money limits shared by the API routes and the UI, so a number shown to the
  * user can never drift from the number the server enforces.
@@ -65,4 +67,25 @@ export function minStake(currency?: string | null) {
 /** Normalize a currency string to the two supported codes. */
 export function normalizeCurrency(currency?: string | null): "GHS" | "NGN" {
   return currency === "NGN" ? "NGN" : "GHS";
+}
+
+/**
+ * Human-readable minimums for the UI. Always rendered in the wallet's OWN
+ * currency, so a naira account sees the naira equivalent (₦5,000 for the
+ * GH₵50 deposit floor) instead of a figure in a foreign currency.
+ *
+ * These are display-only labels — the numbers are the same ones the server
+ * enforces (deposits/withdrawals in wallet-actions.tsx, stakes in
+ * /api/bets), so the copy can never drift from the validation.
+ */
+export function minDepositLabel(currency?: string | null): string {
+  return `Minimum deposit ${formatCustomerAmount(minDeposit(currency), currency)}`;
+}
+
+export function minWithdrawalLabel(currency?: string | null): string {
+  return `Minimum withdrawal ${formatCustomerAmount(minWithdrawal(currency), currency)}`;
+}
+
+export function minStakeLabel(currency?: string | null): string {
+  return `Minimum stake ${formatCustomerAmount(minStake(currency), currency)}`;
 }

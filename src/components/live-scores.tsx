@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, RefreshCw, Ticket, X, Share2, Copy, CheckCheck } from "lucide-react";
 import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, type BetSlipSelection } from "@/lib/bet-slip";
+import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
+import { minStake, minStakeLabel, normalizeCurrency } from "@/lib/limits";
 
 type SportScoreMatch = {
   home?: string;
@@ -92,7 +94,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [selectedBets, setSelectedBets] = useState<Record<string, BetSlipSelection>>({});
-  const [stake, setStake] = useState("10");
+  const [stake, setStake] = useState("150");
   const slipHydrated = useRef(false);
   const [placing, setPlacing] = useState(false);
   const [betNotice, setBetNotice] = useState("");
@@ -102,6 +104,9 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   // collapsed on mobile; guests see it too — selection needs no account.
   const [slipOpen, setSlipOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  // Currency of the signed-in wallet — drives the stake label and the
+  // minimum-stake hint on the slip. Defaults to cedis for guests.
+  const [walletCurrency, setWalletCurrency] = useState<string>("GHS");
   const [bookingCode, setBookingCode] = useState<string | null>(null);
   const [generatingCode, setGeneratingCode] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -152,9 +157,53 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     writeBetSlip({ selections: selectedBets, stake });
   }, [selectedBets, stake]);
 
+  // Dismiss the bet slip like a real popup: tap/click anywhere outside it,
+  // or press Escape. Picking another odd is deliberately NOT treated as
+  // "outside" — the slip stays put while the user keeps adding selections.
+  useEffect(() => {
+    if (!slipOpen) return;
+
+    function isOutsideInteractive(target: HTMLElement | null) {
+      if (!target) return false;
+      if (target.closest(".betslip")) return false; // inside the slip
+      // Odds chips, tab strips and sliders keep the slip open.
+      return !target.closest(
+        ".sportscore-odds, .odds-row, .live-odds, .league-tabs, .sport-tabs, .market-tabs, .featured-track, .promo-strip, .shortcut-row"
+      );
+    }
+
+    function onOutside(event: MouseEvent | TouchEvent) {
+      if (isOutsideInteractive(event.target as HTMLElement | null)) setSlipOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setSlipOpen(false);
+    }
+
+    document.addEventListener("mousedown", onOutside);
+    document.addEventListener("touchstart", onOutside, { passive: true });
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onOutside);
+      document.removeEventListener("touchstart", onOutside);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [slipOpen]);
+
   useEffect(() => {
     fetch("/api/auth/customer", { cache: "no-store" })
-      .then((response) => setAuthenticated(response.ok))
+      .then(async (response) => {
+        if (!response.ok) { setAuthenticated(false); return; }
+        const value = await response.json() as { currency?: string | null } | null;
+        setAuthenticated(true);
+        if (value?.currency) {
+          setWalletCurrency(value.currency);
+          // Prefill the stake with the minimum for this wallet's currency so
+          // the Place bet button is never disabled out of the box (GH₵150 for
+          // cedi accounts, ₦15,000 for naira accounts).
+          const minimum = minStake(value.currency);
+          setStake((current) => (Number(current || 0) < minimum ? String(minimum) : current));
+        }
+      })
       .catch(() => setAuthenticated(false));
     // A returning winner who hasn't been greeted yet sees the trophy on the
     // homepage itself (not just on /account?nav=bets).
@@ -229,10 +278,24 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   const betslipItems = Object.entries(selectedBets);
   const combinedOdds = betslipItems.reduce((total, [, bet]) => total * Number(bet.odds), 1);
   const potentialReturn = Number(stake || 0) * combinedOdds;
+
+  // The slip shows every amount in the signed-in wallet's currency. Guests
+  // (and cedi accounts) see GH₵; a naira account sees ₦ with the ₦15,000
+  // floor instead of GH₵150.
+  const slipCurrency = normalizeCurrency(walletCurrency);
+  const stakeMinimum = minStake(slipCurrency);
+  const stakeBelowMinimum = Number(stake || 0) < stakeMinimum;
+
   const placeBet = async () => {
     if (placing) return; // double-click guard — the button is disabled anyway
-    setPlacing(true);
     setBetNotice("");
+    // Client-side mirror of the server rule so the user isn't sent a
+    // request we already know will be rejected.
+    if (stakeBelowMinimum) {
+      setBetNotice(minStakeLabel(slipCurrency) + ".");
+      return;
+    }
+    setPlacing(true);
     try {
       const authResponse = await fetch("/api/auth/customer", { cache: "no-store" });
       if (!authResponse.ok) {
@@ -252,7 +315,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       });
       const data = await response.json() as { error?: string; potentialReturn?: number };
       if (!response.ok) throw new Error(data.error || "The bet could not be placed.");
-      setBetNotice(`Bet placed successfully. Potential return: GH₵ ${Number(data.potentialReturn).toFixed(2)}`);
+      setBetNotice(`Bet placed successfully. Potential return: ${formatCustomerAmount(Number(data.potentialReturn), slipCurrency)}`);
       setSelectedBets({});
     } catch (error) {
       setBetNotice(error instanceof Error ? error.message : "The bet could not be placed.");
@@ -389,7 +452,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
           <div className="betslip-heading">
             <span><Ticket size={18} /> BET SLIP <b>{betslipItems.length}</b></span>
             <button className="betslip-collapse" onClick={() => setSlipOpen(false)} aria-label="Minimize bet slip">−</button>
-            <button onClick={() => setSelectedBets({})} aria-label="Clear bet slip"><X size={16} /></button>
+            <button onClick={() => setSlipOpen(false)} aria-label="Close bet slip"><X size={16} /></button>
           </div>
           <div className="betslip-selections">
             {betslipItems.map(([key, bet]) => (
@@ -400,8 +463,16 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
             ))}
             {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
           </div>
-          <label className="betslip-stake">Stake (GH₵)<input type="number" min="0.01" step="0.01" value={stake} onChange={(event) => setStake(event.target.value)} /></label>
-          <div className="betslip-footer"><span>Potential return <small>{betslipItems.length} selection{betslipItems.length === 1 ? "" : "s"}</small></span><strong>GH₵ {potentialReturn.toFixed(2)}</strong></div>
+          {betslipItems.length > 0 && (
+            <button type="button" className="betslip-clear" onClick={() => setSelectedBets({})}>Clear all selections</button>
+          )}
+          <label className="betslip-stake">Stake ({currencySymbol(slipCurrency)})<input type="number" min={stakeMinimum} step="0.01" inputMode="decimal" value={stake} onChange={(event) => setStake(event.target.value)} aria-label={`Stake in ${slipCurrency}`} /></label>
+          {/* Minimum stake is always visible above the action button so the
+              user knows the floor before tapping "Place bet". */}
+          <p className={`betslip-min-stake ${stakeBelowMinimum ? "is-below" : ""}`}>
+            {stakeBelowMinimum ? `Minimum stake is ${formatCustomerAmount(stakeMinimum, slipCurrency)} — enter at least that amount.` : `${minStakeLabel(slipCurrency)}`}
+          </p>
+          <div className="betslip-footer"><span>Potential return <small>{betslipItems.length} selection{betslipItems.length === 1 ? "" : "s"}</small></span><strong>{formatCustomerAmount(potentialReturn, slipCurrency)}</strong></div>
           <div className="betslip-booking-code">
             <div className="betslip-booking-code-head">
               <Share2 size={13} />
@@ -429,7 +500,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
           </div>
           <a href="/load-code" className="load-code-link">Have a booking code? Load it →</a>
           {betNotice && <p className="betslip-notice">{betNotice}</p>}
-          <button className="place-bet-button" onClick={() => void placeBet()} disabled={placing || betslipItems.length === 0 || !stake || Number(stake) <= 0}>{placing ? "Placing bet..." : "Place bet"}</button>
+          <button className="place-bet-button" onClick={() => void placeBet()} disabled={placing || betslipItems.length === 0 || !stake || Number(stake) <= 0 || stakeBelowMinimum}>{placing ? "Placing bet..." : stakeBelowMinimum ? `Min stake ${formatCustomerAmount(stakeMinimum, slipCurrency)}` : "Place bet"}</button>
           </>}
         </aside>
       )}

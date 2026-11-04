@@ -3,8 +3,8 @@
 import { ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
-import { minDeposit, minWithdrawal, minStake, normalizeCurrency } from "@/lib/limits";
+import { formatCustomerAmount } from "@/lib/currency";
+import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, minStakeLabel, normalizeCurrency } from "@/lib/limits";
 
 /**
  * The single Deposit/Withdraw control used everywhere a wallet button appears:
@@ -96,14 +96,18 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
   const withdrawClass = isAdmin ? "wallet-action-button withdraw" : undefined;
   const iconSize = isAdmin ? 15 : 17;
 
+  // Shown directly under every Deposit/Withdraw control so the floor is
+  // visible before the user types anything. Rendered in the wallet's own
+  // currency — a naira account sees ₦5,000, a cedi account sees GH₵50.
+  const limitsCurrency = isAdmin ? "GHS" : normalized;
   const minHint = isAdmin
-    ? `Min deposit GH₵ ${minDeposit("GHS").toFixed(2)} · min withdrawal GH₵ ${minWithdrawal("GHS").toFixed(2)}`
-    : `Min deposit ${money(minDeposit(normalized))} · min withdrawal ${money(minWithdrawal(normalized))} · min stake ${money(minStake(normalized))}`;
+    ? `${minDepositLabel("GHS")} · ${minWithdrawalLabel("GHS")}`
+    : `${minDepositLabel(limitsCurrency)} · ${minWithdrawalLabel(limitsCurrency)}`;
 
   return (
     <>
       <div className={rowClass}>
-        <input inputMode="decimal" aria-label="Amount" placeholder={`Amount (${isAdmin ? "GH₵" : currencySymbol(currency)})`} value={amount} onChange={(event) => setAmount(event.target.value)} disabled={busy !== null} />
+        <input inputMode="decimal" aria-label="Amount" min={minDeposit(limitsCurrency)} placeholder={`Amount — min ${formatCustomerAmount(minDeposit(limitsCurrency), limitsCurrency)}`} value={amount} onChange={(event) => setAmount(event.target.value)} disabled={busy !== null} />
         <button type="button" className={depositClass} onClick={() => void run("deposit")} disabled={busy !== null}>{busy === "deposit" ? "Processing..." : <><ArrowDownToLine size={iconSize} /> Deposit</>}</button>
         <button type="button" className={withdrawClass} onClick={() => void run("withdrawal")} disabled={busy !== null}>{busy === "withdrawal" ? "Processing..." : <><ArrowUpFromLine size={iconSize} /> Withdraw</>}</button>
       </div>

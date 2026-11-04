@@ -163,18 +163,20 @@ a{color:inherit;text-decoration:none}
 .load-code-back{display:inline-flex;align-items:center;gap:7px;color:#fff;font-size:13px;font-weight:600}
 .load-code-logo{font-size:24px;font-weight:900;letter-spacing:-1.5px;color:#fff}
 .load-code-logo span{font-weight:500}
-.load-code-main{flex:1;display:grid;place-items:center;padding:28px 16px 60px}
+.load-code-main{flex:1 0 auto;display:grid;place-items:center;padding:28px 16px 60px}
 .load-code-card{width:min(560px,100%);background:#24252b;border:1px solid #3a3b42;border-radius:18px;padding:28px 22px;box-shadow:0 20px 50px #0006}
 .load-code-hero{text-align:center}
 .load-code-icon{width:62px;height:62px;margin:0 auto 14px;border-radius:18px;background:#3a2029;border:1px solid #5a2a38;color:#ff7188;display:grid;place-items:center;box-shadow:0 0 0 8px #ff718814}
 .load-code-hero .auth-eyebrow{color:#ff7188}
 .load-code-hero h1{margin:10px 0 8px;font-size:24px;color:#fff;letter-spacing:-.5px}
 .load-code-hero p{margin:0;color:#a8a9b0;font-size:13px;line-height:1.6;max-width:380px;margin-left:auto;margin-right:auto}
-.load-code-code-input{display:flex;justify-content:center;gap:8px;margin:22px 0 8px}
-.load-code-char{width:46px;height:56px;border-radius:12px;border:2px solid #3a3b42;background:#1b1c21;color:#fff;text-align:center;font-size:22px;font-weight:800;letter-spacing:1px;outline:none;transition:border-color .15s,box-shadow .15s,transform .15s;text-transform:uppercase}
+/* The 8 code boxes share the available width instead of using a fixed
+   46px each — fixed widths overflowed by up to 47px on a 375px phone. */
+.load-code-code-input{display:flex;justify-content:center;gap:8px;margin:22px 0 8px;width:100%}
+.load-code-char{flex:1 1 0;min-width:0;max-width:54px;height:56px;border-radius:12px;border:2px solid #3a3b42;background:#1b1c21;color:#fff;text-align:center;font-size:22px;font-weight:800;letter-spacing:1px;outline:none;transition:border-color .15s,box-shadow .15s,transform .15s;text-transform:uppercase}
 .load-code-char:focus{border-color:var(--green);box-shadow:0 0 0 3px #42bd7030;transform:translateY(-1px)}
 .load-code-char:disabled{opacity:.6}
-.load-code-char-gap{margin-left:10px}
+.load-code-char-gap{margin-left:6px}
 .load-code-hint{text-align:center;color:#999ba4;font-size:11px;margin:0 0 18px}
 .load-code-hint code{background:#1b1c21;border:1px solid #333;border-radius:5px;padding:2px 6px;color:#6ee7a0;font-size:11px}
 .load-code-paste-note{margin:6px 0 0;color:#858791;font-size:11px}
@@ -215,7 +217,7 @@ a{color:inherit;text-decoration:none}
 .load-code-how ol{margin:0;padding-left:18px;color:#c5c6cb;font-size:12px;line-height:1.7}
 .load-code-how code{background:#24252b;padding:1px 5px;border-radius:4px;color:#6ee7a0;font-size:11px}
 .load-code-how small{display:block;margin-top:10px;color:#858791;font-size:11px;line-height:1.5}
-@media(max-width:480px){.load-code-char{width:38px;height:48px;font-size:18px}.load-code-summary{grid-template-columns:1fr 1fr}.load-code-summary>div:last-child{grid-column:span 2}}
+@media(max-width:480px){.load-code-char{height:48px;font-size:18px}.load-code-char-gap{margin-left:6px}.load-code-summary{grid-template-columns:1fr 1fr}.load-code-summary>div:last-child{grid-column:span 2}}
 
 /* SportScore live football feed */
 .sportscore-panel{margin:14px -12px 0;background:#1d1e23;border-top:1px solid #393a42;border-bottom:1px solid #393a42}
@@ -241,6 +243,13 @@ a{color:inherit;text-decoration:none}
 .betslip{position:fixed;z-index:30;left:50%;bottom:64px;width:min(560px,calc(100% - 24px));transform:translateX(-50%);background:#24252b;border:1px solid #4d515b;border-top:2px solid var(--green);border-radius:12px 12px 0 0;padding:11px 14px;box-shadow:0 -8px 28px #0008}.betslip.is-collapsed{left:auto;right:18px;bottom:82px;width:auto;padding:0;transform:none;border:0;background:transparent;box-shadow:none}.betslip-bubble{position:relative;width:58px;height:58px;border:2px solid var(--green);border-radius:50%;background:#24252b;color:#62d28b;display:grid;place-items:center;box-shadow:0 5px 22px #000b;cursor:pointer}.betslip-bubble b{position:absolute;top:-7px;right:-5px;min-width:23px;height:23px;padding:0 5px;border:2px solid #24252b;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-size:11px}.betslip-heading,.betslip-footer,.betslip-selection{display:flex;align-items:center;justify-content:space-between;gap:10px}.betslip-heading{font-size:12px;font-weight:800}.betslip-heading span{display:flex;align-items:center;gap:7px}.betslip-heading b{background:var(--green);color:#082212;border-radius:20px;padding:2px 6px;font-size:10px}.betslip-heading button{border:0;background:none;color:#a8a9b0;padding:3px}.betslip-collapse{font-size:22px;line-height:1}.betslip-selections{display:flex;flex-direction:column;gap:8px;margin:11px 0;max-height:210px;overflow:auto}.betslip-selection{background:#1b1c21;border-radius:6px;padding:8px 9px}.betslip-selection span{display:flex;flex-direction:column;gap:3px;min-width:0}.betslip-selection strong{font-size:12px;color:#62d28b}.betslip-selection small{font-size:10px;color:#a6a7ad;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px}.betslip-footer{border-top:1px solid #3a3b42;padding-top:10px;color:#c5c6cb;font-size:11px}.betslip-footer span{display:flex;flex-direction:column;gap:3px}.betslip-footer small{color:#858791}.betslip-footer strong{color:#fff;font-size:16px}
 .betslip-selection button{border:0;background:none;color:#a8a9b0;padding:3px}.betslip-stake{display:flex;align-items:center;justify-content:space-between;color:#c5c6cb;font-size:11px;margin:10px 0}.betslip-stake input{width:105px;height:31px;border:1px solid #4a4b54;border-radius:5px;background:#1b1c21;color:#fff;padding:0 8px;font-size:12px}.betslip-notice{margin:9px 0;color:#ffcb75;font-size:10px;line-height:1.4}.place-bet-button{width:100%;height:39px;border:0;border-radius:6px;background:var(--green);color:#082212;font-size:12px;font-weight:800;margin-top:11px}.place-bet-button:disabled{opacity:.6;cursor:wait}
 .betslip-empty{margin:12px 0;color:#a8a9b0;font-size:11px;text-align:center}
+/* "Clear all" — the X in the header now closes the slip, so clearing the
+   selections is its own explicit action. */
+.betslip-clear{display:block;width:100%;border:0;background:none;color:#999ba4;font-size:11px;padding:6px 0 2px;text-align:center;text-decoration:underline;text-underline-offset:3px}
+.betslip-clear:hover{color:#ff8194}
+/* Minimum-stake hint under the stake input on the bet slip. */
+.betslip-min-stake{margin:6px 0 0;padding:8px 10px;border-radius:7px;background:#1b1c21;border:1px solid #2c2d34;color:#999ba4;font-size:11px;line-height:1.45;text-align:center}
+.betslip-min-stake.is-below{background:#3b3020;border-color:#6b522d;color:#ffcf83;font-weight:700}
 .games-coming-soon{min-height:calc(100vh - 132px);padding:70px 28px 110px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.games-coming-soon-icon{width:76px;height:76px;border:1px solid #6b3b4a;border-radius:24px;background:#3a2029;color:#ff7188;display:grid;place-items:center;margin-bottom:22px;box-shadow:0 12px 35px #0005}.games-coming-soon .auth-eyebrow{color:#ff7188;font-size:11px;font-weight:800;letter-spacing:1.5px}.games-coming-soon h1{margin:13px 0 10px;color:#fff;font-size:28px;line-height:1.1}.games-coming-soon p{max-width:380px;margin:0;color:#a8a9b0;font-size:13px;line-height:1.7}.games-coming-soon button{margin-top:25px;border:0;border-radius:7px;background:var(--green);color:#082212;padding:11px 20px;font-weight:800}
 .sportscore-auth-notice{padding:10px 16px;background:#3a2029;color:#ffb5c2;border-top:1px solid #713344;font-size:11px;text-align:center}
 .sportscore-setup-notice{padding:10px 16px;background:#3b3020;color:#ffcf83;border-bottom:1px solid #6b522d;font-size:10px;line-height:1.45}
@@ -335,6 +344,9 @@ tbody tr:last-child td{border-bottom:0}
 .wallet-actions input:disabled{opacity:.6}
 .wallet-actions button:disabled{opacity:.6;cursor:wait}
 .wallet-limits{margin:6px 0 2px;font-size:10px;color:#999ba4;text-align:center}
+/* Deposit / withdrawal floors — must be legible on a phone, not a footnote. */
+@media(max-width:700px){.wallet-limits{font-size:12px;line-height:1.5;margin:8px 0 4px;color:#b6b7bf}}
+.wallet-limits strong{color:#fff}
 .account-wallet-actions input{flex:1;min-width:120px;height:38px;border:1px solid #4a4b54;border-radius:7px;background:#1b1c21;color:#fff;padding:0 12px;font-size:12px}
 .account-wallet-actions input::placeholder{color:#858791}
 .account-wallet-actions input:disabled{opacity:.6}
@@ -1511,9 +1523,9 @@ video {
     padding: 0 2px;
   }
 
-  .load-code-code-input { gap: 4px; }
-  .load-code-char { width: 40px; height: 50px; font-size: 19px; }
-  .load-code-char-gap { margin-left: 4px; }
+  .load-code-code-input { gap: 5px; }
+  .load-code-char { height: 50px; font-size: 19px; }
+  .load-code-char-gap { margin-left: 5px; }
 
   .load-code-summary { grid-template-columns: 1fr 1fr; }
   .load-code-summary > div:last-child { grid-column: span 2; }
@@ -1544,7 +1556,7 @@ video {
   .odds-row button span { font-size: 11px; }
   .odds-row button strong { font-size: 13px; }
   .client-bottom-nav a { font-size: 9px; }
-  .load-code-char { width: 34px; height: 46px; font-size: 17px; }
+  .load-code-char { height: 46px; font-size: 17px; }
 }
 
 /* ── Respect reduced-motion everywhere ───────────────────────── */
