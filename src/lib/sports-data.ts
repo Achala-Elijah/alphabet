@@ -57,9 +57,11 @@ export function isFinishedMatch(status: string, status_text: string): boolean {
   return ["finished", "cancelled"].includes(normalizeStatus(status, status_text).status);
 }
 
-/** True when a match should be shown on the customer site. Finished/cancelled are hidden. */
+/** True when a match should be shown on the customer site. Finished/cancelled are hidden.
+ *  Only live/upcoming are shown — anything else is hidden. */
 export function isShownOnSite(status: string, status_text: string): boolean {
-  return !isFinishedMatch(status, status_text);
+  const normalized = normalizeStatus(status, status_text).status;
+  return normalized === "live" || normalized === "scheduled";
 }
 
 /**

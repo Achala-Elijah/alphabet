@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { LayoutDashboard, Users, ArrowLeftRight, Menu, Bell, Search, ChevronDown, ArrowLeft, Ticket, UserPlus, Link as LinkIcon, ArrowUpCircle, SlidersHorizontal, CalendarDays, Wallet, HandCoins, type LucideIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { LayoutDashboard, Users, ArrowLeftRight, Menu, X, Bell, Search, ChevronDown, ArrowLeft, Ticket, UserPlus, Link as LinkIcon, ArrowUpCircle, SlidersHorizontal, CalendarDays, Wallet, HandCoins, type LucideIcon } from "lucide-react";
 
 type NavLink = { label: string; href: string; Icon: LucideIcon; external?: boolean };
 
@@ -32,6 +32,9 @@ const subAdminLinks: NavLink[] = [
 export default function AdminShell({ children, title, description }: { children: React.ReactNode; title: string; description?: string }) {
   const pathname = usePathname();
   const [role, setRole] = useState<"admin" | "sub_admin">("sub_admin");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     fetch("/api/staff/profile", { cache: "no-store" })
@@ -40,6 +43,33 @@ export default function AdminShell({ children, title, description }: { children:
       .catch(() => undefined);
   }, []);
 
+  // Close the mobile menu on any outside tap, and on Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function onOutside(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node;
+      if (sidebarRef.current?.contains(target)) return;
+      if (buttonRef.current?.contains(target)) return;
+      setMenuOpen(false);
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+
+    document.addEventListener("mousedown", onOutside);
+    document.addEventListener("touchstart", onOutside, { passive: true });
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onOutside);
+      document.removeEventListener("touchstart", onOutside);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  // Also close when the user navigates to a new page.
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
+
   const isAdmin = role === "admin";
   const workspaceLabel = isAdmin ? "ADMIN" : "SUB-ADMIN";
   const roleLabel = isAdmin ? "Admin" : "Sub Admin";
@@ -47,7 +77,8 @@ export default function AdminShell({ children, title, description }: { children:
   const links = isAdmin ? adminLinks : subAdminLinks;
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
+      {menuOpen && <div className="menu-backdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
+      <aside className={`admin-sidebar ${menuOpen ? "is-open" : ""}`} ref={sidebarRef}>
         <Link href="/" className="admin-logo">Alpha<span>Bet</span><small>{workspaceLabel}</small></Link>
         <div className="admin-profile"><div className="profile-avatar">{isAdmin ? "AD" : "SA"}</div><div><strong>{roleLabel}</strong><span>{roleDescription}</span></div><ChevronDown size={16} /></div>
         <p className="nav-caption">WORKSPACE</p>
@@ -58,7 +89,15 @@ export default function AdminShell({ children, title, description }: { children:
       </aside>
       <main className="admin-main">
         <header className="admin-topbar">
-          <button className="mobile-menu" aria-label="Menu"><Menu size={22} /></button>
+          <button
+            ref={buttonRef}
+            className={`mobile-menu ${menuOpen ? "is-open" : ""}`}
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
           <div className="breadcrumb">Dashboard <span>/</span> <strong>{title}</strong></div>
           <div className="topbar-actions"><button className="admin-search"><Search size={17} /><span>Search...</span><kbd>⌘ K</kbd></button><button className="notification"><Bell size={19} /><i /></button><div className="top-avatar">{isAdmin ? "AD" : "SA"}</div></div>
         </header>
