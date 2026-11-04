@@ -382,7 +382,7 @@ tbody tr:last-child td{border-bottom:0}
 .wallet-input-wrap input:disabled{opacity:.6}
 .wallet-chips{display:flex;gap:8px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .wallet-chips::-webkit-scrollbar{display:none}
-.wallet-chip{flex:1 1 0;min-width:0;min-height:38px;border:1px solid #3a3b42;border-radius:8px;background:#24252b;color:#c5c6cb;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;padding:6px 4px;transition:border-color .15s,background .15s,color .15s}
+.wallet-chip{flex:1 1 0;min-width:0;min-height:38px;border:1px solid #3a3b42;border-radius:8px;background:#24252b;color:#c5c6cb;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;padding:6px 2px;transition:border-color .15s,background .15s,color .15s;overflow:hidden;text-overflow:ellipsis}
 .wallet-chip:hover:not(:disabled){border-color:var(--green);color:#6ee7a0}
 .wallet-chip.is-active{border-color:var(--green);background:#193b29;color:#6ee7a0}
 .wallet-chip:disabled{opacity:.6;cursor:wait}

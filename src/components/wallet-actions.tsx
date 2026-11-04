@@ -38,9 +38,13 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
   const money = (value: number) => (isAdmin ? `GH₵ ${value.toFixed(2)}` : formatCustomerAmount(value, normalized));
 
   const floor = action === "deposit" ? minDeposit(limitsCurrency) : minWithdrawal(limitsCurrency);
-  // 50 / 100 / 200 / 500 / 1000 for cedi wallets, 5000 … 100000 for naira —
-  // all derived from the real minimum so the chips can never contradict it.
+  // Quick-amount chips, like every real cashier: bare numbers only — the
+  // currency prefix sits in the amount field above. A symbol on every chip
+  // (GH₵ 1,000.00) overflows 5-up on a phone, so chips stay short and the
+  // field shows the full value. Amounts derive from the enforced minimum.
   const quickAmounts = [1, 2, 4, 10, 20].map((multiplier) => minDeposit(limitsCurrency) * multiplier);
+  const chipLabel = (value: number) =>
+    value >= 1_000_000 ? `${value / 1_000_000}M` : value >= 1_000 ? `${value / 1_000}K` : String(value);
 
   function switchAction(next: Action) {
     if (next === action || busy) return;
@@ -168,8 +172,9 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
             className={`wallet-chip ${Number(amount) === quick ? "is-active" : ""}`}
             onClick={() => { setAmount(String(quick)); setNotice(null); }}
             disabled={busy !== null}
+            title={formatCustomerAmount(quick, limitsCurrency)}
           >
-            {formatCustomerAmount(quick, limitsCurrency)}
+            {chipLabel(quick)}
           </button>
         ))}
       </div>
