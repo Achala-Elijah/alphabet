@@ -61,6 +61,24 @@ export function formatBookingCode(code: string): string {
   return normalizeBookingCode(code);
 }
 
+/** Quick-add bridge: any card on the page (e.g. the homepage featured
+ *  slider) can push an odd into the bet slip without owning the slip state. */
+export const ADD_SELECTION_EVENT = "alphabet:add-selection";
+export const BET_SLIP_UPDATED_EVENT = "alphabet:bet-slip-updated";
+
+export type QuickSelection = {
+  match: string;
+  matchId: string;
+  option: string;
+  odds: string;
+  market?: string;
+};
+
+export function addSelectionToSlip(selection: QuickSelection) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<QuickSelection>(ADD_SELECTION_EVENT, { detail: selection }));
+}
+
 export function readBetSlip(): BetSlipState {
   if (typeof window === "undefined") return { selections: {}, stake: "150", mode: "multiple" };
   try {
@@ -78,6 +96,7 @@ export function readBetSlip(): BetSlipState {
 
 export function writeBetSlip(state: BetSlipState) {
   window.localStorage.setItem(BET_SLIP_STORAGE_KEY, JSON.stringify(state));
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(BET_SLIP_UPDATED_EVENT));
 }
 
 /**

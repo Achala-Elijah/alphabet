@@ -11,8 +11,8 @@ export const GHS_TO_NGN = 100;
 
 /** Minimum single deposit: GH₵ 50 / ₦5,000. Withdrawal flow statuses documented in withdrawal_requests migration. */
 export const MIN_DEPOSIT_GHS = 50;
-/** Minimum single withdrawal: GH₵ 50 / ₦5,000. */
-export const MIN_WITHDRAWAL_GHS = 50;
+/** Minimum single withdrawal: GH₵ 1,000 / ₦100,000. */
+export const MIN_WITHDRAWAL_GHS = 1000;
 /** Minimum stake for a single bet: GH₵ 150 / ₦15,000. */
 export const MIN_STAKE_GHS = 150;
 

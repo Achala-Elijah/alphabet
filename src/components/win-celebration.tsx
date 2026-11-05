@@ -1,6 +1,7 @@
 "use client";
 
 import { Trophy } from "lucide-react";
+import { formatCustomerAmount } from "@/lib/currency";
 
 export type WinCelebrationBet = {
   id: string;
@@ -22,7 +23,7 @@ const CONFETTI = [
 ];
 
 /** The "you won" pop-up shown right after a bet settles in the customer's favour. */
-export default function WinCelebration({ win, onClose }: { win: WinCelebrationBet; onClose: () => void }) {
+export default function WinCelebration({ win, onClose, currency = "GHS" }: { win: WinCelebrationBet; onClose: () => void; currency?: string }) {
   return (
     <div className="win-celebration" role="dialog" aria-modal="true" aria-label="Congratulations, you won">
       <div className="win-celebration-card">
@@ -34,9 +35,9 @@ export default function WinCelebration({ win, onClose }: { win: WinCelebrationBe
         <span className="win-celebration-trophy"><Trophy size={30} /></span>
         <h2>CONGRATULATIONS!</h2>
         <p>You won</p>
-        <strong className="win-celebration-amount">GH₵ {Number(win.payout || 0).toFixed(2)}</strong>
+        <strong className="win-celebration-amount">{formatCustomerAmount(win.payout, currency)}</strong>
         <small>
-          Bet {win.id.slice(0, 8).toUpperCase()} · Stake GH₵ {Number(win.stake || 0).toFixed(2)} · Return GH₵ {Number(win.potential_return || 0).toFixed(2)}
+          Bet {win.id.slice(0, 8).toUpperCase()} · Stake {formatCustomerAmount(win.stake, currency)} · Return {formatCustomerAmount(win.potential_return, currency)}
         </small>
         <button type="button" onClick={onClose}>AWESOME</button>
       </div>

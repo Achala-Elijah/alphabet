@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generatedMatches, normalizeStatus, isLiveMatch, isFinishedMatch, isShownOnSite, sortByBigness, generateAllMarketOdds, generateFeaturedOdds, type SportsMatch } from "@/lib/sports-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { settleOpenBets, FULL_TIME_MINUTE } from "@/lib/bets/settlement";
+import { rememberFixtures } from "@/lib/live-feed-cache";
 
 export const revalidate = 60;
 
@@ -230,11 +231,35 @@ export async function GET(request: Request) {
     );
   }
 
+  // Leg-state lookup (open-bets detail ticks) — `?matchIds=a,b,c` returns
+  // JUST those fixtures (id + score + status), including finished ones,
+  // without the site-wide feed filter that hides decided matches.
+  const matchIdsParam = new URL(request.url).searchParams.get("matchIds");
+  const requestedIds = matchIdsParam ? matchIdsParam.split(",").map((id) => id.trim()).filter(Boolean).slice(0, 100) : null;
+
   try {
     // Settle first: matches that ran out of time go to full time here (instead
     // of staying "live" forever) and their bets are decided in the same pass,
     // so the response below already reflects the final result.
     await settleOpenBets();
+
+    // Leg-state lookup by id (open-bets detail) — query across every sport,
+    // not just the requested one, so a settled tennis/basketball leg still
+    // reports its final score.
+    let requestedFixtures: SportsMatch[] = [];
+    if (requestedIds && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      const lookup = await createSupabaseServerClient();
+      const { data, error } = await lookup
+        .from("matches")
+        .select("id,sport,competition,home,away,home_score,away_score,status,kickoff,source,odds,current_minute")
+        .in("id", requestedIds);
+      if (!error) {
+        requestedFixtures = (data || []).map((match) => normalizeDatabaseMatch({
+          ...match,
+          scheduled_goals: runtimeScheduledGoals.get(match.id) || getScheduledGoals(match.odds)
+        }));
+      }
+    }
 
     let databaseMatches: SportsMatch[] = [];
     let databaseReady = false;
@@ -272,6 +297,27 @@ export async function GET(request: Request) {
       ? payload.matches.map((match) => normalizeMatch(match, sport))
       : [];
     const fallbackMatches = (generatedMatches[sport] || []).map(normalizeFallbackMatch);
+    // Keep the last-seen version of every fixture so settlement can still
+    // grade a bet after SportScore drops the finished match from its feed.
+    rememberFixtures([...databaseMatches, ...upstreamMatches, ...fallbackMatches]);
+    // Leg-state lookups bypass the hard rule below — the open-bets detail
+    // screen needs finished fixtures to show won/lost ticks on legs.
+    if (requestedIds) {
+      const wanted = new Set(requestedIds);
+      const bySlug = new Map<string, SportsMatch>();
+      for (const match of [...requestedFixtures, ...databaseMatches, ...upstreamMatches, ...fallbackMatches]) {
+        if (match.slug) bySlug.set(match.slug, match);
+      }
+      const fixtures = [...wanted].map((id) => bySlug.get(id)).filter((match): match is SportsMatch => Boolean(match));
+      return NextResponse.json({ matches: fixtures.map((match) => ({
+        slug: match.slug,
+        home_score: match.home_score,
+        away_score: match.away_score,
+        status: match.status,
+        status_text: match.status_text,
+        current_minute: match.current_minute
+      })), sport });
+    }
     // Hard rule: finished and cancelled matches are NEVER shown on the
     // customer site. They only exist in the admin panel and settlement.
     // This filter runs before featured/live slicing so a finished match

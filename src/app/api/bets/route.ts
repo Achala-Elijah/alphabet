@@ -188,7 +188,7 @@ export async function GET() {
         return NextResponse.json({ error: "Bet history is temporarily unavailable." }, { status: 500 });
       }
       const mine = settled.filter((bet) => bet.kind === "customer" && bet.accountId === customer.account_id);
-      return NextResponse.json({ bets: data || [], settled: mine });
+      return NextResponse.json({ bets: data || [], settled: mine, currency: customer.currency || "GHS" });
     }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Sign in to view your bets." }, { status: 401 });
@@ -198,7 +198,7 @@ export async function GET() {
       return NextResponse.json({ error: "Bet history is temporarily unavailable." }, { status: 500 });
     }
     const mine = settled.filter((bet) => bet.kind === "staff" && bet.userId === user.id);
-    return NextResponse.json({ bets: data || [], settled: mine });
+    return NextResponse.json({ bets: data || [], settled: mine, currency: "GHS" });
   } catch (error) {
     console.error("Bet history request failed:", error);
     return NextResponse.json({ error: "Bet history is temporarily unavailable." }, { status: 500 });

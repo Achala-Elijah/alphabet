@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { cachedFixtures } from "@/lib/live-feed-cache";
 
 /**
  * Bet settlement.
@@ -15,6 +16,10 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /** A match reaches full time after this many minutes. */
 export const FULL_TIME_MINUTE = 90;
+/** Fallback used only when the feed drops a fixture before reporting a final
+ *  status. Wall-clock time is generous because stoppage, breaks and overtime
+ *  all run longer than 90 minutes of play. */
+const AUTO_FINISH_MINUTES = 180;
 
 type Goal = { minute: number; team: "home" | "away" };
 type Selection = { matchId?: string; option?: string; odds?: number | string; market?: string };
@@ -232,6 +237,84 @@ async function creditPayout(db: SupabaseClient, kind: "customer" | "staff", bet:
   }
 }
 
+/** Sports the public feed covers — used to resolve feed-only bet legs. */
+const FEED_SPORTS = ["football", "tennis", "basketball", "table-tennis"];
+
+/**
+ * Resolve fixtures that are not in the `matches` table. SportScore keeps
+ * returning a fixture while it plays, so a bet placed on a feed-only match can
+ * still be settled from its final score even though it was never mirrored
+ * into our database.
+ */
+async function fetchFeedFixtures(wanted: Set<string>): Promise<MatchRow[]> {
+  const found = new Map<string, MatchRow>();
+  await Promise.all(FEED_SPORTS.map(async (sport) => {
+    try {
+      const response = await fetch(
+        `https://sportscore.com/api/widget/matches/?sport=${encodeURIComponent(sport)}&limit=50&src=betkiing`,
+        { headers: { Accept: "application/json" }, cache: "no-store" }
+      );
+      if (!response.ok) return;
+      const payload = await response.json() as {
+        matches?: Array<{
+          home?: string;
+          away?: string;
+          home_score?: number | null;
+          away_score?: number | null;
+          status?: string;
+          status_text?: string;
+          time?: string;
+          slug?: string;
+        }>;
+      };
+      for (const match of payload.matches || []) {
+        const slug = match.slug || `${sport}-${match.home || "home"}-${match.away || "away"}`.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        if (!wanted.has(slug) || found.has(slug)) continue;
+        const rawStatus = `${match.status || ""} ${match.status_text || ""}`.toLowerCase();
+        const kickoff = match.time || new Date().toISOString();
+        const elapsed = (Date.now() - new Date(kickoff).getTime()) / 60000;
+        const cancelled = rawStatus.includes("cancel");
+        const finished = !cancelled && (
+          rawStatus.includes("full time") ||
+          rawStatus.includes("finished") ||
+          rawStatus.includes("completed") ||
+          rawStatus.includes("ended") ||
+          /\bft\b/.test(rawStatus) ||
+          elapsed >= AUTO_FINISH_MINUTES
+        );
+        const live = !finished && (rawStatus.includes("live") || rawStatus.includes("half") || rawStatus.includes("in play"));
+        found.set(slug, {
+          id: slug,
+          status: cancelled ? "cancelled" : finished ? "finished" : live ? "live" : "scheduled",
+          kickoff,
+          current_minute: finished ? FULL_TIME_MINUTE : live ? Math.max(0, Math.floor(elapsed)) : null,
+          home_score: typeof match.home_score === "number" ? match.home_score : null,
+          away_score: typeof match.away_score === "number" ? match.away_score : null,
+          odds: null
+        });
+      }
+    } catch {
+      // Feed unavailable — other legs may still resolve, so keep going.
+    }
+  }));
+  return [...found.values()];
+}
+
+function matchRowFromCache(fixture: ReturnType<typeof cachedFixtures>[number]): MatchRow {
+  const kickoff = fixture.kickoff;
+  const elapsed = (Date.now() - new Date(kickoff).getTime()) / 60000;
+  const overTime = fixture.status !== "cancelled" && (fixture.status === "finished" || elapsed >= AUTO_FINISH_MINUTES);
+  return {
+    id: fixture.id,
+    status: overTime ? "finished" : fixture.status,
+    kickoff,
+    current_minute: overTime ? FULL_TIME_MINUTE : fixture.current_minute,
+    home_score: fixture.home_score,
+    away_score: fixture.away_score,
+    odds: null
+  };
+}
+
 /**
  * Settle every open bet whose selections have all been decided.
  * Returns only the bets this call actually settled, so callers can show a
@@ -264,6 +347,20 @@ export async function settleOpenBets(): Promise<SettledBet[]> {
     .select("id,status,kickoff,current_minute,home_score,away_score,odds")
     .in("id", matchIds);
   const matchById = new Map((matches || []).map((match) => [match.id, match as MatchRow]));
+
+  // Feed-only fixtures are not in the `matches` table. Resolve them from the
+  // last-seen feed cache first, then from the live SportScore feed itself.
+  const unresolved = matchIds.filter((id) => !matchById.has(id));
+  if (unresolved.length) {
+    for (const fixture of cachedFixtures(unresolved)) {
+      matchById.set(fixture.id, matchRowFromCache(fixture));
+    }
+    const stillMissing = unresolved.filter((id) => !matchById.has(id));
+    if (stillMissing.length) {
+      const feedFixtures = await fetchFeedFixtures(new Set(stillMissing));
+      for (const fixture of feedFixtures) matchById.set(fixture.id, fixture);
+    }
+  }
   if (!matchById.size) return [];
 
   const settled: SettledBet[] = [];

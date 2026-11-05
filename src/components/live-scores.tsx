@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, RefreshCw, Ticket, X, Share2, Copy, CheckCheck } from "lucide-react";
-import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, normalizeBookingCode, isValidBookingCode, formatBookingCode, CODE_LENGTH, type BetSlipSelection, type BetSlipMode } from "@/lib/bet-slip";
+import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, normalizeBookingCode, isValidBookingCode, formatBookingCode, CODE_LENGTH, ADD_SELECTION_EVENT, type QuickSelection, type BetSlipSelection, type BetSlipMode } from "@/lib/bet-slip";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
 import { minStake, minStakeLabel, normalizeCurrency } from "@/lib/limits";
+import WinCelebration, { type WinCelebrationBet } from "@/components/win-celebration";
+import BetPlaced, { type PlacedBetReceipt } from "@/components/bet-placed";
 
 type SportScoreMatch = {
   home?: string;
@@ -168,6 +170,9 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   // collapsed on mobile; guests see it too — selection needs no account.
   const [slipOpen, setSlipOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  // Post-placement receipt and the win congratulations overlay (home page).
+  const [receipt, setReceipt] = useState<PlacedBetReceipt | null>(null);
+  const [winQueue, setWinQueue] = useState<WinCelebrationBet[]>([]);
   // Currency of the signed-in wallet — drives the stake label and the
   // minimum-stake hint on the slip. Defaults to cedis for guests.
   const [walletCurrency, setWalletCurrency] = useState<string>("GHS");
@@ -175,10 +180,11 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   const [generatingCode, setGeneratingCode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [codeNotice, setCodeNotice] = useState("");
-  const [codeChars, setCodeChars] = useState<string[]>(Array(CODE_LENGTH).fill(""));
+  const [codeValue, setCodeValue] = useState("");
   const [loadingCode, setLoadingCode] = useState(false);
-  const codeInputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const codeValue = codeChars.join("");
+  // One plain text field (not OTP boxes) — normalize to the 5-char format
+  // as the user types so the value is always ready to load.
+  const setCodeFromText = (text: string) => setCodeValue(normalizeBookingCode(text).slice(0, CODE_LENGTH));
 
   const loadMatches = useCallback(async () => {
     const apiSport = sport === "LIVE" ? "football" : sportNames[sport] || "football";
@@ -221,8 +227,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     // /?code=X7K2P auto-loads that slip here, SportyBet style.
     const shared = new URLSearchParams(window.location.search).get("code");
     if (shared) {
-      const normalized = normalizeBookingCode(shared).split("").slice(0, CODE_LENGTH);
-      setCodeChars([...normalized, ...Array(CODE_LENGTH - normalized.length).fill("")]);
+      setCodeFromText(shared);
       setSlipOpen(true);
     }
   }, []);
@@ -301,37 +306,47 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
         }
       })
       .catch(() => setAuthenticated(false));
-    // A returning winner who hasn't been greeted yet sees the trophy on the
-    // homepage itself (not just on /account?nav=bets).
-    const checkReturningWin = async () => {
-      try {
-        const response = await fetch("/api/bets", { cache: "no-store" });
-        if (!response.ok) return;
-        const data = await response.json() as { settled?: Array<{ id: string; status: string; payout: number }>; bets?: Array<{ id: string; status: string; potential_return: number; stake: number }> };
-        const celebrated = JSON.parse(window.localStorage.getItem("alphabet_celebrated_wins") || window.localStorage.getItem("betkiing_celebrated_wins") || "[]") as string[];
-        const freshWins = (data.bets || []).filter((bet) => bet.status === "won" && !celebrated.includes(bet.id));
-        if (freshWins.length) {
-          // Persist so we don't greet again on refresh.
-          window.localStorage.setItem("alphabet_celebrated_wins", JSON.stringify([...new Set([...celebrated, ...freshWins.map((b) => b.id)])]));
-          // Import lazily to avoid a top-level cycle — WinCelebration is a leaf.
-          const { default: WinCelebration } = await import("@/components/win-celebration");
-          const overlay = document.createElement("div");
-          overlay.id = "win-celebration-root";
-          document.body.appendChild(overlay);
-          const ReactDOM = await import("react-dom/client");
-          const React = await import("react");
-          const root = ReactDOM.createRoot(overlay);
-          root.render(React.createElement(WinCelebration, {
-            win: { id: freshWins[0].id, payout: freshWins[0].potential_return, stake: freshWins[0].stake, potential_return: freshWins[0].potential_return },
-            onClose: () => { root.unmount(); overlay.remove(); }
-          }));
-        }
-      } catch {
-        // Non-fatal — the wins are also shown on /account?nav=bets.
-      }
-    };
-    if (window.location.pathname === "/") void checkReturningWin();
   }, []);
+
+  // A winner who hasn't been greeted yet sees the trophy on the homepage
+  // itself. The bet list settles open bets when it is fetched, so polling it
+  // here means the popup appears as soon as the last leg finishes — no
+  // refresh needed.
+  const checkForWins = useCallback(async () => {
+    try {
+      const response = await fetch("/api/bets", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json() as {
+        settled?: Array<{ id: string; status: string; payout: number; stake: number; potential_return: number }>;
+        bets?: Array<{ id: string; status: string; potential_return: number; stake: number }>;
+        currency?: string;
+      };
+      if (data.currency) setWalletCurrency(data.currency);
+      const celebrated = JSON.parse(window.localStorage.getItem("alphabet_celebrated_wins") || window.localStorage.getItem("betkiing_celebrated_wins") || "[]") as string[];
+      // Exact payout when this very poll settled the bet; otherwise the row's
+      // potential return for a win that landed earlier.
+      const settledWins = (data.settled || []).filter((bet) => bet.status === "won" && !celebrated.includes(bet.id));
+      const rowWins = (data.bets || []).filter((bet) => bet.status === "won" && !celebrated.includes(bet.id));
+      const fresh: WinCelebrationBet[] = settledWins.length
+        ? settledWins.map((bet) => ({ id: bet.id, payout: bet.payout, stake: bet.stake, potential_return: bet.potential_return || bet.payout }))
+        : rowWins.map((bet) => ({ id: bet.id, payout: bet.potential_return, stake: bet.stake, potential_return: bet.potential_return }));
+      if (fresh.length === 0) return;
+      // Persist so we don't greet again on refresh.
+      window.localStorage.setItem("alphabet_celebrated_wins", JSON.stringify([...new Set([...celebrated, ...fresh.map((bet) => bet.id)])]));
+      setWinQueue((current) => [...current, ...fresh.filter((bet) => !current.some((shown) => shown.id === bet.id))]);
+      window.dispatchEvent(new Event("alphabet:balance-updated"));
+      window.dispatchEvent(new Event("betkiing:balance-updated"));
+    } catch {
+      // Non-fatal — the wins are also shown on /account?nav=bets.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (authenticated !== true) return;
+    void checkForWins();
+    const interval = window.setInterval(() => void checkForWins(), 20_000);
+    return () => window.clearInterval(interval);
+  }, [authenticated, checkForWins]);
 
   useEffect(() => {
     setLoading(true);
@@ -408,6 +423,35 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     });
   };
 
+  // Featured cards on the homepage live outside this component — they push
+  // their odd here through a tiny window event so one slip serves the whole
+  // page (same behaviour as tapping an odd in the live list).
+  useEffect(() => {
+    function onQuickAdd(event: Event) {
+      const detail = (event as CustomEvent<QuickSelection>).detail;
+      if (!detail?.matchId || !detail.option || !detail.odds) return;
+      setAuthNotice("");
+      setSelectedBets((current) => {
+        const next = { ...current };
+        if (next[detail.matchId]) delete next[detail.matchId];
+        else {
+          const defaultStake = slipMode === "singles" ? String(minStake(normalizeCurrency(walletCurrency))) : undefined;
+          next[detail.matchId] = {
+            match: detail.match,
+            matchId: detail.matchId,
+            option: detail.option,
+            odds: detail.odds,
+            market: detail.market || "1X2",
+            stake: defaultStake
+          };
+        }
+        return next;
+      });
+    }
+    window.addEventListener(ADD_SELECTION_EVENT, onQuickAdd);
+    return () => window.removeEventListener(ADD_SELECTION_EVENT, onQuickAdd);
+  }, [slipMode, walletCurrency]);
+
   const betslipItems = Object.entries(selectedBets);
   const combinedOdds = betslipItems.reduce((total, [, bet]) => total * Number(bet.odds), 1);
 
@@ -462,12 +506,38 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
           }))
         })
       });
-      const data = await response.json() as { error?: string; potentialReturn?: number; count?: number };
+      const data = await response.json() as {
+        error?: string;
+        potentialReturn?: number;
+        count?: number;
+        bet?: { id?: string } | Array<{ id?: string }> | null;
+        bets?: Array<{ id?: string } | Array<{ id?: string }>>;
+      };
       if (!response.ok) throw new Error(data.error || "The bet could not be placed.");
-      setBetNotice(isSingles && data.count && data.count > 1
-        ? `Placed ${data.count} single bets. Total potential return: ${formatCustomerAmount(Number(data.potentialReturn), slipCurrency)}`
-        : `Bet placed successfully. Potential return: ${formatCustomerAmount(Number(data.potentialReturn), slipCurrency)}`);
+      // Snapshot the slip before it is cleared for the receipt.
+      const placedSelections = betslipItems.map(([, bet]) => bet);
+      const flatten = (rows: Array<{ id?: string } | Array<{ id?: string }>> | undefined) =>
+        (rows || []).flatMap((row) => (Array.isArray(row) ? row : [row])).map((row) => row.id).filter((id): id is string => Boolean(id));
+      const ids = flatten(data.bets);
+      if (ids.length === 0 && data.bet) ids.push(...flatten([data.bet]));
+      setReceipt({
+        ids,
+        count: Number(data.count) || placedSelections.length,
+        mode: slipMode,
+        stake: isSingles ? totalStake : Number(stake),
+        potentialReturn: Number(data.potentialReturn) || potentialReturn,
+        selections: placedSelections
+      });
+      setBetNotice("");
       setSelectedBets({});
+      setBookingCode(null);
+      setCodeNotice("");
+      setCodeValue("");
+      // Close the slip and let the receipt take over the screen, like a real
+      // sportsbook after "Place bet".
+      setSlipOpen(false);
+      window.dispatchEvent(new Event("alphabet:balance-updated"));
+      window.dispatchEvent(new Event("betkiing:balance-updated")); // stake just left the wallet
     } catch (error) {
       setBetNotice(error instanceof Error ? error.message : "The bet could not be placed.");
     } finally {
@@ -512,8 +582,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   };
 
   function fillCodeBoxes(text: string) {
-    const chars = normalizeBookingCode(text).split("").slice(0, CODE_LENGTH);
-    setCodeChars([...chars, ...Array(CODE_LENGTH - chars.length).fill("")]);
+    setCodeFromText(text);
   }
 
   async function loadBookingCode() {
@@ -537,36 +606,11 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       setSlipMode(state.mode || "multiple");
       setCodeNotice(`Loaded ${Object.keys(state.selections).length} selection${Object.keys(state.selections).length === 1 ? "" : "s"} from ${formatBookingCode(code)}.`);
       // Toast-free, SportyBet-style: the slip just reflects the loaded state.
-      setCodeChars(Array(CODE_LENGTH).fill(""));
+      setCodeValue("");
     } catch (error) {
       setCodeNotice(error instanceof Error ? error.message : "Could not load this booking code.");
     } finally {
       setLoadingCode(false);
-    }
-  }
-
-  function handleCodeCharChange(index: number, value: string) {
-    // Pasting all 5 chars into one box spreads across the boxes.
-    if (value.length > 1) {
-      fillCodeBoxes(value);
-      return;
-    }
-    const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    setCodeChars((current) => {
-      const next = [...current];
-      next[index] = cleaned;
-      return next;
-    });
-    if (cleaned && index < CODE_LENGTH - 1) codeInputRefs.current[index + 1]?.focus();
-  }
-
-  function handleCodeKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Backspace" && !codeChars[index] && index > 0) {
-      codeInputRefs.current[index - 1]?.focus();
-    }
-    if (event.key === "Enter") {
-      event.preventDefault();
-      void loadBookingCode();
     }
   }
 
@@ -747,7 +791,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
                   onClick={() => {
                     setSelectedBets({});
                     setBookingCode(null);
-                    setCodeChars(Array(CODE_LENGTH).fill(""));
+                    setCodeValue("");
                     setCodeNotice("");
                     setBetNotice("");
                   }}
@@ -841,37 +885,39 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
               <div className="betslip-load-code">
                 <span className="betslip-load-code-label">Or load a code from a friend</span>
                 <div className="betslip-code-input">
-                  {codeChars.map((char, index) => (
-                    <input
-                      key={index}
-                      ref={(el) => { codeInputRefs.current[index] = el; }}
-                      value={char}
-                      onChange={(event) => handleCodeCharChange(index, event.target.value)}
-                      onKeyDown={(event) => handleCodeKeyDown(index, event)}
-                      onPaste={(event) => {
-                        const pasted = event.clipboardData.getData("text");
-                        if (pasted) { event.preventDefault(); fillCodeBoxes(pasted); }
-                      }}
-                      maxLength={1}
-                      inputMode="text"
-                      autoComplete="off"
-                      autoCapitalize="characters"
-                      spellCheck={false}
-                      className="betslip-code-char"
-                      disabled={loadingCode}
-                      aria-label={`Booking code character ${index + 1}`}
-                      placeholder="·"
-                    />
-                  ))}
+                  <input
+                    type="text"
+                    value={codeValue}
+                    onChange={(event) => setCodeFromText(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void loadBookingCode();
+                      }
+                    }}
+                    onPaste={(event) => {
+                      const pasted = event.clipboardData.getData("text");
+                      if (pasted) { event.preventDefault(); fillCodeBoxes(pasted); }
+                    }}
+                    maxLength={CODE_LENGTH}
+                    inputMode="text"
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    className="betslip-code-field"
+                    disabled={loadingCode}
+                    aria-label="Booking code"
+                    placeholder="X7K2P"
+                  />
+                  <button
+                    type="button"
+                    className="betslip-load-code-button"
+                    onClick={() => void loadBookingCode()}
+                    disabled={loadingCode || !isValidBookingCode(codeValue)}
+                  >
+                    {loadingCode ? "Loading…" : "Load"}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  className="betslip-load-code-button"
-                  onClick={() => void loadBookingCode()}
-                  disabled={loadingCode || !isValidBookingCode(codeValue)}
-                >
-                  {loadingCode ? "Loading slip…" : "Load slip"}
-                </button>
               </div>
               {codeNotice && <p className="betslip-notice">{codeNotice}</p>}
             </div>
@@ -892,6 +938,8 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
           </>}
         </aside>
       )}
+      {receipt && <BetPlaced receipt={receipt} currency={slipCurrency} onClose={() => setReceipt(null)} />}
+      {winQueue.length > 0 && <WinCelebration win={winQueue[0]} currency={slipCurrency} onClose={() => setWinQueue((current) => current.slice(1))} />}
       <div className="sportscore-attribution">
         {lastUpdated && <span>Updated {new Date(lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
         <a href="https://sportscore.com/" rel="dofollow" target="_blank">Powered by SportScore</a>

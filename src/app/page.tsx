@@ -9,6 +9,15 @@ import MatchCard from "@/components/match-card";
 import SectionTitle from "@/components/section-title";
 import { featuredMatches } from "@/lib/mock-data";
 import LiveScores from "@/components/live-scores";
+import { addSelectionToSlip, readBetSlip, BET_SLIP_UPDATED_EVENT, type BetSlipSelection } from "@/lib/bet-slip";
+
+type FeaturedMatch = (typeof featuredMatches)[number] & { slug?: string };
+
+/** The bet slip keys selections by match slug (or a stable name pair when a
+ *  placeholder card has no slug yet) — the featured card must use the same. */
+function featuredMatchId(match: FeaturedMatch) {
+  return match.slug || `${match.home}|${match.away}`;
+}
 
 const promos = [
   { title: "Premier League", sub: "THE BIGGEST MATCHES", art: "⚽", style: "promo-blue" },
@@ -42,12 +51,22 @@ function HomeContent() {
   const [sport, setSport] = useState("Football");
   const [market, setMarket] = useState("1X2");
   const [featured, setFeatured] = useState(0);
-  const [apiFeatured, setApiFeatured] = useState<typeof featuredMatches>(featuredMatches);
+  const [apiFeatured, setApiFeatured] = useState<FeaturedMatch[]>(featuredMatches);
+  // Mirror the persisted slip so featured odds light up when selected, and
+  // dim again when the selection is removed anywhere else.
+  const [slipSelections, setSlipSelections] = useState<Record<string, BetSlipSelection>>({});
   const markets = marketsBySport[sport] || marketsBySport.Football;
   const selectSport = (nextSport: string) => {
     setSport(nextSport);
     setMarket(marketsBySport[nextSport][0]);
   };
+
+  useEffect(() => {
+    const sync = () => setSlipSelections(readBetSlip().selections);
+    sync();
+    window.addEventListener(BET_SLIP_UPDATED_EVENT, sync);
+    return () => window.removeEventListener(BET_SLIP_UPDATED_EVENT, sync);
+  }, []);
 
   useEffect(() => {
     if (gamesView) return;
@@ -73,6 +92,7 @@ function HomeContent() {
             awayCode: (match.away || "AT").slice(0, 2).toUpperCase(),
             time: date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "TBA",
             odds: apiOdds,
+            slug: match.slug,
             tag: index === 0 ? "FEATURED" : "BEST ODDS"
           };
         }));
@@ -98,7 +118,27 @@ function HomeContent() {
         {sport === "Football" && <section className="featured-section">
           <div className="featured-heading"><h2><span>♜</span> FEATURED MATCHES</h2><div className="slider-controls"><button onClick={() => setFeatured((featured + 2) % 3)} aria-label="Previous"><ChevronLeft /></button><button onClick={() => setFeatured((featured + 1) % 3)} aria-label="Next"><ChevronRight /></button></div><span className="best-odds-heading">BEST ODDS</span></div>
           <div className="league-tabs"><button className="selected">Top Football</button></div>
-          <div className="featured-track"><MatchCard match={apiFeatured[featured % apiFeatured.length]} /><MatchCard match={apiFeatured[(featured + 1) % apiFeatured.length]} /></div>
+          <div className="featured-track">{apiFeatured[featured % apiFeatured.length] && <MatchCard
+            match={apiFeatured[featured % apiFeatured.length]}
+            selectedOption={slipSelections[featuredMatchId(apiFeatured[featured % apiFeatured.length])]?.option}
+            onSelectOdd={(match, option, odds) => addSelectionToSlip({
+              match: `${match.home} v ${match.away}`,
+              matchId: featuredMatchId(match),
+              option,
+              odds,
+              market: "1X2"
+            })}
+          />}{apiFeatured[(featured + 1) % apiFeatured.length] && <MatchCard
+            match={apiFeatured[(featured + 1) % apiFeatured.length]}
+            selectedOption={slipSelections[featuredMatchId(apiFeatured[(featured + 1) % apiFeatured.length])]?.option}
+            onSelectOdd={(match, option, odds) => addSelectionToSlip({
+              match: `${match.home} v ${match.away}`,
+              matchId: featuredMatchId(match),
+              option,
+              odds,
+              market: "1X2"
+            })}
+          />}</div>
         </section>}
         <div className="sport-tabs">{sports.map(s => <button key={s} className={sport === s ? "active" : ""} onClick={() => selectSport(s)}>{s}</button>)}</div>
         <div className="market-tabs">{markets.map(m => <button key={m} className={market === m ? "active" : ""} onClick={() => setMarket(m)}>{m}</button>)}</div>
