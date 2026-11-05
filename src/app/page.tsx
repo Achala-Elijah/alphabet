@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Trophy, Tv, Share2, Plane, Sparkles, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import ClientHeader from "@/components/client-header";
 import ClientBottomNav from "@/components/client-bottom-nav";
@@ -29,20 +30,24 @@ const marketsBySport: Record<string, string[]> = {
   "Table Tennis": ["Match Winner", "Set Betting", "Total Sets", "Handicap"]
 };
 
-export default function HomePage() {
+function HomeContent() {
+  const router = useRouter();
+  // Derived straight from the URL so tapping Home <-> Games in the bottom
+  // nav re-renders the right view. Reading it once on mount (the old way)
+  // never updated after a client-side navigation, so the two tabs fought
+  // over which view was actually on screen.
+  const searchParams = useSearchParams();
+  const gamesView = searchParams.get("nav") === "games";
+
   const [sport, setSport] = useState("Football");
   const [market, setMarket] = useState("1X2");
   const [featured, setFeatured] = useState(0);
   const [apiFeatured, setApiFeatured] = useState<typeof featuredMatches>(featuredMatches);
-  const [gamesView, setGamesView] = useState(false);
   const markets = marketsBySport[sport] || marketsBySport.Football;
   const selectSport = (nextSport: string) => {
     setSport(nextSport);
     setMarket(marketsBySport[nextSport][0]);
   };
-  useEffect(() => {
-    setGamesView(new URLSearchParams(window.location.search).get("nav") === "games");
-  }, []);
 
   useEffect(() => {
     if (gamesView) return;
@@ -83,7 +88,7 @@ export default function HomePage() {
         <span className="auth-eyebrow">COMING SOON</span>
         <h1>Games are launching soon</h1>
         <p>We are preparing an exciting games experience for AlphaBet. Check back soon for more ways to play.</p>
-        <button onClick={() => { window.history.replaceState({}, "", "/"); setGamesView(false); }}>Back to sports</button>
+        <button onClick={() => router.replace("/")}>Back to sports</button>
       </main> : <main className="client-main">
         <div className="promo-strip">{promos.map(p => <button key={p.title} className={`promo-tile ${p.style}`}><span className="promo-art">{p.art}</span><span className="promo-title">{p.title}</span><small>{p.sub}</small></button>)}</div>
         <div className="shortcut-row">{shortcuts.map(({ label, Icon }) => <button key={label} onClick={() => {
@@ -101,5 +106,15 @@ export default function HomePage() {
       </main>}
       <Suspense fallback={null}><ClientBottomNav /></Suspense>
     </div>
+  );
+}
+
+export default function HomePage() {
+  // useSearchParams needs a Suspense boundary above it, otherwise the whole
+  // route bails out to client rendering.
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }
