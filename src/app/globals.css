@@ -189,6 +189,44 @@ a{color:inherit;text-decoration:none}
 .sportscore-team-names{display:flex;flex-direction:column;gap:9px;min-width:0;font-size:13px}
 .sportscore-team-names strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .sportscore-score{display:flex;align-items:center;gap:9px;min-width:62px;justify-content:flex-end;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* ── Live presentation ───────────────────────────────────────── */
+/* Pulsing red dot on LIVE badges — the tell-tale of an in-play game. */
+@keyframes sportscore-pulse{0%{box-shadow:0 0 0 0 #ef315259}70%{box-shadow:0 0 0 7px #ef315200}100%{box-shadow:0 0 0 0 #ef315200}}
+.sportscore-live-indicator,.sportscore-status.is-live i{animation:sportscore-pulse 1.5s infinite}
+.sportscore-minute{margin-left:3px;color:#ff6079;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+/* Score flash — fires for ~1.6s when a refetch brings a new scoreline. */
+@keyframes score-flash{0%{background:#42bd7059;transform:scale(1.2);border-radius:7px}100%{background:transparent;transform:scale(1)}}
+.sportscore-score.is-flash{animation:score-flash 1.6s ease}
+/* Tappable team row — opens the match detail screen. */
+.sportscore-match-teams.is-tappable{cursor:pointer;border-radius:9px;transition:background .15s;margin:-4px -6px;padding:14px 6px 8px}
+.sportscore-match-teams.is-tappable:hover{background:#ffffff08}
+.sportscore-match-teams.is-tappable:active{background:#ffffff12}
+
+/* ── Match detail: every market for one game ─────────────────── */
+.match-detail{position:fixed;inset:0;z-index:40;display:flex;align-items:stretch;justify-content:center}
+.match-detail-backdrop{position:absolute;inset:0;background:#000000ad}
+.match-detail-sheet{position:relative;display:flex;flex-direction:column;width:100%;max-width:560px;background:#17181d;overflow:hidden;box-shadow:0 24px 70px #000d}
+.match-detail-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1e1f26;border-bottom:1px solid #2b2c33;flex-shrink:0}
+.match-detail-head button{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border:1px solid #34353c;border-radius:9px;background:#23242b;color:#d7d8dd;transition:background .15s}
+.match-detail-head button:hover{background:#2c2d36}
+.match-detail-head span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700;color:#b8b9c1}
+.match-detail-scoreboard{display:flex;flex-direction:column;align-items:center;gap:9px;padding:16px 14px 14px;background:linear-gradient(180deg,#1d1e25,#17181d);border-bottom:1px solid #26272e;flex-shrink:0}
+.match-detail-teams{display:flex;align-items:center;gap:10px;width:100%}
+.match-detail-teams strong{flex:1 1 0;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.match-detail-teams strong:first-child{text-align:left}
+.match-detail-teams strong:last-child{text-align:right}
+.match-detail-score{display:flex;align-items:center;justify-content:center;gap:8px;min-width:92px;text-align:center;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.match-detail-scoreboard time{font-size:11px;color:#858791}
+.match-detail-markets{flex:1 1 auto;min-height:0;overflow-y:auto;padding:13px 13px calc(22px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.match-detail-market{margin-bottom:15px}
+.match-detail-market h3{margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#9b9da6}
+.match-detail-hint{margin:2px 0 0;text-align:center;font-size:10px;color:#75777f}
+/* Desktop: the detail screen becomes a centred card over a dimmed page. */
+@media (min-width: 701px){
+  .match-detail{align-items:center;padding:24px}
+  .match-detail-sheet{max-height:86dvh;border:1px solid #2b2c33;border-radius:16px}
+}
 .sportscore-odds{display:flex;gap:6px;margin-top:13px}.sportscore-odds button{flex:1;min-height:37px;border:1px solid #31533f;border-radius:6px;background:#22382d;color:#6bdb95;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font-size:11px}.sportscore-odds button strong{font-size:13px}.sportscore-odds button.is-selected{background:#42bd70;color:#0b2113;border-color:#42bd70}
 /* Correct score: a dense grid of scorelines instead of one long row, the
    way real sportsbooks lay out the 0-0 … 4-4 matrix. */
@@ -244,7 +282,6 @@ a{color:inherit;text-decoration:none}
 .betslip-min-stake.is-below{background:#3b3020;border-color:#6b522d;color:#ffcf83;font-weight:700}
 .games-coming-soon{min-height:calc(100vh - 132px);padding:70px 28px 110px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.games-coming-soon-icon{width:76px;height:76px;border:1px solid #6b3b4a;border-radius:24px;background:#3a2029;color:#ff7188;display:grid;place-items:center;margin-bottom:22px;box-shadow:0 12px 35px #0005}.games-coming-soon .auth-eyebrow{color:#ff7188;font-size:11px;font-weight:800;letter-spacing:1.5px}.games-coming-soon h1{margin:13px 0 10px;color:#fff;font-size:28px;line-height:1.1}.games-coming-soon p{max-width:380px;margin:0;color:#a8a9b0;font-size:13px;line-height:1.7}.games-coming-soon button{margin-top:25px;border:0;border-radius:7px;background:var(--green);color:#082212;padding:11px 20px;font-weight:800}
 .sportscore-auth-notice{padding:10px 16px;background:#3a2029;color:#ffb5c2;border-top:1px solid #713344;font-size:11px;text-align:center}
-.sportscore-setup-notice{padding:10px 16px;background:#3b3020;color:#ffcf83;border-bottom:1px solid #6b522d;font-size:10px;line-height:1.45}
 .sportscore-attribution{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 16px;color:#858791;font-size:10px}
 .sportscore-attribution a{color:#c5c7ce;text-decoration:underline;text-underline-offset:3px}
 @media(min-width:700px){.sportscore-panel{margin:14px 0 0;border:1px solid #393a42;border-radius:15px;overflow:hidden}.sportscore-match{padding-left:20px;padding-right:20px}}
@@ -1219,6 +1256,11 @@ video {
   .sportscore-heading h2 { font-size: 15px; }
   .sportscore-match { padding: 12px; }
   .sportscore-match-teams { gap: 10px; padding-top: 10px; }
+  .sportscore-match-teams.is-tappable { gap: 10px; }
+  /* Match detail fills the phone screen. */
+  .match-detail-sheet { max-width: 100%; }
+  .match-detail-score { min-width: 80px; font-size: 24px; }
+  .match-detail-teams strong { font-size: 13px; }
   .sportscore-team-names { font-size: 12px; gap: 7px; }
   .sportscore-score { min-width: 54px; font-size: 18px; }
   .sportscore-odds { gap: 5px; margin-top: 11px; }

@@ -80,6 +80,53 @@ const sportNames: Record<string, string> = {
   "Table Tennis": "table-tennis"
 };
 
+/** Stable key for a match — the card list and the match detail screen must
+ *  agree on it, or a selection made in one wouldn't highlight in the other. */
+function matchKeyFor(match: SportScoreMatch, index: number): string {
+  return match.slug || `${match.home}-${match.away}-${index}`;
+}
+
+/** "Live 67'", "Full time", "Upcoming" — one source of truth for every badge. */
+function matchStatus(match: SportScoreMatch) {
+  const rawStatus = (match.status_text || match.status || "scheduled").trim().toLowerCase();
+  const normalized = rawStatus.includes("full time") || rawStatus === "finished" || rawStatus === "ft" || rawStatus === "completed" || rawStatus === "ended"
+    ? "finished"
+    : rawStatus.includes("cancelled") || rawStatus.includes("canceled")
+      ? "cancelled"
+      : rawStatus.includes("live") || rawStatus.includes("in play") || rawStatus.includes("1st half") || rawStatus.includes("2nd half") || rawStatus.includes("half time")
+        ? "live"
+        : "scheduled";
+  const label = normalized === "finished"
+    ? "Full time"
+    : normalized === "cancelled"
+      ? "Cancelled"
+      : normalized === "live"
+        ? (match.status_text && /^\d/.test(match.status_text) ? match.status_text : "Live")
+        : "Upcoming";
+  return { isLive: normalized === "live", isFinished: normalized === "finished" || normalized === "cancelled", label };
+}
+
+/** Market order used by the match detail screen — the classic sportsbook
+ *  stack (result → totals → both teams → specials). */
+const DETAIL_MARKET_ORDER = [
+  "1X2", "Match Winner", "Moneyline",
+  "O/U", "Totals",
+  "DC",
+  "1st Half O/U", "1st Half",
+  "Handicap", "Game Handicap",
+  "Correct Score",
+  "Set Betting", "Total Sets", "Total Games"
+];
+
+/** Every market this match carries, in sportsbook order. */
+function detailMarkets(match: SportScoreMatch): string[] {
+  const available = Object.keys(match.market_odds || {});
+  if (available.length === 0) return DETAIL_MARKET_ORDER.filter((name) => name in marketOptions);
+  const ordered = DETAIL_MARKET_ORDER.filter((name) => available.includes(name));
+  const extras = available.filter((name) => !ordered.includes(name));
+  return [...ordered, ...extras];
+}
+
 /**
  * Odds for a selection come from the API (generateAllMarketOdds) so every
  * surface shows the same prices. Falls back to a stable default only if
@@ -104,6 +151,11 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [selectedBets, setSelectedBets] = useState<Record<string, BetSlipSelection>>({});
   const [stake, setStake] = useState("150");
+  // Match detail screen — the key of the match whose full market list is open.
+  const [detailKey, setDetailKey] = useState<string | null>(null);
+  // Set briefly when a live score changes so the numbers flash (see effect below).
+  const [flashKey, setFlashKey] = useState<string | null>(null);
+  const previousScores = useRef<Record<string, string>>({});
   // "multiple" = one stake on the whole accumulator. "singles" = every game
   // gets its own stake and is placed as its own bet, like a real sportsbook.
   const [slipMode, setSlipMode] = useState<BetSlipMode>("multiple");
@@ -305,10 +357,39 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     );
   });
   const options = marketOptions[market] || marketOptions["1X2"];
+
+  // Flash the score when it changes between refetches — the one cue that
+  // makes a live list feel alive instead of a static table.
+  useEffect(() => {
+    let changedKey: string | null = null;
+    matches.forEach((match, index) => {
+      if (typeof match.home_score !== "number" && typeof match.away_score !== "number") return;
+      const key = matchKeyFor(match, index);
+      const signature = `${match.home_score}:${match.away_score}`;
+      const previous = previousScores.current[key];
+      if (previous !== undefined && previous !== signature && !changedKey) changedKey = key;
+      previousScores.current[key] = signature;
+    });
+    if (!changedKey) return;
+    setFlashKey(changedKey);
+    const timer = window.setTimeout(() => setFlashKey((current) => (current === changedKey ? null : current)), 1600);
+    return () => window.clearTimeout(timer);
+  }, [matches]);
+
+  // Escape closes the match detail screen (the slip has its own listener).
+  useEffect(() => {
+    if (!detailKey) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDetailKey(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [detailKey]);
+
   // Selecting an odd never opens the slip by itself — it only updates the
   // floating bubble count. The sheet opens exclusively when the user taps
   // the bubble (SportyBet style).
-  const toggleBet = (key: string, match: SportScoreMatch, option: string, odds: string) => {
+  const toggleBet = (key: string, match: SportScoreMatch, option: string, odds: string, selectionMarket?: string) => {
     setAuthNotice("");
     setSelectedBets((current) => {
       const next = { ...current };
@@ -317,7 +398,10 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
         // In Singles mode a newly picked game already has its own stake box
         // pre-filled with the minimum, so the slip is placeable immediately.
         const defaultStake = slipMode === "singles" ? String(minStake(normalizeCurrency(walletCurrency))) : undefined;
-        next[key] = { match: `${match.home || "Home"} v ${match.away || "Away"}`, matchId: match.slug || key, option, odds, market, stake: defaultStake };
+        // selectionMarket comes from the match detail screen, where one match
+        // shows many markets at once — it must record WHICH market was picked
+        // or settlement would evaluate the leg against the wrong one.
+        next[key] = { match: `${match.home || "Home"} v ${match.away || "Away"}`, matchId: match.slug || key, option, odds, market: selectionMarket || market, stake: defaultStake };
         // NOTE: no setSlipOpen(true) here — the slip stays put.
       }
       return next;
@@ -486,6 +570,15 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     }
   }
 
+  // Resolved match for the open detail screen — looked up fresh on every
+  // render so the screen tracks refetched scores instead of a stale snapshot.
+  const detailMatchIndex = detailKey ? visibleMatches.findIndex((match, index) => matchKeyFor(match, index) === detailKey) : -1;
+  const detailMatch = detailMatchIndex >= 0 ? visibleMatches[detailMatchIndex] : null;
+  const detailStatus = detailMatch ? matchStatus(detailMatch) : null;
+  const detailMinute = detailMatch && detailStatus?.isLive && typeof detailMatch.current_minute === "number" && detailMatch.current_minute > 0 ? `${detailMatch.current_minute}'` : null;
+  const detailHasScore = typeof detailMatch?.home_score === "number" && typeof detailMatch?.away_score === "number";
+  const detailMarketList = detailMatch ? detailMarkets(detailMatch) : [];
+
   return (
     <section className="sportscore-panel" aria-live="polite">
       <div className="sportscore-heading">
@@ -499,7 +592,6 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       </div>
 
       {loading && <div className="sportscore-message">Loading {sport === "LIVE" ? "live football" : sport.toLowerCase()} matches…</div>}
-      {!loading && !error && setupRequired && <div className="sportscore-setup-notice">Live matches are available, but the AlphaBet database is not set up yet. An admin should run the Supabase schema before creating matches or placing bets.</div>}
       {!loading && error && (
         <div className="sportscore-message sportscore-error">
           <span>{error}</span>
@@ -516,34 +608,33 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       {!loading && !error && visibleMatches.map((match, index) => {
         // Match the SportScore wording exactly — "Live", "Full time",
         // "Upcoming", "Cancelled" — for every source, including manual ones.
-        const rawStatus = (match.status_text || match.status || "scheduled").trim().toLowerCase();
-        const normalized = rawStatus.includes("full time") || rawStatus === "finished" || rawStatus === "ft" || rawStatus === "completed" || rawStatus === "ended"
-          ? "finished"
-          : rawStatus.includes("cancelled") || rawStatus.includes("canceled")
-            ? "cancelled"
-            : rawStatus.includes("live") || rawStatus.includes("in play") || rawStatus.includes("1st half") || rawStatus.includes("2nd half") || rawStatus.includes("half time")
-              ? "live"
-              : "scheduled";
-        const statusLabel = normalized === "finished" ? "Full time" : normalized === "cancelled" ? "Cancelled" : normalized === "live" ? (match.status_text && /^\d/.test(match.status_text) ? match.status_text : "Live") : "Upcoming";
-        const isLive = normalized === "live";
-        const isFinished = normalized === "finished" || normalized === "cancelled";
+        const { isLive, isFinished, label: statusLabel } = matchStatus(match);
+        const minute = isLive && typeof match.current_minute === "number" && match.current_minute > 0 ? `${match.current_minute}'` : null;
         const hasScore = typeof match.home_score === "number" && typeof match.away_score === "number";
-        const matchKey = match.slug || `${match.home}-${match.away}-${index}`;
+        const matchKey = matchKeyFor(match, index);
         return (
           <article className="sportscore-match" key={matchKey}>
             <div className="sportscore-match-meta">
               <span className={isLive ? "sportscore-status is-live" : "sportscore-status"}>
-                {isLive && <i />}{statusLabel}
+                {isLive && <i />}{statusLabel}{minute && <b className="sportscore-minute">{minute}</b>}
               </span>
               <span>{match.competition || sport}</span>
               <time>{formatKickoff(match.time)}</time>
             </div>
-            <div className="sportscore-match-teams">
+            {/* Tapping the teams opens the match's full market list, like a
+                real sportsbook — the odds row below stays tappable on its own. */}
+            <div
+              className="sportscore-match-teams is-tappable"
+              role="button"
+              tabIndex={0}
+              onClick={() => setDetailKey(matchKey)}
+              onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setDetailKey(matchKey); } }}
+            >
               <div className="sportscore-team-names">
                 <strong>{match.home || "Home team"}</strong>
                 <strong>{match.away || "Away team"}</strong>
               </div>
-              <div className="sportscore-score" aria-label={hasScore ? `${match.home_score} to ${match.away_score}` : "Score not available"}>
+              <div className={`sportscore-score ${flashKey === matchKey ? "is-flash" : ""}`} aria-label={hasScore ? `${match.home_score} to ${match.away_score}` : "Score not available"}>
                 {hasScore ? <><span>{match.home_score}</span><span>:</span><span>{match.away_score}</span></> : <span>—</span>}
               </div>
             </div>
@@ -563,6 +654,66 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
           </article>
         );
       })}
+      {/* Match detail — every market for one game, sportsbook style. Sits at
+          z-40: above the page (nav is 30), below the bet-slip backdrop (44)
+          and sheet (55), so the slip stays usable while a match is open. */}
+      {detailMatch && detailStatus && (
+        <div className="match-detail" role="dialog" aria-modal="true" aria-label={`${detailMatch.home || "Home"} versus ${detailMatch.away || "Away"} markets`}>
+          <div className="match-detail-backdrop" onClick={() => setDetailKey(null)} aria-hidden="true" />
+          <div className="match-detail-sheet">
+            <header className="match-detail-head">
+              <button onClick={() => setDetailKey(null)} aria-label="Close match"><X size={18} /></button>
+              <span>{detailMatch.competition || sport}</span>
+            </header>
+            <div className="match-detail-scoreboard">
+              <span className={detailStatus.isLive ? "sportscore-status is-live" : "sportscore-status"}>
+                {detailStatus.isLive && <i />}{detailStatus.label}{detailMinute && <b className="sportscore-minute">{detailMinute}</b>}
+              </span>
+              <div className="match-detail-teams">
+                <strong>{detailMatch.home || "Home team"}</strong>
+                <span className={`match-detail-score ${flashKey === detailKey ? "is-flash" : ""}`} aria-label={detailHasScore ? `${detailMatch.home_score} to ${detailMatch.away_score}` : "Score not available"}>
+                  {detailHasScore ? <><span>{detailMatch.home_score}</span><span>:</span><span>{detailMatch.away_score}</span></> : <span>—</span>}
+                </span>
+                <strong>{detailMatch.away || "Away team"}</strong>
+              </div>
+              <time>{formatKickoff(detailMatch.time)}</time>
+            </div>
+            <div className="match-detail-markets">
+              {detailMarketList.map((marketName) => {
+                const marketOdds = detailMatch.market_odds?.[marketName];
+                const optionList = marketOptions[marketName] || Object.keys(marketOdds || {});
+                if (optionList.length === 0) return null;
+                return (
+                  <section className="match-detail-market" key={marketName}>
+                    <h3>{marketName}</h3>
+                    <div className={`sportscore-odds ${marketName === "Correct Score" ? "is-score-grid" : ""} ${detailStatus.isFinished ? "is-disabled" : ""}`}>
+                      {optionList.map((option) => {
+                        // Same key formula as the card list, so a pick made
+                        // here highlights (and un-picks) in both places.
+                        const betKey = `${detailKey}-${marketName}-${option}`;
+                        const selected = Boolean(selectedBets[betKey]);
+                        const odds = getOdds(detailMatch, marketName, option);
+                        return (
+                          <button
+                            key={option}
+                            disabled={detailStatus.isFinished}
+                            className={selected ? "is-selected" : ""}
+                            onClick={() => toggleBet(betKey, detailMatch, option, odds, marketName)}
+                          >
+                            <span>{option}</span>
+                            <strong>{selected ? <Check size={14} /> : odds}</strong>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              })}
+              <p className="match-detail-hint">Selections are added to your bet slip.</p>
+            </div>
+          </div>
+        </div>
+      )}
       {authNotice && <div className="sportscore-auth-notice">{authNotice}</div>}
       {/* Bet slip is always available — guests can build a slip with no
           account. Sign-in is enforced when they tap "Place bet". */}
