@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, RefreshCw, Ticket, X, Share2, Copy, CheckCheck } from "lucide-react";
-import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, normalizeBookingCode, isValidBookingCode, formatBookingCode, CODE_LENGTH, type BetSlipSelection } from "@/lib/bet-slip";
+import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, normalizeBookingCode, isValidBookingCode, formatBookingCode, CODE_LENGTH, type BetSlipSelection, type BetSlipMode } from "@/lib/bet-slip";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
 import { minStake, minStakeLabel, normalizeCurrency } from "@/lib/limits";
 
@@ -61,7 +61,16 @@ const marketOptions: Record<string, string[]> = {
   Moneyline: ["Home", "Away"],
   Totals: ["Over 180.5", "Under 180.5"],
   "1st Half": ["Home", "Draw", "Away"],
-  "Total Sets": ["Over 3.5", "Under 3.5"]
+  "Total Sets": ["Over 3.5", "Under 3.5"],
+  // Football-only: exact scorelines 0–4 x 0–4 plus "any other" buckets.
+  "Correct Score": [
+    "0-0", "0-1", "0-2", "0-3", "0-4",
+    "1-0", "1-1", "1-2", "1-3", "1-4",
+    "2-0", "2-1", "2-2", "2-3", "2-4",
+    "3-0", "3-1", "3-2", "3-3", "3-4",
+    "4-0", "4-1", "4-2", "4-3", "4-4",
+    "Any other home win", "Any other draw", "Any other away win"
+  ]
 };
 
 const sportNames: Record<string, string> = {
@@ -95,6 +104,9 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [selectedBets, setSelectedBets] = useState<Record<string, BetSlipSelection>>({});
   const [stake, setStake] = useState("150");
+  // "multiple" = one stake on the whole accumulator. "singles" = every game
+  // gets its own stake and is placed as its own bet, like a real sportsbook.
+  const [slipMode, setSlipMode] = useState<BetSlipMode>("multiple");
   const slipHydrated = useRef(false);
   const [placing, setPlacing] = useState(false);
   const [betNotice, setBetNotice] = useState("");
@@ -151,6 +163,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     const saved = readBetSlip();
     setSelectedBets(saved.selections);
     setStake(saved.stake);
+    setSlipMode(saved.mode || "multiple");
 
     // Booking codes are loaded inside the slip — a shared link like
     // /?code=X7K2P auto-loads that slip here, SportyBet style.
@@ -181,8 +194,8 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       slipHydrated.current = true;
       return;
     }
-    writeBetSlip({ selections: selectedBets, stake });
-  }, [selectedBets, stake]);
+    writeBetSlip({ selections: selectedBets, stake, mode: slipMode });
+  }, [selectedBets, stake, slipMode]);
 
   // Dismiss the bet slip like a real popup: tap/click anywhere outside it,
   // or press Escape. Picking another odd is deliberately NOT treated as
@@ -301,7 +314,10 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       const next = { ...current };
       if (next[key]) delete next[key];
       else {
-        next[key] = { match: `${match.home || "Home"} v ${match.away || "Away"}`, matchId: match.slug || key, option, odds, market };
+        // In Singles mode a newly picked game already has its own stake box
+        // pre-filled with the minimum, so the slip is placeable immediately.
+        const defaultStake = slipMode === "singles" ? String(minStake(normalizeCurrency(walletCurrency))) : undefined;
+        next[key] = { match: `${match.home || "Home"} v ${match.away || "Away"}`, matchId: match.slug || key, option, odds, market, stake: defaultStake };
         // NOTE: no setSlipOpen(true) here — the slip stays put.
       }
       return next;
@@ -310,14 +326,25 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
 
   const betslipItems = Object.entries(selectedBets);
   const combinedOdds = betslipItems.reduce((total, [, bet]) => total * Number(bet.odds), 1);
-  const potentialReturn = Number(stake || 0) * combinedOdds;
 
   // The slip shows every amount in the signed-in wallet's currency. Guests
   // (and cedi accounts) see GH₵; a naira account sees ₦ with the ₦15,000
   // floor instead of GH₵150.
   const slipCurrency = normalizeCurrency(walletCurrency);
   const stakeMinimum = minStake(slipCurrency);
-  const stakeBelowMinimum = Number(stake || 0) < stakeMinimum;
+  const isSingles = slipMode === "singles";
+
+  // Multiple: one stake covers the whole accumulator.
+  // Singles: every game carries its own stake — total staked is the sum,
+  // and the return is each game's stake x its odds added together.
+  const singlesStakes = betslipItems.map(([, bet]) => Number(bet.stake || 0));
+  const totalStake = isSingles ? singlesStakes.reduce((total, value) => total + (Number.isFinite(value) ? value : 0), 0) : Number(stake || 0);
+  const potentialReturn = isSingles
+    ? betslipItems.reduce((total, [, bet]) => total + (Number(bet.stake) || 0) * Number(bet.odds), 0)
+    : Number(stake || 0) * combinedOdds;
+  const stakeBelowMinimum = isSingles
+    ? singlesStakes.some((value) => !Number.isFinite(value) || value <= 0) || totalStake < stakeMinimum
+    : Number(stake || 0) < stakeMinimum;
 
   const placeBet = async () => {
     if (placing) return; // double-click guard — the button is disabled anyway
@@ -325,7 +352,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     // Client-side mirror of the server rule so the user isn't sent a
     // request we already know will be rejected.
     if (stakeBelowMinimum) {
-      setBetNotice(minStakeLabel(slipCurrency) + ".");
+      setBetNotice(isSingles ? `Your single stakes must add up to at least ${formatCustomerAmount(stakeMinimum, slipCurrency)}.` : minStakeLabel(slipCurrency) + ".");
       return;
     }
     setPlacing(true);
@@ -342,13 +369,20 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          stake: Number(stake),
-          selections: betslipItems.map(([, bet]) => ({ ...bet, odds: Number(bet.odds) }))
+          mode: slipMode,
+          stake: isSingles ? totalStake : Number(stake),
+          selections: betslipItems.map(([, bet]) => ({
+            ...bet,
+            odds: Number(bet.odds),
+            ...(isSingles ? { stake: Number(bet.stake) } : {})
+          }))
         })
       });
-      const data = await response.json() as { error?: string; potentialReturn?: number };
+      const data = await response.json() as { error?: string; potentialReturn?: number; count?: number };
       if (!response.ok) throw new Error(data.error || "The bet could not be placed.");
-      setBetNotice(`Bet placed successfully. Potential return: ${formatCustomerAmount(Number(data.potentialReturn), slipCurrency)}`);
+      setBetNotice(isSingles && data.count && data.count > 1
+        ? `Placed ${data.count} single bets. Total potential return: ${formatCustomerAmount(Number(data.potentialReturn), slipCurrency)}`
+        : `Bet placed successfully. Potential return: ${formatCustomerAmount(Number(data.potentialReturn), slipCurrency)}`);
       setSelectedBets({});
     } catch (error) {
       setBetNotice(error instanceof Error ? error.message : "The bet could not be placed.");
@@ -416,6 +450,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
       });
       setSelectedBets(state.selections);
       setStake(state.stake);
+      setSlipMode(state.mode || "multiple");
       setCodeNotice(`Loaded ${Object.keys(state.selections).length} selection${Object.keys(state.selections).length === 1 ? "" : "s"} from ${formatBookingCode(code)}.`);
       // Toast-free, SportyBet-style: the slip just reflects the loaded state.
       setCodeChars(Array(CODE_LENGTH).fill(""));
@@ -512,7 +547,7 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
                 {hasScore ? <><span>{match.home_score}</span><span>:</span><span>{match.away_score}</span></> : <span>—</span>}
               </div>
             </div>
-            <div className={`sportscore-odds ${isFinished ? "is-disabled" : ""}`}>
+            <div className={`sportscore-odds ${market === "Correct Score" ? "is-score-grid" : ""} ${isFinished ? "is-disabled" : ""}`}>
               {options.map((option) => {
                 const betKey = `${matchKey}-${market}-${option}`;
                 const selected = Boolean(selectedBets[betKey]);
@@ -555,11 +590,45 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
               <button className="betslip-collapse" onClick={() => setSlipOpen(false)} aria-label="Minimize bet slip">−</button>
               <button onClick={() => setSlipOpen(false)} aria-label="Close bet slip"><X size={16} /></button>
             </div>
+            {/* Multiple (one stake on the whole accumulator) vs Singles
+                (each game gets its own stake and is bet separately) —
+                the toggle every real sportsbook's slip has. */}
+            <div className="betslip-mode" role="tablist" aria-label="Bet type">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={!isSingles}
+                className={!isSingles ? "is-active" : ""}
+                onClick={() => setSlipMode("multiple")}
+              >Multiple</button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={isSingles}
+                className={isSingles ? "is-active" : ""}
+                onClick={() => setSlipMode("singles")}
+              >Singles</button>
+            </div>
             <div className="betslip-selections">
               {betslipItems.map(([key, bet]) => (
-                <div className="betslip-selection" key={key}>
+                <div className={`betslip-selection ${isSingles ? "has-stake" : ""}`} key={key}>
                   <span><strong>{bet.option} @ {bet.odds}</strong><small>{bet.match}</small></span>
                   <button onClick={() => setSelectedBets((current) => { const next = { ...current }; delete next[key]; return next; })} aria-label={`Remove ${bet.match}`}><X size={14} /></button>
+                  {isSingles && (
+                    <label className="betslip-selection-stake">
+                      <span>Stake ({currencySymbol(slipCurrency)})</span>
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={bet.stake ?? ""}
+                        placeholder={String(stakeMinimum)}
+                        onChange={(event) => setSelectedBets((current) => ({ ...current, [key]: { ...bet, stake: event.target.value } }))}
+                        aria-label={`Stake for ${bet.match} in ${slipCurrency}`}
+                      />
+                    </label>
+                  )}
                 </div>
               ))}
               {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
@@ -577,13 +646,23 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
                 }}
               >Clear all selections</button>
             )}
-            <label className="betslip-stake">Stake ({currencySymbol(slipCurrency)})<input type="number" min={stakeMinimum} step="0.01" inputMode="decimal" value={stake} onChange={(event) => setStake(event.target.value)} aria-label={`Stake in ${slipCurrency}`} /></label>
+            {/* Multiple mode has one stake box for the accumulator. In
+                Singles mode every game has its own box above, so the slip
+                just reports the total staked. */}
+            {!isSingles && (
+              <label className="betslip-stake">Stake ({currencySymbol(slipCurrency)})<input type="number" min={stakeMinimum} step="0.01" inputMode="decimal" value={stake} onChange={(event) => setStake(event.target.value)} aria-label={`Stake in ${slipCurrency}`} /></label>
+            )}
+            {isSingles && (
+              <div className="betslip-stake is-total"><span>Total stake ({currencySymbol(slipCurrency)})</span><strong>{formatCustomerAmount(totalStake, slipCurrency)}</strong></div>
+            )}
             {/* Minimum stake is always visible above the action button so the
                 user knows the floor before tapping "Place bet". */}
             <p className={`betslip-min-stake ${stakeBelowMinimum ? "is-below" : ""}`}>
-              {stakeBelowMinimum ? `Minimum stake is ${formatCustomerAmount(stakeMinimum, slipCurrency)} — enter at least that amount.` : `${minStakeLabel(slipCurrency)}`}
+              {stakeBelowMinimum
+                ? (isSingles ? `Single stakes must add up to at least ${formatCustomerAmount(stakeMinimum, slipCurrency)}.` : `Minimum stake is ${formatCustomerAmount(stakeMinimum, slipCurrency)} — enter at least that amount.`)
+                : (isSingles ? `Total stakes ${formatCustomerAmount(totalStake, slipCurrency)} · ${formatCustomerAmount(stakeMinimum, slipCurrency)} minimum` : `${minStakeLabel(slipCurrency)}`)}
             </p>
-            <div className="betslip-footer"><span>Potential return <small>{betslipItems.length} selection{betslipItems.length === 1 ? "" : "s"}</small></span><strong>{formatCustomerAmount(potentialReturn, slipCurrency)}</strong></div>
+            <div className="betslip-footer"><span>Potential return <small>{betslipItems.length} selection{betslipItems.length === 1 ? "" : "s"}{isSingles ? " · singles" : ""}</small></span><strong>{formatCustomerAmount(potentialReturn, slipCurrency)}</strong></div>
             {/* Booking code — SportyBet style, entirely inside the slip:
                 generate (share) and load (enter a code) live here, no
                 separate page. */}
@@ -643,8 +722,19 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
               </div>
               {codeNotice && <p className="betslip-notice">{codeNotice}</p>}
             </div>
+          </div>
+          {/* Pinned outside the scrolling area — in Singles mode every
+              selection carries a stake box, so the sheet's content gets
+              tall. The action must never scroll out of reach. */}
+          <div className="betslip-actions">
             {betNotice && <p className="betslip-notice">{betNotice}</p>}
-            <button className="place-bet-button" onClick={() => void placeBet()} disabled={placing || betslipItems.length === 0 || !stake || Number(stake) <= 0 || stakeBelowMinimum}>{placing ? "Placing bet..." : stakeBelowMinimum ? `Min stake ${formatCustomerAmount(stakeMinimum, slipCurrency)}` : "Place bet"}</button>
+            <button
+              className="place-bet-button"
+              onClick={() => void placeBet()}
+              disabled={placing || betslipItems.length === 0 || stakeBelowMinimum || (!isSingles && (!stake || Number(stake) <= 0))}
+            >
+              {placing ? "Placing bet..." : "Place bet"}
+            </button>
           </div>
           </>}
         </aside>

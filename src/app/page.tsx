@@ -22,8 +22,8 @@ const shortcuts = [
 ];
 const sports = ["LIVE", "Football", "Table Tennis", "Tennis", "Basketball"];
 const marketsBySport: Record<string, string[]> = {
-  LIVE: ["1X2", "O/U", "DC", "1st Half O/U", "Handicap"],
-  Football: ["1X2", "O/U", "DC", "1st Half O/U", "Handicap"],
+  LIVE: ["1X2", "O/U", "DC", "1st Half O/U", "Handicap", "Correct Score"],
+  Football: ["1X2", "O/U", "DC", "1st Half O/U", "Handicap", "Correct Score"],
   Tennis: ["Match Winner", "Set Betting", "Total Games", "Game Handicap"],
   Basketball: ["Moneyline", "Totals", "1st Half", "Handicap"],
   "Table Tennis": ["Match Winner", "Set Betting", "Total Sets", "Handicap"]

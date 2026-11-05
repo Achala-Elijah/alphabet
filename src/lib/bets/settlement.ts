@@ -149,6 +149,19 @@ function evaluateLeg(selection: Selection, match: MatchRow): LegResult {
       return optionLower.includes("1") || optionLower.includes("p1") ? homeWin() : awayWin();
     case "moneyline":
       return optionLower === "home" || optionLower === "player 1" ? homeWin() : awayWin();
+    case "correct score": {
+      // Exact scoreline: "2-1" wins only if the match ends 2-1. The
+      // "Any other …" buckets catch every scoreline outside the 0–4 grid.
+      const inGrid = score.home <= 4 && score.away <= 4;
+      const exact = option.match(/^(\d+)\s*-\s*(\d+)$/);
+      if (exact) {
+        return score.home === Number(exact[1]) && score.away === Number(exact[2]) ? "won" : "lost";
+      }
+      if (optionLower === "any other home win") return !inGrid && score.home > score.away ? "won" : "lost";
+      if (optionLower === "any other away win") return !inGrid && score.away > score.home ? "won" : "lost";
+      if (optionLower === "any other draw") return !inGrid && score.home === score.away ? "won" : "lost";
+      return "void";
+    }
     case "set betting": {
       const parsed = option.match(/^(\d+)\s*-\s*(\d+)$/);
       if (!parsed) return "void";

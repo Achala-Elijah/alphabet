@@ -215,23 +215,55 @@ export function generateMarketOdds(input: MarketOddsInput, market: string): Reco
   else if (market === "Totals") options = ["Over 180.5", "Under 180.5"];
   else if (market === "1st Half") options = ["Home", "Draw", "Away"];
   else if (market === "Total Sets") options = ["Over 3.5", "Under 3.5"];
+  else if (market === "Correct Score") {
+    // Home 0–4 x away 0–4 = 25 exact scorelines, the detailed market real
+    // betting apps offer (e.g. "2-1"), plus "any other" buckets for the
+    // scorelines outside that grid.
+    options = [];
+    for (let h = 0; h <= 4; h++) for (let a = 0; a <= 4; a++) options.push(`${h}-${a}`);
+    options.push("Any other home win", "Any other draw", "Any other away win");
+  }
   else options = ["1", "X", "2"];
 
   const result: Record<string, string> = {};
   options.forEach((option, index) => {
     // Base implied probability varies by option position and market.
     let prob = 0.28 + rand(index) * 0.22;
-    if (market === "1X2") {
+    if (market === "O/U" || market === "Totals" || market === "Total Games" || market === "Total Sets") {
+      prob = 0.5 + (rand(index) - 0.5) * 0.2;
+    } else if (market === "Correct Score") {
+      // Exact scorelines are long shots — low scores are the likeliest,
+      // so price them off a crude Poisson shape (~2.6 total goals) the way
+      // real correct-score markets do: 1-0/1-1/2-1 short, 4-4 very long.
+      const m = option.match(/^(\d)-(\d)$/);
+      if (m) {
+        const total = Number(m[1]) + Number(m[2]);
+        const lambda = 2.6;
+        let fact = 1;
+        for (let i = 2; i <= total; i++) fact *= i;
+        prob = (Math.exp(-lambda) * lambda ** total) / fact;
+        prob = prob * (1 + rand(index) * 0.35);
+        // Home wins lean the scoreline grid one way, away wins the other.
+        if (Number(m[1]) > Number(m[2])) prob *= 1 + homeEdge;
+        if (Number(m[1]) < Number(m[2])) prob *= 1 - homeEdge;
+      } else {
+        // "Any other" buckets collect every scoreline outside 0–4.
+        prob = 0.02 + rand(index) * 0.015;
+      }
+    } else if (market === "1X2") {
       if (option === "1") prob += homeEdge;
       if (option === "X") prob -= 0.08;
       if (option === "2") prob -= homeEdge;
     }
-    if (market === "O/U" || market === "Totals" || market === "Total Games" || market === "Total Sets") {
-      prob = 0.5 + (rand(index) - 0.5) * 0.2;
-    }
     // Live drift: a leading home side shortens, a trailing one lengthens.
     if (option === "1" || option === "Home" || option === "Player 1") prob *= drift;
     if (option === "2" || option === "Away" || option === "Player 2") prob /= drift;
+    if (market === "Correct Score" && input.home_score != null && input.away_score != null) {
+      // In play, the scoreline on the board shortens hard and every other
+      // score lengthens — the live correct-score board bettors know.
+      const live = `${input.home_score}-${input.away_score}`;
+      prob = option === live ? prob * (1 + drift) : prob / (1 + drift * 0.75);
+    }
 
     result[option] = toOdds(prob);
   });
@@ -245,6 +277,9 @@ export function generateAllMarketOdds(input: MarketOddsInput): Record<string, Re
     "Match Winner", "Set Betting", "Total Games", "Game Handicap",
     "Moneyline", "Totals", "1st Half", "Total Sets"
   ];
+  // Correct score is a football-only market — scorelines don't apply to
+  // tennis/basketball the way they do to a 90-minute football match.
+  if ((input.sport || "football") === "football") markets.push("Correct Score");
   const out: Record<string, Record<string, string>> = {};
   for (const market of markets) {
     out[market] = generateMarketOdds(input, market);
