@@ -738,6 +738,21 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
           <div className="betslip-head">
             <div className="betslip-heading">
               <span><Ticket size={18} /> BET SLIP <b>{betslipItems.length}</b></span>
+              {/* Clearing lives at the top of the sheet — with many picks the
+                  old spot (below the list) was several scrolls away. */}
+              {betslipItems.length > 0 && (
+                <button
+                  type="button"
+                  className="betslip-clear"
+                  onClick={() => {
+                    setSelectedBets({});
+                    setBookingCode(null);
+                    setCodeChars(Array(CODE_LENGTH).fill(""));
+                    setCodeNotice("");
+                    setBetNotice("");
+                  }}
+                >Clear all</button>
+              )}
               <button className="betslip-collapse" onClick={() => setSlipOpen(false)} aria-label="Minimize bet slip">−</button>
               <button onClick={() => setSlipOpen(false)} aria-label="Close bet slip"><X size={16} /></button>
             </div>
@@ -784,19 +799,6 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
               ))}
               {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
             </div>
-            {betslipItems.length > 0 && (
-              <button
-                type="button"
-                className="betslip-clear"
-                onClick={() => {
-                  setSelectedBets({});
-                  setBookingCode(null);
-                  setCodeChars(Array(CODE_LENGTH).fill(""));
-                  setCodeNotice("");
-                  setBetNotice("");
-                }}
-              >Clear all selections</button>
-            )}
             {/* Multiple mode has one stake box for the accumulator. In
                 Singles mode every game has its own box above, so the slip
                 just reports the total staked. */}

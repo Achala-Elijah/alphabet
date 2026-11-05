@@ -275,8 +275,11 @@ a{color:inherit;text-decoration:none}
 .betslip-empty{margin:12px 0;color:#a8a9b0;font-size:11px;text-align:center}
 /* "Clear all" — the X in the header now closes the slip, so clearing the
    selections is its own explicit action. */
-.betslip-clear{display:block;width:100%;border:0;background:none;color:#999ba4;font-size:11px;padding:6px 0 2px;text-align:center;text-decoration:underline;text-underline-offset:3px}
-.betslip-clear:hover{color:#ff8194}
+/* "Clear all" sits in the slip's header row — compact, right-aligned, still
+   underlined so it reads as an action. margin-left:auto parks it between
+   the title and the minimize/close buttons. */
+.betslip-heading button.betslip-clear{width:auto;margin-left:auto;border:0;background:none;color:#999ba4;font-size:11px;padding:5px 8px;text-align:right;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;transition:color .15s}
+.betslip-heading button.betslip-clear:hover{color:#ff8194}
 /* Minimum-stake hint under the stake input on the bet slip. */
 .betslip-min-stake{margin:6px 0 0;padding:8px 10px;border-radius:7px;background:#1b1c21;border:1px solid #2c2d34;color:#999ba4;font-size:11px;line-height:1.45;text-align:center}
 .betslip-min-stake.is-below{background:#3b3020;border-color:#6b522d;color:#ffcf83;font-weight:700}
@@ -1348,6 +1351,7 @@ video {
      text so iOS never zooms the field on focus. */
   .betslip-mode { margin-top: 10px; }
   .betslip-mode button { min-height: 42px; font-size: 12px; }
+  .betslip-heading button.betslip-clear { min-height: 36px; font-size: 12px; padding: 6px 8px; }
   .betslip-selection-stake { margin-top: 9px; padding-top: 9px; }
   .betslip-selection-stake input {
     width: 140px;
