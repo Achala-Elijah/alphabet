@@ -469,7 +469,7 @@ tbody tr:last-child td{border-bottom:0}
 .win-celebration-card::-webkit-scrollbar{display:none}
 .win-celebration-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.8),transparent 30%)}
 .win-celebration-rays{position:absolute;top:-96px;left:50%;width:420px;height:420px;margin-left:-210px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,169,29,.26) 0deg 8deg,transparent 8deg 27deg);-webkit-mask-image:radial-gradient(circle,#000 0%,transparent 66%);mask-image:radial-gradient(circle,#000 0%,transparent 66%);animation:win-rays 18s linear infinite}
-.win-celebration-cup-wrap{position:relative;z-index:1;width:198px;height:186px;margin:-8px auto -4px;filter:drop-shadow(0 16px 20px rgba(122,74,0,.35)) drop-shadow(0 0 26px rgba(255,210,80,.9));animation:cup-rise .6s cubic-bezier(.2,1.6,.4,1) both,cup-sway 3.4s ease-in-out .6s infinite;transform-origin:50% 88%}
+.win-celebration-cup-wrap{position:relative;z-index:1;width:236px;height:224px;margin:-8px auto -4px;filter:drop-shadow(0 16px 20px rgba(122,74,0,.35)) drop-shadow(0 0 26px rgba(255,210,80,.9));animation:cup-rise .6s cubic-bezier(.2,1.6,.4,1) both,cup-sway 3.4s ease-in-out .6s infinite;transform-origin:50% 88%}
 .win-celebration-cup-wrap::before{content:"";position:absolute;inset:4% 0 0;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,214,90,.55) 36%,transparent 68%)}
 .win-celebration-cup{position:relative;z-index:1;display:block;width:100%;height:100%}
 .win-celebration-brand{display:inline-block;margin:0 auto 6px;padding:3px 11px;border-radius:999px;background:#0b6b39;color:#ffe9a8;font-size:9px;font-weight:900;letter-spacing:3px;text-indent:3px;box-shadow:0 3px 8px rgba(11,107,57,.28)}
@@ -496,6 +496,21 @@ tbody tr:last-child td{border-bottom:0}
 .bet-placed-card>p{margin:0 0 16px;font-size:11px;color:#999ba4}
 .bet-placed-id{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:12px;padding:8px 10px;border-radius:8px;background:#1c1d22;font-size:10px;color:#9d9fa8}
 .bet-placed-id strong{color:#fff;font-size:11px;letter-spacing:.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bet-placed-booking-code{flex-direction:column;gap:8px;padding:10px}
+.bet-placed-booking-code>span{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;color:#8f919b}
+.bet-placed-booking-code>svg{color:#f2b83b}
+.bet-placed-code-row{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.bet-placed-code-row>strong{font-size:24px;letter-spacing:5px;color:#ffe27a;line-height:1}
+.bet-placed-code-actions{display:flex;gap:8px;justify-content:center;width:100%}
+.bet-placed-code-actions button{height:35px;padding:0 14px;border:1px solid #44464e;border-radius:8px;background:#292a31;color:#f2f2f5;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.bet-placed-code-actions button:active{transform:translateY(1px)}
+.bet-placed-code-loading{display:inline-flex;align-items:center;gap:6px;font-size:12px!important;letter-spacing:.2px!important;color:#d4d6dd!important;white-space:normal!important}
+.bet-placed-code-error{display:flex;flex-direction:column;gap:6px;align-items:center}
+.bet-placed-code-error strong{max-width:100%;white-space:normal!important;color:#ffb2bd;font-size:10px;letter-spacing:.2px}
+.bet-placed-code-error button{height:32px;padding:0 12px;border:1px solid #58414a;border-radius:8px;background:#2b2228;color:#ff96a8;font-size:10px;font-weight:800;cursor:pointer}
+.bet-placed-code-notice{font-size:9px;color:#ffb2bd}
+.spin{animation:spinner-rotate .8s linear infinite}
+@keyframes spinner-rotate{to{transform:rotate(360deg)}}
 .bet-placed-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .bet-placed-rows div{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:#a3a4ac;padding:0 2px}
 .bet-placed-rows strong{color:#e7e7ea;font-size:12px}
@@ -1533,7 +1548,7 @@ video {
   /* ── Win celebration ────────────────────────────────────────── */
   .win-celebration { padding: 12px; }
   .win-celebration-card { padding: 16px 16px 18px; border-radius: 22px; }
-  .win-celebration-cup-wrap { width: 172px; height: 162px; margin-top: -6px; }
+  .win-celebration-cup-wrap { width: 198px; height: 188px; margin-top: -6px; }
   .win-celebration-card h2 { font-size: 32px; }
   .win-celebration-amount { font-size: 38px; }
   .win-celebration-card button { height: 48px; }

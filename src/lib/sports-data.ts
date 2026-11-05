@@ -8,7 +8,7 @@ export type SportsMatch = {
   time: string;
   slug: string;
   competition: string;
-  source: "SportScore" | "BETKIING" | "AlphaBet";
+  source: "SportScore" | "BETKIING" | "AlphaBet" | "APIFootball";
   odds: string[];
   /**
    * Full market map (market label → option label → decimal odds), e.g.
@@ -112,9 +112,13 @@ export const BIG_COMPETITIONS = [
   "bundesliga",
   "ligue 1",
   "champions league",
+  "europa league",
+  "mls",
+  "eredivisie",
+  "liga mx",
   "nba",
-  "atp finals",
-  "wta finals",
+  "atp",
+  "wta",
   "wtt champions"
 ];
 
@@ -224,9 +228,22 @@ function driftAdjustment(input: MarketOddsInput): number {
   return 1 + homeDiff * 0.12 * timeFactor;
 }
 
+/** Correct-score prices never go under 7.00 (including staff-entered odds). */
+function floorCorrectScoreOdds(source: Record<string, string>) {
+  const out: Record<string, string> = {};
+  for (const [option, value] of Object.entries(source)) {
+    const parsed = Number(value);
+    out[option] = (Number.isFinite(parsed) ? Math.max(7, parsed) : 7).toFixed(2);
+  }
+  return out;
+}
+
 export function generateMarketOdds(input: MarketOddsInput, market: string): Record<string, string> {
   // Honour a manually-entered market map if one was saved.
-  if (input.stored_market_odds?.[market]) return input.stored_market_odds[market];
+  if (input.stored_market_odds?.[market]) {
+    const stored = input.stored_market_odds[market];
+    return market === "Correct Score" ? floorCorrectScoreOdds(stored) : stored;
+  }
 
   const seed = `${input.slug}|${input.sport || "football"}|${market}`;
   const hash = hashString(seed);
@@ -300,7 +317,9 @@ export function generateMarketOdds(input: MarketOddsInput, market: string): Reco
       prob = option === live ? prob * (1 + drift) : prob / (1 + drift * 0.75);
     }
 
-    result[option] = toOdds(prob);
+    result[option] = market === "Correct Score"
+      ? Math.max(7, Number(toOdds(prob))).toFixed(2)
+      : toOdds(prob);
   });
   return result;
 }

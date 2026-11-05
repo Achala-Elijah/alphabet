@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generatedMatches, normalizeStatus, isLiveMatch, isFinishedMatch, isShownOnSite, sortByBigness, generateAllMarketOdds, generateFeaturedOdds, type SportsMatch } from "@/lib/sports-data";
+import { fetchApiFootballMatches } from "@/lib/api-football";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { settleOpenBets, FULL_TIME_MINUTE } from "@/lib/bets/settlement";
 import { rememberFixtures } from "@/lib/live-feed-cache";
@@ -220,6 +221,25 @@ function normalizeFallbackMatch(match: SportsMatch): SportsMatch {
   });
 }
 
+function mergeAndDedupe(lists: SportsMatch[][]) {
+  const seen = new Set<string>();
+  const merged: SportsMatch[] = [];
+  for (const list of lists) {
+    for (const match of list) {
+      const kickoff = new Date(match.time || 0);
+      const dateKey = Number.isNaN(kickoff.getTime()) ? "unknown" : kickoff.toISOString().slice(0, 10);
+      const home = (match.home || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+      const away = (match.away || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+      if (!home || !away) continue;
+      const key = `${home}|${away}|${dateKey}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(match);
+    }
+  }
+  return merged;
+}
+
 export async function GET(request: Request) {
   const requestedSport = new URL(request.url).searchParams.get("sport")?.toLowerCase() || "football";
   const sport = requestedSport === "table_tennis" ? "table-tennis" : requestedSport;
@@ -283,6 +303,9 @@ export async function GET(request: Request) {
       }
     }
 
+    // API-Football is the primary football source when a key is configured.
+    const apiFootballMatches = sport === "football" ? await fetchApiFootballMatches() : [];
+
     const sportScoreUrl =
       `https://sportscore.com/api/widget/matches/?sport=${encodeURIComponent(sport)}&limit=50&src=betkiing`;
     const response = await fetch(sportScoreUrl, {
@@ -297,15 +320,17 @@ export async function GET(request: Request) {
       ? payload.matches.map((match) => normalizeMatch(match, sport))
       : [];
     const fallbackMatches = (generatedMatches[sport] || []).map(normalizeFallbackMatch);
+    const mergedFixtures = mergeAndDedupe([databaseMatches, apiFootballMatches, upstreamMatches, fallbackMatches]);
     // Keep the last-seen version of every fixture so settlement can still
-    // grade a bet after SportScore drops the finished match from its feed.
-    rememberFixtures([...databaseMatches, ...upstreamMatches, ...fallbackMatches]);
+    // grade a bet after the feed drops the finished match.
+    rememberFixtures(mergedFixtures);
     // Leg-state lookups bypass the hard rule below — the open-bets detail
     // screen needs finished fixtures to show won/lost ticks on legs.
     if (requestedIds) {
       const wanted = new Set(requestedIds);
+      const footballLookupMatches = sport === "football" ? apiFootballMatches : await fetchApiFootballMatches();
       const bySlug = new Map<string, SportsMatch>();
-      for (const match of [...requestedFixtures, ...databaseMatches, ...upstreamMatches, ...fallbackMatches]) {
+      for (const match of [...requestedFixtures, ...footballLookupMatches, ...databaseMatches, ...apiFootballMatches, ...upstreamMatches, ...fallbackMatches]) {
         if (match.slug) bySlug.set(match.slug, match);
       }
       const fixtures = [...wanted].map((id) => bySlug.get(id)).filter((match): match is SportsMatch => Boolean(match));
@@ -324,7 +349,7 @@ export async function GET(request: Request) {
     // can never leak into any view.
     // Big fixtures rank first — the site showcases the marquee games.
     const allMatches = sortByBigness(
-      [...databaseMatches, ...upstreamMatches, ...fallbackMatches]
+      mergedFixtures
         .filter((match) => isShownOnSite(match.status, match.status_text, match.time))
     );
     const featured = new URL(request.url).searchParams.get("featured") === "true";
@@ -346,9 +371,11 @@ export async function GET(request: Request) {
       updated: payload.updated ?? null,
       sport,
       source: databaseMatches.length > 0
-        ? "SportScore (incl. manually fixed)"
-        : upstreamMatches.length > 0 ? "SportScore" : "SportScore fallback",
-      fallback: databaseMatches.length === 0 && upstreamMatches.length === 0,
+        ? "API-Football + SportScore (incl. manually fixed)"
+        : apiFootballMatches.length > 0
+          ? upstreamMatches.length > 0 ? "API-Football + SportScore" : "API-Football"
+          : upstreamMatches.length > 0 ? "SportScore" : "SportScore fallback",
+      fallback: databaseMatches.length === 0 && apiFootballMatches.length === 0 && upstreamMatches.length === 0,
       databaseReady,
       setupRequired: !databaseReady
     });
@@ -429,7 +456,7 @@ export async function DELETE(request: Request) {
     }
     const { data: match, error: lookupError } = await supabase.from("matches").select("id,source").eq("id", id).single();
     if (lookupError) return NextResponse.json({ error: lookupError.message }, { status: 400 });
-    if (match.source !== "BETKIING" && match.source !== "AlphaBet") return NextResponse.json({ error: "External SportScore matches cannot be deleted." }, { status: 403 });
+    if (match.source !== "BETKIING" && match.source !== "AlphaBet") return NextResponse.json({ error: "External feed matches cannot be deleted." }, { status: 403 });
     const { error } = await supabase.from("matches").delete().eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     runtimeScheduledGoals.delete(id);

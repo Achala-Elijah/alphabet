@@ -96,18 +96,20 @@ export default function WinCelebration({ win, onClose, currency = "GHS" }: { win
               strokeLinejoin="round"
             />
             <path
-              d="M38 54H27c-11 0-15 13-6 20 5 4 11 5 17 5"
+              d="M37 54H8c-13 0-14 29 8 33 10 2 19 1 27-4"
               fill="none"
               stroke="url(#abCupHandle)"
-              strokeWidth="7"
+              strokeWidth="15"
               strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
-              d="M122 54h11c11 0 15 13 6 20-5 4-11 5-17 5"
+              d="M123 54h29c13 0 14 29-8 33-10 2-19 1-27-4"
               fill="none"
               stroke="url(#abCupHandle)"
-              strokeWidth="7"
+              strokeWidth="15"
               strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path d="M47 55c2 20 13 37 28 46-16-3-30-20-32-42 1-2 2-3 4-4Z" fill="url(#abCupShade)" />
 

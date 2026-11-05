@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { cachedFixtures } from "@/lib/live-feed-cache";
+import { fetchApiFootballMatches } from "@/lib/api-football";
 
 /**
  * Bet settlement.
@@ -248,6 +249,19 @@ const FEED_SPORTS = ["football", "tennis", "basketball", "table-tennis"];
  */
 async function fetchFeedFixtures(wanted: Set<string>): Promise<MatchRow[]> {
   const found = new Map<string, MatchRow>();
+  const apiFootballMatches = await fetchApiFootballMatches();
+  for (const fixture of apiFootballMatches) {
+    if (!wanted.has(fixture.slug) || found.has(fixture.slug)) continue;
+    found.set(fixture.slug, {
+      id: fixture.slug,
+      status: fixture.status,
+      kickoff: fixture.time,
+      current_minute: fixture.current_minute ?? (fixture.status === "finished" ? FULL_TIME_MINUTE : null),
+      home_score: fixture.home_score ?? null,
+      away_score: fixture.away_score ?? null,
+      odds: fixture.market_odds || null
+    });
+  }
   await Promise.all(FEED_SPORTS.map(async (sport) => {
     try {
       const response = await fetch(

@@ -518,6 +518,23 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
     ? singlesStakes.some((value) => !Number.isFinite(value) || value <= 0) || totalStake < stakeMinimum
     : Number(stake || 0) < stakeMinimum;
 
+  async function generateBookingCodeForReceipt(selections: BetSlipSelection[], stakeValue: string) {
+    try {
+      const response = await fetch("/api/booking-codes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selections, stake: stakeValue })
+      });
+      const data = await response.json() as { code?: string; error?: string };
+      if (!response.ok || !data.code) {
+        return { code: null as string | null, error: data.error || "Could not create a booking code." };
+      }
+      return { code: data.code, error: null as string | null };
+    } catch {
+      return { code: null as string | null, error: "Could not create a booking code." };
+    }
+  }
+
   const placeBet = async () => {
     if (placing) return; // double-click guard — the button is disabled anyway
     setBetNotice("");
@@ -564,13 +581,18 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
         (rows || []).flatMap((row) => (Array.isArray(row) ? row : [row])).map((row) => row.id).filter((id): id is string => Boolean(id));
       const ids = flatten(data.bets);
       if (ids.length === 0 && data.bet) ids.push(...flatten([data.bet]));
+      const codeStake = String(isSingles ? totalStake : Number(stake) || 0);
+      const booking = await generateBookingCodeForReceipt(placedSelections, codeStake);
       setReceipt({
         ids,
         count: Number(data.count) || placedSelections.length,
         mode: slipMode,
         stake: isSingles ? totalStake : Number(stake),
         potentialReturn: Number(data.potentialReturn) || potentialReturn,
-        selections: placedSelections
+        selections: placedSelections,
+        bookingCode: booking.code,
+        codeStake,
+        codeError: booking.error
       });
       setBetNotice("");
       setSelectedBets({});
@@ -612,6 +634,18 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
     } finally {
       setGeneratingCode(false);
     }
+  };
+
+  const retryReceiptCode = async () => {
+    if (!receipt) return;
+    setReceipt((current) => current ? { ...current, codeLoading: true, codeError: null } : current);
+    const result = await generateBookingCodeForReceipt(receipt.selections, receipt.codeStake || String(receipt.stake));
+    setReceipt((current) => current ? {
+      ...current,
+      codeLoading: false,
+      bookingCode: result.code,
+      codeError: result.error
+    } : current);
   };
 
   const copyBookingCode = async () => {
@@ -672,7 +706,7 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
       <div className="sportscore-heading">
         <div>
           <h2><span className="sportscore-live-indicator" /> {sport === "LIVE" ? "LIVE NOW" : sport.toUpperCase()} <em>{filteredMatches.length}</em></h2>
-          <p>{searchActive ? <>Showing results for “{searchTerm}” · {market}</> : <>{sport === "LIVE" ? "In-play football and markets" : `${sport} scores and markets`} from SportScore · {market}</>}</p>
+          <p>{searchActive ? <>Showing results for “{searchTerm}” · {market}</> : <>{sport === "LIVE" ? "In-play football and markets" : `${sport} scores and markets`} from API-Football & SportScore · {market}</>}</p>
         </div>
         <div className="sportscore-heading-actions">
           {searchActive && <button className="sportscore-clear" onClick={clearSearch}>Clear</button>}
@@ -985,11 +1019,11 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
           </>}
         </aside>
       )}
-      {receipt && <BetPlaced receipt={receipt} currency={slipCurrency} onClose={() => setReceipt(null)} />}
+      {receipt && <BetPlaced receipt={receipt} currency={slipCurrency} onClose={() => setReceipt(null)} onRetryCode={retryReceiptCode} />}
       {winQueue.length > 0 && <WinCelebration win={winQueue[0]} currency={slipCurrency} onClose={() => setWinQueue((current) => current.slice(1))} />}
       <div className="sportscore-attribution">
         {lastUpdated && <span>Updated {new Date(lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
-        <a href="https://sportscore.com/" rel="dofollow" target="_blank">Powered by SportScore</a>
+        <span>Scores via <a href="https://www.api-football.com/" target="_blank" rel="noreferrer">API-Football</a> · <a href="https://sportscore.com/" rel="dofollow" target="_blank">SportScore</a></span>
       </div>
     </section>
   );

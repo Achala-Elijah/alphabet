@@ -11,6 +11,7 @@ export default function CustomerAccount({ username, email: initialEmail = "", cu
   const [email, setEmail] = useState(initialEmail || "");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+  const initialCode = initialCurrency === "NGN" ? "NGN" : "GHS";
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
@@ -22,7 +23,7 @@ export default function CustomerAccount({ username, email: initialEmail = "", cu
       body: JSON.stringify({ currency, email: email.trim() || null })
     });
     const result = await response.json() as { error?: string };
-    setNotice(response.ok ? "Account preferences saved." : result.error || "Unable to save account preferences.");
+    setNotice(response.ok ? currency !== initialCode ? "Currency changed — wallet, bets and history revalued at 1 GH₵ = ₦100." : "Account preferences saved." : result.error || "Unable to save account preferences.");
     setSaving(false);
     if (response.ok) router.refresh();
   }
