@@ -464,30 +464,33 @@ tbody tr:last-child td{border-bottom:0}
 .wallet-shell.is-admin .wallet-banner.success{background:#e7f8ee;color:#12864a}
 .wallet-shell.is-admin .wallet-banner.error{background:#ffeaed;color:#c3344d}
 .user-cell{display:flex;align-items:center;gap:9px}.mini-avatar{width:29px;height:29px;background:#fce9ed;color:#d73352;font-size:9px}.user-cell>div{display:flex;flex-direction:column;gap:4px}.user-cell strong{font-size:10px;color:#33343d}.user-cell small{font-size:9px;color:#999ba3}
-.win-celebration{position:fixed;inset:0;z-index:140;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 50% 38%,rgba(255,214,90,.42),rgba(7,16,11,.9) 62%);backdrop-filter:blur(5px);animation:win-fade .2s ease}
-.win-celebration-card{position:relative;overflow:hidden;width:min(364px,100%);max-height:94dvh;overflow-y:auto;padding:20px 20px 20px;border:3px solid #fff;border-radius:24px;background:linear-gradient(165deg,#fffdf2 0%,#fff4c9 32%,#ffdc72 70%,#ffc23c 100%);box-shadow:0 0 0 3px #f0b429,0 30px 70px rgba(0,0,0,.55),0 0 90px rgba(255,205,70,.5);text-align:center;color:#3a2602;animation:win-pop .42s cubic-bezier(.2,1.5,.4,1);scrollbar-width:none}
+.win-celebration{position:fixed;inset:0;z-index:140;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 50% 25%,rgba(29,91,54,.56),transparent 36%),radial-gradient(circle at 0 100%,rgba(244,190,69,.08),transparent 32%),#060b08;backdrop-filter:blur(8px);animation:win-fade .24s ease}
+.win-celebration-card{position:relative;overflow:hidden;width:min(384px,100%);max-height:94dvh;overflow-y:auto;padding:18px 18px 20px;border:1px solid #d8bd63;border-radius:22px;background:linear-gradient(180deg,#17261d 0%,#101a14 46%,#080d0a 100%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.18),inset 0 0 40px rgba(216,189,99,.08),0 30px 70px rgba(0,0,0,.74),0 0 80px rgba(216,189,99,.14);text-align:center;color:#fff8dc;animation:win-pop .38s cubic-bezier(.18,1.18,.32,1);scrollbar-width:none}
 .win-celebration-card::-webkit-scrollbar{display:none}
-.win-celebration-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.8),transparent 30%)}
-.win-celebration-rays{position:absolute;top:-96px;left:50%;width:420px;height:420px;margin-left:-210px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,169,29,.26) 0deg 8deg,transparent 8deg 27deg);-webkit-mask-image:radial-gradient(circle,#000 0%,transparent 66%);mask-image:radial-gradient(circle,#000 0%,transparent 66%);animation:win-rays 18s linear infinite}
-.win-celebration-cup-wrap{position:relative;z-index:1;width:236px;height:224px;margin:-8px auto -4px;filter:drop-shadow(0 16px 20px rgba(122,74,0,.35)) drop-shadow(0 0 26px rgba(255,210,80,.9));animation:cup-rise .6s cubic-bezier(.2,1.6,.4,1) both,cup-sway 3.4s ease-in-out .6s infinite;transform-origin:50% 88%}
-.win-celebration-cup-wrap::before{content:"";position:absolute;inset:4% 0 0;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,214,90,.55) 36%,transparent 68%)}
+.win-celebration-card::after{content:"";position:absolute;inset:6px;border:1px solid rgba(216,189,99,.36);border-radius:17px;pointer-events:none}
+.win-celebration-spotlight{position:absolute;top:-120px;left:50%;width:420px;height:380px;margin-left:-210px;pointer-events:none;background:radial-gradient(circle at 50% 30%,rgba(255,231,140,.34),rgba(216,189,99,0) 58%)}
+.win-celebration-noise{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.06;background-image:linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:4px 4px}
+.win-celebration-header{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 -4px;text-align:left}
+.win-celebration-mark{display:grid;place-items:center;width:46px;height:50px;clip-path:polygon(50% 0,100% 12%,100% 62%,50% 100%,0 62%,0 12%);background:linear-gradient(180deg,#f7dda0,#a77b29);color:#111c14;font-size:15px;font-weight:950;letter-spacing:1px;text-shadow:0 1px #fff6cf;box-shadow:0 0 16px rgba(216,189,99,.34)}
+.win-celebration-header>div:last-child{display:flex;flex-direction:column;gap:2px}
+.win-celebration-brand{color:#f5d978;font-size:10px;font-weight:950;letter-spacing:3px;text-transform:uppercase}
+.win-celebration-verified{color:#84998d;font-size:8px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+.win-celebration-cup-wrap{position:relative;z-index:1;width:270px;height:252px;margin:-7px auto -8px;filter:drop-shadow(0 18px 22px rgba(0,0,0,.62)) drop-shadow(0 0 28px rgba(216,189,99,.25));animation:cup-rise .6s cubic-bezier(.2,1.45,.4,1) both,cup-sway 4.2s ease-in-out .6s infinite;transform-origin:50% 88%}
+.win-celebration-cup-wrap::before{content:"";position:absolute;inset:10% 3% 0;border-radius:50%;background:radial-gradient(circle,rgba(255,232,143,.22) 0,rgba(216,189,99,.08) 48%,transparent 72%)}
 .win-celebration-cup{position:relative;z-index:1;display:block;width:100%;height:100%}
-.win-celebration-brand{display:inline-block;margin:0 auto 6px;padding:3px 11px;border-radius:999px;background:#0b6b39;color:#ffe9a8;font-size:9px;font-weight:900;letter-spacing:3px;text-indent:3px;box-shadow:0 3px 8px rgba(11,107,57,.28)}
-.win-celebration-card h2{position:relative;z-index:1;margin:4px 0 0;font-size:36px;line-height:1;font-weight:900;font-style:italic;letter-spacing:1px;color:#0b6b39;text-shadow:0 2px 0 #fff,0 7px 16px rgba(11,107,57,.22)}
-.win-celebration-sub{position:relative;z-index:1;margin:8px 0 0;font-size:11px;line-height:1.45;letter-spacing:.2px;font-weight:600;color:#7a5a16}
-.win-celebration-amount{position:relative;z-index:1;display:block;margin:10px 0 12px;font-size:44px;line-height:1;font-weight:900;letter-spacing:-.8px;background:linear-gradient(180deg,#16b45f 0%,#0b7a3b 58%,#064d26 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #fff);animation:win-amount .5s cubic-bezier(.2,1.6,.4,1) both}
-.win-celebration-meta{position:relative;z-index:1;display:flex;flex-direction:column;gap:5px;margin-bottom:18px;padding:10px 12px;border:1px solid rgba(168,113,6,.28);border-radius:10px;background:rgba(255,255,255,.68)}
-.win-celebration-meta span{display:flex;justify-content:space-between;gap:10px;font-size:10px;font-weight:600;color:#8a6a26}
-.win-celebration-meta b{font-size:10px;letter-spacing:.3px;color:#3a2602}
-.win-celebration-card button{position:relative;z-index:1;width:100%;height:48px;border:0;border-radius:12px;background:linear-gradient(180deg,#16a858,#0b7a3b 60%,#075c2b);box-shadow:0 5px 0 #054721,0 10px 22px rgba(11,107,57,.28);color:#fff8d6;font-size:14px;font-weight:900;letter-spacing:1.5px;cursor:pointer;transition:transform .12s,box-shadow .12s}
-.win-celebration-sparkles{position:absolute;inset:0;z-index:2;pointer-events:none}
-.win-celebration-sparkles .spark{position:absolute;font-style:normal;font-size:14px;color:#e8a51b;text-shadow:0 0 8px #fff,0 0 14px rgba(255,212,94,.9);animation:spark-twinkle 1.9s ease-in-out infinite}
-.win-celebration-sparkles .spark-1{top:40px;left:22px;font-size:18px}
-.win-celebration-sparkles .spark-2{top:104px;right:18px;font-size:13px;animation-delay:.4s}
-.win-celebration-sparkles .spark-3{top:146px;left:28px;font-size:11px;animation-delay:.9s}
-.win-celebration-sparkles .spark-4{top:28px;right:30px;font-size:10px;animation-delay:1.3s}
-.win-celebration-confetti{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none}
-.win-celebration-confetti i{position:absolute;top:-16px;opacity:.92;animation:win-fall linear infinite;box-shadow:0 0 6px rgba(255,255,255,.55)}
+.win-celebration-card h2{position:relative;z-index:1;margin:0 0 2px;font-size:41px;line-height:.96;font-weight:950;letter-spacing:1.2px;color:#fff7d0;text-shadow:0 2px 0 #4d3510,0 8px 16px rgba(0,0,0,.5)}
+.win-celebration-sub{position:relative;z-index:1;margin:8px 0 10px;font-size:11px;line-height:1.45;color:#a6b6aa;font-weight:600}
+.win-celebration-amount{position:relative;z-index:1;display:block;margin:8px 0 14px;font-size:52px;line-height:1;font-weight:950;letter-spacing:-1.5px;background:linear-gradient(180deg,#fff5bf 0%,#f5d66e 32%,#b77a24 69%,#8a5c14 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(245,214,110,.18));animation:win-amount .5s cubic-bezier(.2,1.4,.4,1) both}
+.win-celebration-meta{position:relative;z-index:1;display:flex;flex-direction:column;margin:0 0 16px;border:1px solid rgba(216,189,99,.32);border-radius:13px;background:rgba(0,0,0,.28);overflow:hidden}
+.win-celebration-meta div{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;min-height:31px;padding:5px 11px;border-bottom:1px solid rgba(216,189,99,.13)}
+.win-celebration-meta div:last-child{border-bottom:0}
+.win-celebration-meta dt{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#8ba092}
+.win-celebration-meta dd{margin:0;font-size:11px;font-weight:800;letter-spacing:.4px;color:#fff7d8}
+.win-celebration-meta .is-gold{background:linear-gradient(90deg,rgba(216,189,99,.16),transparent)}
+.win-celebration-meta .is-gold dd{color:#f6df8d}
+.win-celebration-card button{position:relative;z-index:1;width:100%;height:52px;border:1px solid #d2a935;border-radius:12px;background:linear-gradient(180deg,#22ad58 0%,#137a3d 55%,#0b5428 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 5px 0 #073e1e,0 10px 22px rgba(0,0,0,.32);color:#fff9dd;font-size:13px;font-weight:950;letter-spacing:2px;text-shadow:0 1px 0 rgba(0,0,0,.45);cursor:pointer;transition:transform .13s,box-shadow .13s}
+.win-celebration-confetti{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
+.win-celebration-confetti i{position:absolute;top:-16px;opacity:.66;animation:win-fall linear infinite;box-shadow:0 0 6px rgba(216,189,99,.32)}
 /* ── Bet placed receipt ─────────────────────────────────────── */
 .bet-placed{position:fixed;inset:0;z-index:145;display:grid;place-items:center;padding:18px;background:rgba(9,9,12,.82);animation:win-fade .18s ease}
 .bet-placed-card{width:min(380px,100%);max-height:88dvh;overflow-y:auto;padding:24px 18px 18px;border:1px solid #3f4149;border-radius:18px;background:linear-gradient(170deg,#24262d,#18191e);box-shadow:0 24px 60px rgba(0,0,0,.55);text-align:center;color:#fff;animation:win-pop .3s cubic-bezier(.2,1.4,.4,1)}
@@ -522,8 +525,8 @@ tbody tr:last-child td{border-bottom:0}
 .bet-placed-selections small{font-size:10px;color:#94959e}
 .bet-placed-selections em{font-size:9px;font-style:normal;color:#6ee7a0}
 .bet-placed-card>button{width:100%;height:46px;border:0;border-radius:10px;background:linear-gradient(90deg,#42bd70,#2e9b56);color:#062711;font-size:13px;font-weight:800;letter-spacing:1.2px;cursor:pointer}
-.win-celebration-card button:hover{filter:brightness(1.05)}
-.win-celebration-card button:active{transform:translateY(4px);box-shadow:0 1px 0 #054721,0 4px 10px rgba(11,107,57,.25)}
+.win-celebration-card button:hover{filter:brightness(1.08)}
+.win-celebration-card button:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 2px 0 #073e1e,0 6px 12px rgba(0,0,0,.28)}
 @keyframes win-fade{from{opacity:0}}
 @keyframes win-pop{from{transform:scale(.7) rotate(-3deg);opacity:0}}
 @keyframes win-rays{to{transform:rotate(360deg)}}
@@ -532,7 +535,7 @@ tbody tr:last-child td{border-bottom:0}
 @keyframes win-amount{from{transform:scale(.62);opacity:0}}
 @keyframes spark-twinkle{0%,100%{transform:scale(.5);opacity:.2}50%{transform:scale(1.18);opacity:1}}
 @keyframes win-fall{to{transform:translateY(520px) rotate(700deg);opacity:0}}
-@media (prefers-reduced-motion: reduce){.win-celebration,.win-celebration-card,.win-celebration-cup-wrap,.win-celebration-rays,.win-celebration-amount,.win-celebration-sparkles .spark,.win-celebration-confetti i{animation:none}}
+@media (prefers-reduced-motion: reduce){.win-celebration,.win-celebration-card,.win-celebration-cup-wrap,.win-celebration-amount,.win-celebration-confetti i{animation:none}}
 .compact-stats .stat-card{min-height:110px}
 .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}
 .settings-card h2{display:flex;align-items:center;gap:8px}.settings-card h2 svg{color:#e32e50}
@@ -1546,12 +1549,18 @@ video {
   .auth-callback-card { padding: 26px 20px; }
 
   /* ── Win celebration ────────────────────────────────────────── */
-  .win-celebration { padding: 12px; }
-  .win-celebration-card { padding: 16px 16px 18px; border-radius: 22px; }
-  .win-celebration-cup-wrap { width: 198px; height: 188px; margin-top: -6px; }
-  .win-celebration-card h2 { font-size: 32px; }
-  .win-celebration-amount { font-size: 38px; }
-  .win-celebration-card button { height: 48px; }
+  .win-celebration { padding: 10px; }
+  .win-celebration-card { padding: 14px 14px 16px; border-radius: 18px; }
+  .win-celebration-header { gap: 8px; margin-top: 2px; }
+  .win-celebration-mark { width: 40px; height: 43px; font-size: 13px; }
+  .win-celebration-brand { font-size: 8px; letter-spacing: 2.5px; }
+  .win-celebration-verified { font-size: 7px; }
+  .win-celebration-cup-wrap { width: 214px; height: 201px; margin-top: -3px; margin-bottom: -4px; }
+  .win-celebration-card h2 { font-size: 36px; }
+  .win-celebration-sub { margin-bottom: 8px; font-size: 10px; }
+  .win-celebration-amount { font-size: 45px; margin-bottom: 12px; }
+  .win-celebration-meta div { min-height: 28px; padding: 3px 9px; }
+  .win-celebration-card button { height: 49px; letter-spacing: 1.6px; }
   .bet-placed { padding: 14px; }
   .bet-placed-card { padding: 22px 15px 15px; }
   .bet-placed-selections { max-height: 150px; }

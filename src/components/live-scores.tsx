@@ -1023,7 +1023,6 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
       {winQueue.length > 0 && <WinCelebration win={winQueue[0]} currency={slipCurrency} onClose={() => setWinQueue((current) => current.slice(1))} />}
       <div className="sportscore-attribution">
         {lastUpdated && <span>Updated {new Date(lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>}
-        <span>Scores via <a href="https://www.api-football.com/" target="_blank" rel="noreferrer">API-Football</a> · <a href="https://sportscore.com/" rel="dofollow" target="_blank">SportScore</a></span>
       </div>
     </section>
   );
