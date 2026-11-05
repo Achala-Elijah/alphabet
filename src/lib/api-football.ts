@@ -35,9 +35,9 @@ const DEFAULT_LEAGUES = [
 ];
 
 const DEFAULT_HOST = "https://v3.football.api-sports.io";
-const DEFAULT_DAILY_LIMIT = 90;
-const DEFAULT_DATE_TTL_SECONDS = 20 * 60; // every 20 minutes → ≈72 requests/day
-const DEFAULT_NEXT_TTL_SECONDS = 6 * 60 * 60; // every 6 hours → ≈4 requests/day
+const DAILY_LIMIT = 98;
+const DATE_TTL_MS = 16 * 60 * 1000;
+const NEXT_TTL_MS = 6 * 60 * 60 * 1000;
 
 type CacheEntry = { at: number; data: SportsMatch[] };
 const cache = new Map<string, CacheEntry>();
@@ -64,11 +64,6 @@ function configuredLeagues() {
 }
 
 const LEAGUE_IDS = new Set(configuredLeagues());
-const DAILY_LIMIT = Math.max(1, Number(process.env.FOOTBALL_API_DAILY_LIMIT || DEFAULT_DAILY_LIMIT));
-const DATE_TTL_MS =
-  Math.max(60, Number(process.env.FOOTBALL_API_LIVE_CACHE_SECONDS || DEFAULT_DATE_TTL_SECONDS)) * 1000;
-const NEXT_TTL_MS =
-  Math.max(60, Number(process.env.FOOTBALL_API_UPCOMING_CACHE_SECONDS || DEFAULT_NEXT_TTL_SECONDS)) * 1000;
 const HOST = (process.env.FOOTBALL_API_HOST || DEFAULT_HOST).replace(/\/+$/, "");
 
 function providerHeaders(): Record<string, string> | null {
@@ -188,8 +183,8 @@ async function cachedFetch(cacheKey: string, requestUrl: string, ttlMs: number):
 }
 
 /**
- * One date response (today's fixtures, including live) + one next-100 sweep.
- * Default ≈76 of your 100/day free allowance.
+ * One date response every 16 minutes (≈90 calls/day) + next-100 every 6 hours.
+ * About 94 calls/day by design, with a hard in-app cap at 98.
  */
 export async function fetchApiFootballMatches(): Promise<SportsMatch[]> {
   if (!process.env.API_FOOTBALL_KEY && !process.env.FOOTBALL_API_KEY) return [];
