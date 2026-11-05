@@ -1312,9 +1312,14 @@ video {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
+  /* Selections flow naturally and the WHOLE sheet scrolls (.betslip-head).
+     The desktop rule caps this list at 210px with overflow:visible, which on
+     a phone made every selection past 210px paint over the booking-code
+     block below it instead of scrolling — kill the cap here. */
   .betslip-selections {
     flex-shrink: 0;
     overflow: visible;
+    max-height: none;
   }
   .betslip.is-collapsed {
     left: auto;
