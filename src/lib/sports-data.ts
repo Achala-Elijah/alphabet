@@ -33,14 +33,40 @@ export type SportsMatch = {
  * AlphaBet match behaves identically to a SportScore match.
  */
 export function normalizeStatus(statusRaw: string, statusTextRaw?: string): { status: string; status_text: string } {
-  const raw = (statusTextRaw || statusRaw || "").trim().toLowerCase();
-  if (raw.includes("full time") || raw === "finished" || raw === "ft" || raw === "completed" || raw === "ended") {
+  // Some feeds put the useful phrase in status_text and leave status vague
+  // (or vice versa), so consider both instead of only the text field.
+  const raw = `${statusTextRaw || ""} ${statusRaw || ""}`.trim().toLowerCase();
+  if (
+    raw.includes("full time") ||
+    raw.includes("full-time") ||
+    raw.includes("finished") ||
+    raw.includes("completed") ||
+    raw.includes("ended") ||
+    /\bft\b/.test(raw) ||
+    raw.includes("after extra time") ||
+    /\baet\b/.test(raw)
+  ) {
     return { status: "finished", status_text: "Full time" };
   }
-  if (raw.includes("cancelled") || raw.includes("canceled")) {
+  if (
+    raw.includes("cancel") ||
+    raw.includes("abandon") ||
+    raw.includes("postpon") ||
+    raw.includes("suspend")
+  ) {
     return { status: "cancelled", status_text: "Cancelled" };
   }
-  if (raw.includes("live") || raw.includes("in play") || raw.includes("1st half") || raw.includes("2nd half") || raw.includes("half time") || raw === "in-play") {
+  if (
+    raw.includes("live") ||
+    raw.includes("in play") ||
+    raw.includes("in-play") ||
+    raw.includes("half") ||
+    raw.includes("extra time") ||
+    raw.includes("penalt") ||
+    raw.includes("shootout") ||
+    raw.includes("quarter") ||
+    /\bset\s*\d/.test(raw)
+  ) {
     return { status: "live", status_text: "Live" };
   }
   // Default: not yet started
@@ -57,11 +83,20 @@ export function isFinishedMatch(status: string, status_text: string): boolean {
   return ["finished", "cancelled"].includes(normalizeStatus(status, status_text).status);
 }
 
-/** True when a match should be shown on the customer site. Finished/cancelled are hidden.
- *  Only live/upcoming are shown — anything else is hidden. */
-export function isShownOnSite(status: string, status_text: string): boolean {
+/**
+ * True when a match should be shown on the customer site.
+ * Finished/cancelled are hidden. A "scheduled" row whose kickoff is hours in
+ * the past is stale fixture data for a game that has already been played, so
+ * it is hidden too instead of appearing as an upcoming match.
+ */
+export function isShownOnSite(status: string, status_text: string, kickoff?: string | null): boolean {
   const normalized = normalizeStatus(status, status_text).status;
-  return normalized === "live" || normalized === "scheduled";
+  if (normalized !== "live" && normalized !== "scheduled") return false;
+  if (normalized === "scheduled" && kickoff) {
+    const start = new Date(kickoff).getTime();
+    if (!Number.isNaN(start) && Date.now() - start > 6 * 60 * 60 * 1000) return false;
+  }
+  return true;
 }
 
 /**

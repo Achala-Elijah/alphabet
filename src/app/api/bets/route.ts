@@ -73,7 +73,13 @@ export async function POST(request: Request) {
     const mode = body.mode === "singles" ? "singles" : "multiple";
     const stake = Number(body.stake);
     const selections = Array.isArray(body.selections) ? body.selections : [];
-    const customer = await getCustomerSession();
+    // A staff member can also carry an old customer cookie from testing the
+    // customer site. Their staff profile is the wallet shown in the header,
+    // so always prefer a signed-in staff account over that stale customer
+    // session — otherwise the bet is debited from the wrong (empty) wallet.
+    const authClient = await createSupabaseServerClient();
+    const { data: { user: staffUser } } = await authClient.auth.getUser();
+    const customer = staffUser ? null : await getCustomerSession();
 
     // Minimum stake: GH₵ 150 for staff and GHS wallets, ₦15,000 for NGN wallets.
     const stakeCurrency = normalizeCurrency(customer?.currency);
@@ -98,6 +104,14 @@ export async function POST(request: Request) {
       // so a short balance never leaves half the singles already staked.
       if (customer && Number(customer.balance) < totalStake) {
         return NextResponse.json({ error: "Your wallet balance is too low for this stake. Deposit first, then try again." }, { status: 400 });
+      }
+      // Staff wallets live on `profiles`, not `customer_accounts` — check the
+      // same balance the header shows before placing any single.
+      if (!customer && staffUser) {
+        const { data: staffProfile } = await authClient.from("profiles").select("balance").eq("id", staffUser.id).maybeSingle();
+        if (staffProfile && Number(staffProfile.balance) < totalStake) {
+          return NextResponse.json({ error: "Your wallet balance is too low for this stake. Deposit first, then try again." }, { status: 400 });
+        }
       }
       const guard = await guardDecidedMatches(selections);
       if (guard) return guard;
@@ -148,11 +162,9 @@ export async function POST(request: Request) {
       }
       return NextResponse.json({ bet: data, potentialReturn }, { status: 201 });
     }
-    const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Sign in before placing a bet." }, { status: 401 });
+    if (!staffUser) return NextResponse.json({ error: "Sign in before placing a bet." }, { status: 401 });
 
-    const { data, error } = await supabase.rpc("place_bet", {
+    const { data, error } = await authClient.rpc("place_bet", {
       p_stake: stake,
       p_potential_return: potentialReturn,
       p_selections: selections
@@ -179,8 +191,11 @@ export async function GET() {
     // Settle anything that has been decided, then report what changed so the
     // client can celebrate a win exactly once.
     const settled = await settleOpenBets();
-    const customer = await getCustomerSession();
+    // Same precedence as POST: a signed-in staff account owns the wallet in
+    // the header, even if an old customer cookie is still around.
     const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const customer = user ? null : await getCustomerSession();
     if (customer) {
       const { data, error } = await supabase.rpc("customer_bet_history", { p_account_id: customer.account_id });
       if (error) {
@@ -190,7 +205,6 @@ export async function GET() {
       const mine = settled.filter((bet) => bet.kind === "customer" && bet.accountId === customer.account_id);
       return NextResponse.json({ bets: data || [], settled: mine, currency: customer.currency || "GHS" });
     }
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Sign in to view your bets." }, { status: 401 });
     const { data, error } = await supabase.from("bets").select("id,stake,potential_return,status,selections,placed_at").eq("user_id", user.id).order("placed_at", { ascending: false });
     if (error) {

@@ -325,7 +325,7 @@ export async function GET(request: Request) {
     // Big fixtures rank first — the site showcases the marquee games.
     const allMatches = sortByBigness(
       [...databaseMatches, ...upstreamMatches, ...fallbackMatches]
-        .filter((match) => isShownOnSite(match.status, match.status_text))
+        .filter((match) => isShownOnSite(match.status, match.status_text, match.time))
     );
     const featured = new URL(request.url).searchParams.get("featured") === "true";
     const liveOnly = new URL(request.url).searchParams.get("live") === "true";
@@ -353,7 +353,9 @@ export async function GET(request: Request) {
       setupRequired: !databaseReady
     });
   } catch {
-    const fallback = (generatedMatches[sport] || []).map(normalizeFallbackMatch);
+    const fallback = (generatedMatches[sport] || [])
+      .map(normalizeFallbackMatch)
+      .filter((match) => isShownOnSite(match.status, match.status_text, match.time));
     return NextResponse.json({ matches: fallback, updated: null, sport, source: "AlphaBet fallback", fallback: true, databaseReady: false, setupRequired: true });
   }
 }

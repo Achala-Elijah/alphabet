@@ -1,8 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Check, RefreshCw, Ticket, X, Share2, Copy, CheckCheck } from "lucide-react";
 import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, normalizeBookingCode, isValidBookingCode, formatBookingCode, CODE_LENGTH, ADD_SELECTION_EVENT, type QuickSelection, type BetSlipSelection, type BetSlipMode } from "@/lib/bet-slip";
+import { isShownOnSite } from "@/lib/sports-data";
+import { fuzzyScore } from "@/lib/fuzzy-search";
+import { writeSearchQuery } from "@/lib/search-query";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
 import { minStake, minStakeLabel, normalizeCurrency } from "@/lib/limits";
 import WinCelebration, { type WinCelebrationBet } from "@/components/win-celebration";
@@ -27,6 +31,8 @@ type SportScoreMatch = {
 type LiveScoresProps = {
   sport: string;
   market: string;
+  /** Inline header search term — filters this sport's match list on the home page. */
+  query?: string;
 };
 
 type LiveScoresResponse = {
@@ -146,7 +152,7 @@ function getOdds(match: SportScoreMatch, market: string, option: string): string
   return "1.90";
 }
 
-export default function LiveScores({ sport, market }: LiveScoresProps) {
+export default function LiveScores({ sport, market, query = "" }: LiveScoresProps) {
   const [matches, setMatches] = useState<SportScoreMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -155,6 +161,16 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   const [stake, setStake] = useState("150");
   // Match detail screen — the key of the match whose full market list is open.
   const [detailKey, setDetailKey] = useState<string | null>(null);
+  // Search results arrive as /?sport=…&match=<slug>&focus=<nonce>.
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const focusMatch = searchParams.get("match");
+  const focusStamp = searchParams.get("focus");
+  const openedFocus = useRef<string | null>(null);
+  // Inline home search — filters the current sport's team list with fuzzy
+  // matching, without changing the rest of the home page.
+  const searchTerm = query.trim();
+  const searchActive = searchTerm.length > 0;
   // Set briefly when a live score changes so the numbers flash (see effect below).
   const [flashKey, setFlashKey] = useState<string | null>(null);
   const previousScores = useRef<Record<string, string>>({});
@@ -359,19 +375,47 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
   // Finished and cancelled matches are NEVER shown on the customer site —
   // the API already filters them, this is a client-side safety net so a
   // stale cache can never leak a finished match into the UI.
-  const visibleMatches = matches.filter((match) => {
-    const raw = (match.status_text || match.status || "").trim().toLowerCase();
-    return !(
-      raw.includes("full time") ||
-      raw === "finished" ||
-      raw === "ft" ||
-      raw === "completed" ||
-      raw === "ended" ||
-      raw.includes("cancelled") ||
-      raw.includes("canceled")
-    );
-  });
+  // Finished, cancelled and stale "upcoming" rows are NEVER shown on the
+  // customer site. The API already filters them; this client-side safety net
+  // keeps a stale cache from leaking an already played match into the home
+  // list or the LIVE tab.
+  const visibleMatches = matches.filter((match) => isShownOnSite(match.status || "", match.status_text || "", match.time));
   const options = marketOptions[market] || marketOptions["1X2"];
+
+  // A search result navigates to /?sport=…&match=<slug>&focus=<nonce>.
+  // Open that match's detail screen once its fixture arrives in the feed.
+  useEffect(() => {
+    if (!focusMatch) return;
+    const stamp = `${focusStamp || ""}:${focusMatch}`;
+    if (openedFocus.current === stamp) return;
+    const index = visibleMatches.findIndex((match) => match.slug === focusMatch);
+    if (index < 0) return;
+    openedFocus.current = stamp;
+    setDetailKey(matchKeyFor(visibleMatches[index], index));
+  }, [focusMatch, focusStamp, matches]);
+
+  // Filtering can hide the match that is currently open, so dismiss its
+  // detail screen as soon as the search term changes.
+  useEffect(() => {
+    if (searchTerm) setDetailKey(null);
+  }, [searchTerm]);
+
+  // Typing in the header filters this sport's matches in place — promos,
+  // featured cards, tabs, odds and the bet slip all stay exactly where they
+  // are. No separate search page, no layout switch.
+  const filteredMatches = !searchTerm
+    ? visibleMatches
+    : visibleMatches.filter((match) =>
+      // Team names only — league/competition text never brings a match back.
+      fuzzyScore(`${match.home || ""} ${match.away || ""}`, searchTerm) > 0
+    );
+
+  function clearSearch() {
+    writeSearchQuery("");
+    const params = new URLSearchParams(window.location.search);
+    params.delete("q");
+    router.replace(`/?${params.toString()}`, { scroll: false });
+  }
 
   // Flash the score when it changes between refetches — the one cue that
   // makes a live list feel alive instead of a static table.
@@ -627,12 +671,15 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
     <section className="sportscore-panel" aria-live="polite">
       <div className="sportscore-heading">
         <div>
-          <h2><span className="sportscore-live-indicator" /> {sport === "LIVE" ? "LIVE NOW" : sport.toUpperCase()} <em>{matches.length}</em></h2>
-          <p>{sport === "LIVE" ? "In-play football and markets" : `${sport} scores and markets`} from SportScore · {market}</p>
+          <h2><span className="sportscore-live-indicator" /> {sport === "LIVE" ? "LIVE NOW" : sport.toUpperCase()} <em>{filteredMatches.length}</em></h2>
+          <p>{searchActive ? <>Showing results for “{searchTerm}” · {market}</> : <>{sport === "LIVE" ? "In-play football and markets" : `${sport} scores and markets`} from SportScore · {market}</>}</p>
         </div>
-        <button className="sportscore-refresh" onClick={() => { setLoading(true); void loadMatches(); }} aria-label="Refresh scores">
-          <RefreshCw size={16} />
-        </button>
+        <div className="sportscore-heading-actions">
+          {searchActive && <button className="sportscore-clear" onClick={clearSearch}>Clear</button>}
+          <button className="sportscore-refresh" onClick={() => { setLoading(true); void loadMatches(); }} aria-label="Refresh scores">
+            <RefreshCw size={16} />
+          </button>
+        </div>
       </div>
 
       {loading && <div className="sportscore-message">Loading {sport === "LIVE" ? "live football" : sport.toLowerCase()} matches…</div>}
@@ -642,14 +689,14 @@ export default function LiveScores({ sport, market }: LiveScoresProps) {
           <button onClick={() => { setLoading(true); void loadMatches(); }}>Try again</button>
         </div>
       )}
-      {!loading && !error && visibleMatches.length === 0 && (
+      {!loading && !error && filteredMatches.length === 0 && (
         <div className="sportscore-message">
           <Ticket size={22} />
-          <span>{sport === "LIVE" ? "No games are live right now. Explore upcoming football markets." : `No ${sport.toLowerCase()} matches are available right now. Check back later.`}</span>
+          <span>{searchActive ? `No ${sport.toLowerCase()} matches found for “${searchTerm}”. Try another team name.` : sport === "LIVE" ? "No games are live right now. Explore upcoming football markets." : `No ${sport.toLowerCase()} matches are available right now. Check back later.`}</span>
         </div>
       )}
 
-      {!loading && !error && visibleMatches.map((match, index) => {
+      {!loading && !error && filteredMatches.map((match, index) => {
         // Match the SportScore wording exactly — "Live", "Full time",
         // "Upcoming", "Cancelled" — for every source, including manual ones.
         const { isLive, isFinished, label: statusLabel } = matchStatus(match);

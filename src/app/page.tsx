@@ -46,12 +46,18 @@ function HomeContent() {
   // never updated after a client-side navigation, so the two tabs fought
   // over which view was actually on screen.
   const searchParams = useSearchParams();
-  const gamesView = searchParams.get("nav") === "games";
+  const searchQuery = searchParams.get("q") || "";
+  // A search always uses the sports feed, even if the Games tab was active.
+  const gamesView = searchParams.get("nav") === "games" && !searchQuery.trim();
+  const sportParam = searchParams.get("sport");
 
   const [sport, setSport] = useState("Football");
   const [market, setMarket] = useState("1X2");
   const [featured, setFeatured] = useState(0);
-  const [apiFeatured, setApiFeatured] = useState<FeaturedMatch[]>(featuredMatches);
+  // The API is the only source of featured fixtures. The old hard-coded
+  // placeholders were real matches from past rounds and could appear on the
+  // home page before the feed answered.
+  const [apiFeatured, setApiFeatured] = useState<FeaturedMatch[]>([]);
   // Mirror the persisted slip so featured odds light up when selected, and
   // dim again when the selection is removed anywhere else.
   const [slipSelections, setSlipSelections] = useState<Record<string, BetSlipSelection>>({});
@@ -60,6 +66,15 @@ function HomeContent() {
     setSport(nextSport);
     setMarket(marketsBySport[nextSport][0]);
   };
+
+  // A search result carries its sport in the URL so the home page opens the
+  // right feed before the match detail is shown.
+  useEffect(() => {
+    if (sportParam && sports.includes(sportParam)) {
+      setSport(sportParam);
+      setMarket(marketsBySport[sportParam]?.[0] || "1X2");
+    }
+  }, [sportParam]);
 
   useEffect(() => {
     const sync = () => setSlipSelections(readBetSlip().selections);
@@ -77,7 +92,7 @@ function HomeContent() {
         return response.json();
       })
       .then((data: { matches?: Array<{ home?: string; away?: string; competition?: string; time?: string; odds?: string[]; market_odds?: Record<string, Record<string, string>>; slug?: string }> }) => {
-        if (cancelled || !Array.isArray(data.matches) || data.matches.length === 0) return;
+        if (cancelled || !Array.isArray(data.matches)) return;
         // Prefer the API's 1X2 from market_odds so featured cards match the
         // odds in the live list — both come from generateAllMarketOdds.
         setApiFeatured(data.matches.map((match, index) => {
@@ -100,6 +115,11 @@ function HomeContent() {
       .catch(() => undefined);
     return () => { cancelled = true; };
   }, [gamesView]);
+
+  const featuredCount = apiFeatured.length;
+  const primaryFeatured = featuredCount ? apiFeatured[featured % featuredCount] : null;
+  const secondaryFeatured = featuredCount > 1 ? apiFeatured[(featured + 1) % featuredCount] : null;
+
   return (
     <div className="client-app">
       <ClientHeader />
@@ -115,12 +135,12 @@ function HomeContent() {
           if (label === "Live") selectSport("LIVE");
           if (label === "All Sports") selectSport("Football");
         }}><Icon size={27} strokeWidth={1.6} /><span>{label}</span></button>)}</div>
-        {sport === "Football" && <section className="featured-section">
-          <div className="featured-heading"><h2><span>♜</span> FEATURED MATCHES</h2><div className="slider-controls"><button onClick={() => setFeatured((featured + 2) % 3)} aria-label="Previous"><ChevronLeft /></button><button onClick={() => setFeatured((featured + 1) % 3)} aria-label="Next"><ChevronRight /></button></div><span className="best-odds-heading">BEST ODDS</span></div>
+        {sport === "Football" && primaryFeatured && <section className="featured-section">
+          <div className="featured-heading"><h2><span>♜</span> FEATURED MATCHES</h2><div className="slider-controls"><button onClick={() => setFeatured((featured + featuredCount - 1) % featuredCount)} aria-label="Previous"><ChevronLeft /></button><button onClick={() => setFeatured((featured + 1) % featuredCount)} aria-label="Next"><ChevronRight /></button></div><span className="best-odds-heading">BEST ODDS</span></div>
           <div className="league-tabs"><button className="selected">Top Football</button></div>
-          <div className="featured-track">{apiFeatured[featured % apiFeatured.length] && <MatchCard
-            match={apiFeatured[featured % apiFeatured.length]}
-            selectedOption={slipSelections[featuredMatchId(apiFeatured[featured % apiFeatured.length])]?.option}
+          <div className="featured-track"><MatchCard
+            match={primaryFeatured}
+            selectedOption={slipSelections[featuredMatchId(primaryFeatured)]?.option}
             onSelectOdd={(match, option, odds) => addSelectionToSlip({
               match: `${match.home} v ${match.away}`,
               matchId: featuredMatchId(match),
@@ -128,9 +148,9 @@ function HomeContent() {
               odds,
               market: "1X2"
             })}
-          />}{apiFeatured[(featured + 1) % apiFeatured.length] && <MatchCard
-            match={apiFeatured[(featured + 1) % apiFeatured.length]}
-            selectedOption={slipSelections[featuredMatchId(apiFeatured[(featured + 1) % apiFeatured.length])]?.option}
+          />{secondaryFeatured && <MatchCard
+            match={secondaryFeatured}
+            selectedOption={slipSelections[featuredMatchId(secondaryFeatured)]?.option}
             onSelectOdd={(match, option, odds) => addSelectionToSlip({
               match: `${match.home} v ${match.away}`,
               matchId: featuredMatchId(match),
@@ -142,7 +162,7 @@ function HomeContent() {
         </section>}
         <div className="sport-tabs">{sports.map(s => <button key={s} className={sport === s ? "active" : ""} onClick={() => selectSport(s)}>{s}</button>)}</div>
         <div className="market-tabs">{markets.map(m => <button key={m} className={market === m ? "active" : ""} onClick={() => setMarket(m)}>{m}</button>)}</div>
-        <LiveScores sport={sport} market={market} />
+        <LiveScores sport={sport} market={market} query={searchQuery} />
       </main>}
       <Suspense fallback={null}><ClientBottomNav /></Suspense>
     </div>

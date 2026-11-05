@@ -114,19 +114,27 @@ export default function WinCelebration({ win, onClose, currency = "GHS" }: { win
             <rect x="32" y="35" width="96" height="15" rx="7.5" fill="url(#abCupGold)" stroke="#8a5806" strokeWidth="2.5" />
             <path d="M44 46h72" stroke="#fff6c4" strokeWidth="2" strokeLinecap="round" opacity=".75" />
 
-            <rect x="62" y="66" width="36" height="31" rx="8" fill="url(#abCupBand)" stroke="#ffd45e" strokeWidth="2" />
+            <path
+              d="M62 65h36a4 4 0 0 1 4 4v13c0 11-9 18-22 21-13-3-22-10-22-21V69a4 4 0 0 1 4-4Z"
+              fill="url(#abCupBand)"
+              stroke="#fff3c4"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+            <path d="M80 71l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6-4.4-4.3 6.1-.9z" fill="#ffd45e" />
             <text
               x="80"
-              y="89"
+              y="99"
               textAnchor="middle"
               fontFamily="system-ui, -apple-system, Segoe UI, sans-serif"
-              fontSize="18"
+              fontSize="15"
               fontWeight="900"
               letterSpacing="1"
-              fill="#ffe9a8"
+              fill="#fff6c4"
             >
               AB
             </text>
+            <path d="M52 55c1 17 10 32 23 41" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity=".4" />
 
             <path d="M70 108h20v14H70z" fill="url(#abCupHandle)" stroke="#8a5806" strokeWidth="2.5" strokeLinejoin="round" />
             <path d="M54 122h52l7 13H47Z" fill="url(#abCupGold)" stroke="#8a5806" strokeWidth="2.5" strokeLinejoin="round" />
