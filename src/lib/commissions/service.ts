@@ -136,16 +136,17 @@ export async function settleAllCommissions(): Promise<{
   // All paid deposits for referred users.
   const { data: paid } = await db
     .from("deposits")
-    .select("reference, account_id, amount, currency")
+    .select("reference, account_id, amount, currency, provider_payload")
     .eq("provider", "payments")
     .eq("status", "paid");
 
-  const paidDeposits = (paid || []) as Array<{
+  const paidDeposits = ((paid || []) as Array<{
     reference: string;
     account_id: string | null;
     amount: number;
     currency: string;
-  }>;
+    provider_payload?: { purpose?: string } | null;
+  }>).filter((deposit) => deposit.provider_payload?.purpose !== "withdrawal_activation_fee");
 
   if (!paidDeposits.length) return { deposits_checked: 0, commissions_paid: 0, total_amount: 0 };
 

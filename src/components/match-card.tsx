@@ -15,17 +15,21 @@ type MatchCardProps = {
   /** Tapping an odd adds it to the bet slip — same behaviour as the live list. */
   onSelectOdd?: (match: Match, option: string, odds: string) => void;
   selectedOption?: string;
+  /** Opens the match detail screen (all markets, like the live list). */
+  onOpenMatch?: (match: Match) => void;
 };
 
-export default function MatchCard({ match, onSelectOdd, selectedOption }: MatchCardProps) {
+export default function MatchCard({ match, onSelectOdd, selectedOption, onOpenMatch }: MatchCardProps) {
   return (
     <article className="match-card">
-      <div className="match-tags"><span className={match.tag.includes("HOT") ? "hot-tag" : "best-tag"}>{match.tag}</span><span className="league-link">{match.league}</span></div>
-      <div className="match-teams">
-        <div className="team"><span className="team-crest">{match.homeCode}</span><span>{match.home}</span></div>
-        <div className="match-time"><strong>{match.time}</strong><span>Today</span></div>
-        <div className="team"><span className="team-crest alt">{match.awayCode}</span><span>{match.away}</span></div>
-      </div>
+      <button type="button" className="match-card-open" onClick={() => onOpenMatch?.(match)} aria-label={`Open ${match.home} v ${match.away} details`}>
+        <div className="match-tags"><span className={match.tag.includes("HOT") ? "hot-tag" : "best-tag"}>{match.tag}</span><span className="league-link">{match.league}</span></div>
+        <div className="match-teams">
+          <div className="team"><span className="team-crest">{match.homeCode}</span><span>{match.home}</span></div>
+          <div className="match-time"><strong>{match.time}</strong><span>Today</span></div>
+          <div className="team"><span className="team-crest alt">{match.awayCode}</span><span>{match.away}</span></div>
+        </div>
+      </button>
       <div className="odds-row">
         {["1", "X", "2"].map((option, index) => (
           <button

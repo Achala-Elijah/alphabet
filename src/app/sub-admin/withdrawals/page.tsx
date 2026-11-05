@@ -10,6 +10,7 @@ type Withdrawal = {
   username: string;
   phone: string | null;
   amount: number;
+  activation_fee: number;
   currency: string;
   status: string;
   reference: string | null;
@@ -128,7 +129,7 @@ export default function WithdrawalsPage() {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Reference</th><th>User</th><th>Phone</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr>
+              <tr><th>Reference</th><th>User</th><th>Phone</th><th>Amount</th><th>Activation fee</th><th>Status</th><th>Requested</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {filtered.map((row) => (
@@ -137,6 +138,7 @@ export default function WithdrawalsPage() {
                   <td><div className="user-cell"><span className="mini-avatar">{(row.username || "??").slice(0, 2).toUpperCase()}</span><div><strong>{row.username}</strong><small>{row.reference}</small></div></div></td>
                   <td>{row.phone || "—"}</td>
                   <td className="amount-cell">{money(row.amount, row.currency)}</td>
+                  <td className="amount-cell">{money(row.activation_fee, row.currency)}</td>
                   <td><span className={`status ${statusColor(row.status)}`}>{row.status}</span></td>
                   <td>{new Date(row.created_at).toLocaleString()}</td>
                   <td>
@@ -155,7 +157,7 @@ export default function WithdrawalsPage() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="empty-table">{loading ? "Loading..." : filter === "pending" ? "No pending withdrawal requests." : "No withdrawal requests found."}</td></tr>
+                <tr><td colSpan={8} className="empty-table">{loading ? "Loading..." : filter === "pending" ? "No pending withdrawal requests." : "No withdrawal requests found."}</td></tr>
               )}
             </tbody>
           </table>

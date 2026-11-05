@@ -68,7 +68,12 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           ? { type: "customer" as const, accountId: customer.account_id }
           : { type: "staff" as const, staffId: user!.id };
         const settleResult = await verifyAndSettle(paymentsClient(), ref, subject);
-        if (settleResult.status === "paid") {
+        if (settleResult.purpose === "withdrawal_activation_fee") {
+          currentBalance = settleResult.balance;
+          paymentNotice = settleResult.activationRequested
+            ? { kind: "success", text: "Activation fee paid. Your withdrawal request is pending admin review." }
+            : { kind: "error", text: settleResult.activationError || "Activation fee paid, but the withdrawal request could not be created. Contact admin." };
+        } else if (settleResult.status === "paid") {
           currentBalance = settleResult.balance;
           paymentNotice = {
             kind: "success",
@@ -98,7 +103,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <h1>{customer?.username || staff?.username}</h1>
       <p>{staff ? (staff.role === "admin" ? "Ghana · Admin account" : "Ghana · Sub-admin account") : "Ghana · Customer account"}</p>
       <strong>{formatCustomerAmount(customer?.balance ?? staff?.balance ?? 0, customer?.currency || "GHS")}</strong>
-      <WalletActions mode={staff ? "staff" : "customer"} currency={customer?.currency || "GHS"} layout="summary" />
+      <WalletActions mode={staff ? "staff" : "customer"} currency={customer?.currency || "GHS"} layout="summary" availableBalance={Number(customer?.balance ?? staff?.balance ?? 0)} />
     </section> : <section className="account-profile-summary account-profile-guest">
       <span className="profile-summary-avatar"><UserRound size={25} /></span>
       <h1>Welcome to AlphaBet</h1>

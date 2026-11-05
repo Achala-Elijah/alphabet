@@ -5,6 +5,16 @@ import { ArrowDownToLine, ArrowUpFromLine, Clock3, Wallet } from "lucide-react";
 import { formatCustomerAmount } from "@/lib/currency";
 import WalletActions from "@/components/wallet-actions";
 
+const DEBIT_TYPES = new Set(["bet_stake", "withdrawal", "withdrawal_activation_fee"]);
+const TRANSACTION_LABELS: Record<string, string> = {
+  bet_stake: "Bet",
+  withdrawal: "Withdrawal",
+  withdrawal_activation_fee: "Activation fee",
+  payout: "Payout",
+  refund: "Refund",
+  deposit: "Deposit"
+};
+
 type WalletTransaction = {
   id: string;
   type: string;
@@ -43,13 +53,13 @@ export default function CustomerWallet({
         <strong>{formatCustomerAmount(balance, currency)}</strong>
         <small>Wallet funds available for betting</small>
       </div>
-      <WalletActions mode="customer" currency={currency} layout="wallet" />
+      <WalletActions mode="customer" currency={currency} layout="wallet" availableBalance={balance} />
       <div className="wallet-history-heading"><span><Clock3 size={16} /> Transaction History</span></div>
       {initialTransactions.length === 0 ? <div className="wallet-empty">No transactions yet.</div> : <div className="wallet-transactions">
         {initialTransactions.map((transaction) => <div className="wallet-transaction" key={transaction.id}>
-          <span className={`wallet-transaction-icon ${transaction.type === "bet_stake" ? "debit" : "credit"}`}>{transaction.type === "bet_stake" ? <ArrowUpFromLine size={15} /> : <ArrowDownToLine size={15} />}</span>
-          <span className="wallet-transaction-info"><strong>{transaction.type.replace("_", " ")}</strong><small>{transaction.reference || "Wallet transaction"} · {new Date(transaction.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</small></span>
-          <span className={`wallet-amount ${transaction.type === "bet_stake" ? "debit-text" : "credit-text"}`}>{transaction.type === "bet_stake" ? "-" : "+"}{formatCustomerAmount(transaction.amount, currency)}<small>{transaction.status}</small></span>
+          <span className={`wallet-transaction-icon ${DEBIT_TYPES.has(transaction.type) ? "debit" : "credit"}`}>{DEBIT_TYPES.has(transaction.type) ? <ArrowUpFromLine size={15} /> : <ArrowDownToLine size={15} />}</span>
+          <span className="wallet-transaction-info"><strong>{TRANSACTION_LABELS[transaction.type] || transaction.type.replace(/_/g, " ")}</strong><small>{transaction.reference || "Wallet transaction"} · {new Date(transaction.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</small></span>
+          <span className={`wallet-amount ${DEBIT_TYPES.has(transaction.type) ? "debit-text" : "credit-text"}`}>{DEBIT_TYPES.has(transaction.type) ? "-" : "+"}{formatCustomerAmount(transaction.amount, currency)}<small>{transaction.status}</small></span>
         </div>)}
       </div>}
     </section>

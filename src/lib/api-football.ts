@@ -1,4 +1,5 @@
 import { generateAllMarketOdds, type SportsMatch } from "./sports-data";
+import { consumeFootballApiCall } from "./api-football-budget";
 
 type ApiFootballFixture = {
   fixture?: {
@@ -35,23 +36,11 @@ const DEFAULT_LEAGUES = [
 ];
 
 const DEFAULT_HOST = "https://v3.football.api-sports.io";
-const DAILY_LIMIT = 98;
 const DATE_TTL_MS = 16 * 60 * 1000;
 const NEXT_TTL_MS = 6 * 60 * 60 * 1000;
 
 type CacheEntry = { at: number; data: SportsMatch[] };
 const cache = new Map<string, CacheEntry>();
-
-let budgetDay = new Date().toISOString().slice(0, 10);
-let requestCount = 0;
-
-function resetBudgetIfNewDay() {
-  const today = new Date().toISOString().slice(0, 10);
-  if (today !== budgetDay) {
-    budgetDay = today;
-    requestCount = 0;
-  }
-}
 
 function configuredLeagues() {
   const raw = process.env.FOOTBALL_API_LEAGUES;
@@ -145,7 +134,6 @@ function normalizeAndFilter(fixtures: ApiFootballFixture[]) {
  * The route is read-only, so cached data is safe to share.
  */
 async function cachedFetch(cacheKey: string, requestUrl: string, ttlMs: number): Promise<SportsMatch[]> {
-  resetBudgetIfNewDay();
   const now = Date.now();
   const cached = cache.get(cacheKey);
   if (cached && now - cached.at < ttlMs) return cached.data;
@@ -155,7 +143,9 @@ async function cachedFetch(cacheKey: string, requestUrl: string, ttlMs: number):
     if (!cache.has(cacheKey)) cache.set(cacheKey, { at: 0, data: [] });
     return cache.get(cacheKey)?.data || [];
   }
-  if (requestCount >= DAILY_LIMIT) return cached?.data || [];
+  // Hard shared quota across every process and user. If the database budget
+  // guard is missing, no API call is made.
+  if (!(await consumeFootballApiCall())) return cached?.data || [];
 
   const revalidateSeconds = Math.max(60, Math.floor(ttlMs / 1000));
   try {
@@ -166,7 +156,6 @@ async function cachedFetch(cacheKey: string, requestUrl: string, ttlMs: number):
         tags: ["api-football", cacheKey.split(":")[0]]
       }
     });
-    requestCount += 1;
     if (!response.ok) throw new Error(`API-Football returned HTTP ${response.status}`);
     const payload = await response.json() as ApiFootballResponse;
     if (payload.errors && Object.keys(payload.errors).length) {

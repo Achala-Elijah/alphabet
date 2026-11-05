@@ -119,6 +119,11 @@ function HomeContent() {
   const featuredCount = apiFeatured.length;
   const primaryFeatured = featuredCount ? apiFeatured[featured % featuredCount] : null;
   const secondaryFeatured = featuredCount > 1 ? apiFeatured[(featured + 1) % featuredCount] : null;
+  const openFeaturedMatch = (match: FeaturedMatch) => {
+    if (!match.slug) return;
+    const focus = Date.now().toString(36);
+    router.push(`/?sport=Football&match=${encodeURIComponent(match.slug)}&focus=${focus}`, { scroll: false });
+  };
 
   return (
     <div className="client-app">
@@ -141,6 +146,7 @@ function HomeContent() {
           <div className="featured-track"><MatchCard
             match={primaryFeatured}
             selectedOption={slipSelections[featuredMatchId(primaryFeatured)]?.option}
+            onOpenMatch={openFeaturedMatch}
             onSelectOdd={(match, option, odds) => addSelectionToSlip({
               match: `${match.home} v ${match.away}`,
               matchId: featuredMatchId(match),
@@ -151,6 +157,7 @@ function HomeContent() {
           />{secondaryFeatured && <MatchCard
             match={secondaryFeatured}
             selectedOption={slipSelections[featuredMatchId(secondaryFeatured)]?.option}
+            onOpenMatch={openFeaturedMatch}
             onSelectOdd={(match, option, odds) => addSelectionToSlip({
               match: `${match.home} v ${match.away}`,
               matchId: featuredMatchId(match),

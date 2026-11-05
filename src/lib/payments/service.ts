@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import { getPaymentProvider } from "./index";
 import { PaymentError, type Currency, type DepositStatus, type DepositSubject, type WebhookEvent } from "./types";
+import { withdrawalActivationFee } from "@/lib/limits";
 
 /**
  * Payment orchestration — provider agnostic.
@@ -23,6 +24,15 @@ type DepositRow = {
   checkout_url: string | null;
   paid_at: string | null;
   created_at: string;
+  provider_payload?: { purpose?: string; withdrawal_amount?: number } | null;
+};
+
+export type SettleResult = {
+  status: DepositStatus;
+  balance: number;
+  purpose?: "withdrawal_activation_fee" | "deposit";
+  activationRequested?: boolean;
+  activationError?: string;
 };
 
 let client: SupabaseClient | undefined;
@@ -48,8 +58,9 @@ export function paymentsClient(): SupabaseClient {
   return client;
 }
 
-function newReference() {
-  return `DEP-${Date.now().toString(36).toUpperCase()}${randomBytes(4).toString("hex").toUpperCase()}`;
+function newReference(purpose?: "withdrawal_activation_fee") {
+  const prefix = purpose === "withdrawal_activation_fee" ? "ACT-" : "DEP-";
+  return `${prefix}${Date.now().toString(36).toUpperCase()}${randomBytes(4).toString("hex").toUpperCase()}`;
 }
 
 function tableHint(error: { message: string }) {
@@ -117,10 +128,96 @@ export async function markDepositFailed(db: SupabaseClient, reference: string) {
  * guarantees a deposit is only ever settled once, even if a webhook and a
  * verify call race each other.
  */
-export async function settleDeposit(db: SupabaseClient, reference: string): Promise<{ status: DepositStatus; balance: number }> {
+/**
+ * A paid withdrawal activation fee must create the withdrawal — but the fee is
+ * never credited to the wallet itself. This isolates the non-wallet flow.
+ */
+async function settleWithdrawalActivation(db: SupabaseClient, row: DepositRow): Promise<SettleResult> {
+  const intended = Number(row.provider_payload?.withdrawal_amount);
+  const accountId = row.account_id;
+  if (!accountId || !Number.isFinite(intended) || intended <= 0 || intended > 1_000_000) {
+    return { status: "paid", balance: await getBalance(db, row), purpose: "withdrawal_activation_fee", activationError: "Invalid withdrawal request." };
+  }
+
+  const balance = await getBalance(db, row);
+  if (balance < intended) {
+    return {
+      status: "paid",
+      balance,
+      purpose: "withdrawal_activation_fee",
+      activationRequested: false,
+      activationError: "Insufficient wallet balance for the withdrawal amount. The activation fee is retained; contact admin for a refund or assistance."
+    };
+  }
+
+  const reference = row.reference;
+  const now = new Date().toISOString();
+  const feeAmount = Number(row.amount);
+  const nextBalance = Math.round((balance - intended) * 100) / 100;
+  let feeRowId: string | null = null;
+  let reservationRowId: string | null = null;
+
+  try {
+    // Activation fee paid externally — recorded here, not credited.
+    const { data: feeRow, error: feeError } = await db
+      .from("customer_transactions")
+      .insert({ account_id: accountId, type: "withdrawal_activation_fee", amount: feeAmount, status: "completed", reference })
+      .select("id")
+      .single();
+    if (feeError || !feeRow) throw new Error(feeError?.message || "Could not record the activation fee.");
+    feeRowId = feeRow.id as string;
+
+    // Reserve the withdrawal amount from the wallet only.
+    const { data: reservationRow, error: reservationError } = await db
+      .from("customer_transactions")
+      .insert({ account_id: accountId, type: "withdrawal", amount: intended, status: "pending", reference })
+      .select("id")
+      .single();
+    if (reservationError || !reservationRow) throw new Error(reservationError?.message || "Could not reserve the withdrawal.");
+    reservationRowId = reservationRow.id as string;
+
+    const { error: balanceError } = await db
+      .from("customer_accounts")
+      .update({ balance: nextBalance, updated_at: now })
+      .eq("id", accountId);
+    if (balanceError) throw new Error(balanceError.message);
+
+    // Admin sees the withdrawal request with the same reference as the fee.
+    const { error: requestError } = await db.from("withdrawal_requests").insert({
+      account_id: accountId,
+      amount: intended,
+      currency: row.currency,
+      status: "pending",
+      reference
+    });
+    if (requestError) throw new Error(requestError.message);
+
+    return { status: "paid", balance: nextBalance, purpose: "withdrawal_activation_fee", activationRequested: true };
+  } catch (reason) {
+    // No wallet should be left in a partial state if the fee was already paid.
+    if (reservationRowId) await db.from("customer_transactions").delete().eq("id", reservationRowId);
+    if (feeRowId) await db.from("customer_transactions").delete().eq("id", feeRowId);
+    // Keep the payment record paid — admin can resolve the failure manually.
+    return {
+      status: "paid",
+      balance,
+      purpose: "withdrawal_activation_fee",
+      activationRequested: false,
+      activationError: reason instanceof Error ? reason.message : "Could not create the withdrawal request. Contact admin."
+    };
+  }
+}
+
+export async function settleDeposit(db: SupabaseClient, reference: string): Promise<SettleResult> {
   const row = await readDeposit(db, reference);
   if (!row) throw new PaymentError("Deposit not found.", 404);
-  if (row.status !== "pending") return { status: row.status, balance: await getBalance(db, row) };
+  if (row.status !== "pending") {
+    return {
+      status: row.status,
+      balance: await getBalance(db, row),
+      purpose: row.provider_payload?.purpose === "withdrawal_activation_fee" ? "withdrawal_activation_fee" : "deposit"
+    };
+  }
 
   const now = new Date().toISOString();
   const { data: claimed } = await db.from("deposits")
@@ -130,7 +227,15 @@ export async function settleDeposit(db: SupabaseClient, reference: string): Prom
     .select("id");
   if (!claimed?.length) {
     const current = await readDeposit(db, reference);
-    return { status: current?.status || row.status, balance: await getBalance(db, row) };
+    return {
+      status: current?.status || row.status,
+      balance: await getBalance(db, row),
+      purpose: row.provider_payload?.purpose === "withdrawal_activation_fee" ? "withdrawal_activation_fee" : "deposit"
+    };
+  }
+
+  if (row.provider_payload?.purpose === "withdrawal_activation_fee") {
+    return settleWithdrawalActivation(db, row);
   }
 
   try {
@@ -178,6 +283,10 @@ export type CreateDepositArgs = {
   currency: Currency;
   callbackUrl?: string;
   customer?: { email?: string | null; phone?: string | null };
+  /** Internal purpose used for non-wallet payments. */
+  purpose?: "withdrawal_activation_fee";
+  /** Amount to reserve from the wallet after an activation fee is paid. */
+  withdrawalAmount?: number;
 };
 
 /**
@@ -199,7 +308,7 @@ export async function createDeposit(args: CreateDepositArgs) {
 
   const db = paymentsClient();
   const provider = getPaymentProvider();
-  const reference = newReference();
+  const reference = newReference(args.purpose);
 
   let result;
   try {
@@ -226,7 +335,9 @@ export async function createDeposit(args: CreateDepositArgs) {
     staff_id: args.subject.type === "staff" ? args.subject.staffId : null,
     account_id: args.subject.type === "customer" ? args.subject.accountId : null,
     checkout_url: result.checkoutUrl || null,
-    provider_payload: result.payload || null,
+    provider_payload: args.purpose
+      ? { ...(result.payload || {}), purpose: args.purpose, withdrawal_amount: args.withdrawalAmount ?? null }
+      : (result.payload || null),
     paid_at: null
   }).select("*").single();
   if (error) throw new PaymentError(tableHint(error), 500);
@@ -242,6 +353,23 @@ export async function createDeposit(args: CreateDepositArgs) {
   return { reference, status: result.status, checkoutUrl: result.checkoutUrl || null, balance: await getBalance(db, data as DepositRow) };
 }
 
+/**
+ * Create a checkout for the per-withdrawal activation fee. The fee is paid
+ * separately — it never comes out of the customer's wallet.
+ */
+export async function createWithdrawalActivationPayment(args: Omit<CreateDepositArgs, "amount" | "purpose" | "withdrawalAmount"> & { amount: number }) {
+  if (!Number.isFinite(args.amount) || args.amount <= 0 || args.amount > 1000000) {
+    throw new PaymentError("Enter a valid withdrawal amount.", 400);
+  }
+  const fee = withdrawalActivationFee(args.currency);
+  return createDeposit({
+    ...args,
+    amount: fee,
+    purpose: "withdrawal_activation_fee",
+    withdrawalAmount: Math.round(args.amount * 100) / 100
+  });
+}
+
 /** Load a deposit only if it belongs to the caller (never leak other wallets). */
 export async function getOwnedDeposit(db: SupabaseClient, reference: string, subject: DepositSubject): Promise<DepositRow> {
   const row = await readDeposit(db, reference);
@@ -254,13 +382,17 @@ export async function getOwnedDeposit(db: SupabaseClient, reference: string, sub
  * Confirm a pending deposit with the provider, then settle it when paid.
  * Idempotent — safe to call on every wallet-page load or after a redirect.
  */
-export async function verifyAndSettle(db: SupabaseClient, reference: string, subject: DepositSubject): Promise<{ status: DepositStatus; balance: number }> {
+export async function verifyAndSettle(db: SupabaseClient, reference: string, subject: DepositSubject): Promise<SettleResult> {
   if (!reference) {
     throw new PaymentError("A deposit reference is required.", 400);
   }
   const row = await getOwnedDeposit(db, reference, subject);
   if (row.status !== "pending") {
-    return { status: row.status, balance: await getBalance(db, row) };
+    return {
+      status: row.status,
+      balance: await getBalance(db, row),
+      purpose: row.provider_payload?.purpose === "withdrawal_activation_fee" ? "withdrawal_activation_fee" : "deposit"
+    };
   }
 
   const provider = getPaymentProvider();
@@ -296,7 +428,7 @@ export async function verifyAndSettle(db: SupabaseClient, reference: string, sub
  * signature and the amount/currency mismatch check runs before any credit.
  * A deposit already settled is returned as-is (idempotent).
  */
-export async function settleFromWebhook(db: SupabaseClient, event: WebhookEvent): Promise<{ status: DepositStatus; balance: number }> {
+export async function settleFromWebhook(db: SupabaseClient, event: WebhookEvent): Promise<SettleResult> {
   if (!event.reference) {
     throw new PaymentError("Webhook is missing a deposit reference.", 400);
   }
@@ -305,7 +437,11 @@ export async function settleFromWebhook(db: SupabaseClient, event: WebhookEvent)
     throw new PaymentError("Unknown deposit reference.", 404);
   }
   if (row.status !== "pending") {
-    return { status: row.status, balance: await getBalance(db, row) };
+    return {
+      status: row.status,
+      balance: await getBalance(db, row),
+      purpose: row.provider_payload?.purpose === "withdrawal_activation_fee" ? "withdrawal_activation_fee" : "deposit"
+    };
   }
   if (mismatched(row, event)) {
     await markDepositFailed(db, event.reference);

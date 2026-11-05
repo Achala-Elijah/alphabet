@@ -57,6 +57,9 @@ a{color:inherit;text-decoration:none}
 .league-tabs button.selected{border-color:#f04465;color:#fff;background:#3a2029}
 .featured-track{display:flex;gap:12px;overflow-x:auto;padding:0 2px 2px 14px;scrollbar-width:none}
 .match-card{flex:0 0 min(440px,88vw);border:1px solid #44454b;border-radius:15px;overflow:hidden;background:#202127}
+.match-card-open{display:block;width:100%;border:0;padding:0;color:inherit;font:inherit;text-align:inherit;background:transparent;cursor:pointer}
+.match-card-open:focus-visible{outline:2px solid #6ee7a0;outline-offset:-2px}
+.match-card-open:hover{background:#24252b}
 .match-tags{height:30px;display:flex;align-items:center;gap:8px;background:#24252b}
 .match-tags span{font-size:11px}
 .hot-tag,.best-tag{height:100%;padding:7px 12px;font-weight:800;color:#fff;background:#e90036}
@@ -436,6 +439,25 @@ tbody tr:last-child td{border-bottom:0}
 .wallet-banner{margin:12px 0 0;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;text-align:center}
 .wallet-banner.success{background:#193b29;color:#68dc94}
 .wallet-banner.error{background:#43232c;color:#ff8194}
+.activation-modal{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:16px;background:rgba(8,10,8,.82);backdrop-filter:blur(5px);animation:win-fade .2s ease}
+.activation-card{width:min(370px,100%);padding:22px 20px 18px;border:1px solid #d6a84c;border-radius:17px;background:linear-gradient(180deg,#172418 0%,#10170f 100%);box-shadow:inset 0 0 0 1px #0b0f0b,0 24px 60px rgba(0,0,0,.65);color:#fff;text-align:center}
+.activation-icon{display:grid;place-items:center;width:55px;height:55px;margin:0 auto 10px;border-radius:15px;background:#132a1b;border:1px solid #bba046;color:#f3d575;box-shadow:0 0 20px rgba(243,213,117,.18)}
+.activation-eyebrow{display:block;margin-bottom:5px;color:#c8a54b;font-size:9px;font-weight:900;letter-spacing:2.5px}
+.activation-card h3{margin:0 0 7px;font-size:23px;letter-spacing:.2px;color:#fff;text-shadow:0 2px #000}
+.activation-card>p{margin:0 0 12px;font-size:11px;line-height:1.5;color:#a6b3aa}
+.activation-summary{display:flex;flex-direction:column;margin:0 0 10px;padding:9px 12px;border:1px solid rgba(214,168,76,.35);border-radius:10px;background:rgba(0,0,0,.22);text-align:left}
+.activation-summary div{display:flex;justify-content:space-between;gap:12px;min-height:26px;align-items:center;border-bottom:1px solid rgba(214,168,76,.14)}
+.activation-summary div:last-child{border-bottom:0}
+.activation-summary dt{font-size:9px;font-weight:800;letter-spacing:1.3px;color:#93a296;text-transform:uppercase}
+.activation-summary dd{margin:0;font-size:11px;font-weight:900;color:#fff2c7}
+.activation-total{background:rgba(214,168,76,.08);margin:0 -12px -9px;padding:6px 12px 9px;border-radius:0 0 10px 10px}
+.activation-total dd{color:#f7db78}
+.activation-note{font-size:10px!important;color:#d2c067!important;margin-bottom:14px!important}
+.activation-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.activation-cancel,.activation-pay{height:44px;border:0;border-radius:10px;font-size:11px;font-weight:900;cursor:pointer}
+.activation-cancel{background:#262923;color:#c5c8bf}
+.activation-pay{background:linear-gradient(180deg,#22a45a,#12723d);color:#fff;box-shadow:0 4px 0 #094e27,0 12px 20px rgba(0,0,0,.28)}
+.activation-cancel:disabled,.activation-pay:disabled{opacity:.62;cursor:not-allowed}
 /* Compact variant inside the account summary card. */
 .wallet-shell.is-summary{margin:18px 0 0}
 .wallet-shell.is-summary .wallet-input-wrap{height:46px}

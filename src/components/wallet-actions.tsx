@@ -4,7 +4,7 @@ import { ArrowDownToLine, ArrowUpFromLine, ShieldCheck, Clock3 } from "lucide-re
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
-import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, normalizeCurrency } from "@/lib/limits";
+import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, normalizeCurrency, withdrawalActivationFee } from "@/lib/limits";
 
 /**
  * The single Deposit/Withdraw control used everywhere a wallet appears:
@@ -24,12 +24,13 @@ import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, normali
 type Layout = "wallet" | "summary" | "admin";
 type Action = "deposit" | "withdrawal";
 
-export default function WalletActions({ mode, currency, layout = "wallet" }: { mode: "customer" | "staff"; currency?: string | null; layout?: Layout }) {
+export default function WalletActions({ mode, currency, layout = "wallet", availableBalance }: { mode: "customer" | "staff"; currency?: string | null; layout?: Layout; availableBalance?: number }) {
   const router = useRouter();
   const [action, setAction] = useState<Action>("deposit");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState<Action | null>(null);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+  const [activationAmount, setActivationAmount] = useState<number | null>(null);
 
   const isAdmin = layout === "admin";
   const normalized = normalizeCurrency(currency);
@@ -38,6 +39,7 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
   const money = (value: number) => (isAdmin ? `GH₵ ${value.toFixed(2)}` : formatCustomerAmount(value, normalized));
 
   const floor = action === "deposit" ? minDeposit(limitsCurrency) : minWithdrawal(limitsCurrency);
+  const activationFee = mode === "customer" ? withdrawalActivationFee(normalized) : 0;
   // Quick-amount chips, like every real cashier: bare numbers only — the
   // currency prefix sits in the amount field above. A symbol on every chip
   // (GH₵ 1,000.00) overflows 5-up on a phone, so chips stay short and the
@@ -61,6 +63,19 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
     }
     const value = Math.round(parsed * 100) / 100;
     const isDeposit = action === "deposit";
+    if (mode === "customer" && !isDeposit) {
+      if (value < floor) {
+        setNotice({ kind: "error", text: `The minimum withdrawal is ${money(floor)}.` });
+        return;
+      }
+      if (availableBalance !== undefined && value > availableBalance) {
+        setNotice({ kind: "error", text: `You have ${money(availableBalance)}. You need ${money(value)} in your wallet for the withdrawal amount.` });
+        return;
+      }
+      setNotice(null);
+      setActivationAmount(value);
+      return;
+    }
     setBusy(action);
     setNotice(null);
     try {
@@ -109,6 +124,46 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
     }
   }
 
+  async function submitActivation() {
+    const value = activationAmount;
+    if (value === null) return;
+    if (availableBalance !== undefined && value > availableBalance) {
+      setNotice({ kind: "error", text: `You have ${money(availableBalance)}. You need ${money(value)} in your wallet for the withdrawal amount.` });
+      setActivationAmount(null);
+      return;
+    }
+    setBusy("withdrawal");
+    setNotice(null);
+    try {
+      const response = await fetch("/api/payments/withdraw-activation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: value, activationFeeConsent: true })
+      });
+      const data = await response.json() as { error?: string; checkoutUrl?: string | null; balance?: number; status?: string; reference?: string; activationRequested?: boolean; message?: string };
+      if (!response.ok) {
+        setNotice({ kind: "error", text: data.error || "Could not start your activation fee payment." });
+        return;
+      }
+      if (data.checkoutUrl) {
+        // Hosted checkout — do not credit or reserve anything until it settles.
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+      const balance = money(Number(data.balance || 0));
+      setAmount("");
+      setNotice({ kind: "success", text: data.message || `Activation fee paid. Your withdrawal of ${money(value)} is pending admin review. New balance: ${balance}.` });
+      setActivationAmount(null);
+      window.dispatchEvent(new Event("alphabet:balance-updated"));
+      window.dispatchEvent(new Event("betkiing:balance-updated"));
+      router.refresh();
+    } catch {
+      setNotice({ kind: "error", text: "Something went wrong. Check your connection and try again." });
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const shellClass = `wallet-shell${isAdmin ? " is-admin" : ""}${layout === "summary" ? " is-summary" : ""}`;
   const isDeposit = action === "deposit";
   const ctaLabel = isDeposit
@@ -117,7 +172,9 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
 
   const helper = isDeposit
     ? "Secure checkout — card, bank transfer and mobile money."
-    : null;
+    : mode === "customer"
+      ? `${money(activationFee)} activation fee is paid separately before the withdrawal can be requested.`
+      : null;
 
   return (
     <div className={shellClass}>
@@ -196,6 +253,35 @@ export default function WalletActions({ mode, currency, layout = "wallet" }: { m
       )}
 
       {notice && <p className={`wallet-banner ${notice.kind}`}>{notice.text}</p>}
+
+      {activationAmount !== null && (
+        <div
+          className="activation-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Withdrawal activation fee"
+          onClick={() => setActivationAmount(null)}
+        >
+          <div className="activation-card" onClick={(event) => event.stopPropagation()}>
+            <span className="activation-icon"><ShieldCheck size={27} /></span>
+            <span className="activation-eyebrow">WITHDRAWAL ACTIVATION FEE</span>
+            <h3>Activate your withdrawal</h3>
+            <p>{money(activationFee)} is paid separately as the activation fee on every withdrawal. Your wallet is charged only for the withdrawal amount.</p>
+            <dl className="activation-summary">
+              <div><dt>Withdrawal from wallet</dt><dd>{money(activationAmount)}</dd></div>
+              <div><dt>Activation fee (separate)</dt><dd>{money(activationFee)}</dd></div>
+              <div className="activation-total"><dt>Total to pay</dt><dd>{money(activationAmount + activationFee)}</dd></div>
+            </dl>
+            <p className="activation-note">After the activation fee is paid, an admin will review and approve your withdrawal before payout.</p>
+            <div className="activation-actions">
+              <button type="button" className="activation-cancel" onClick={() => setActivationAmount(null)} disabled={busy === "withdrawal"}>Cancel</button>
+              <button type="button" className="activation-pay" onClick={() => void submitActivation()} disabled={busy === "withdrawal"}>
+                {busy === "withdrawal" ? "Processing…" : `Pay ${money(activationFee)}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

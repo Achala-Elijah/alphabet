@@ -13,6 +13,8 @@ export const GHS_TO_NGN = 100;
 export const MIN_DEPOSIT_GHS = 50;
 /** Minimum single withdrawal: GH₵ 1,000 / ₦100,000. */
 export const MIN_WITHDRAWAL_GHS = 1000;
+/** Per-withdrawal activation charge: GH₵ 200 / ₦20,000. */
+export const WITHDRAWAL_ACTIVATION_FEE_GHS = 200;
 /** Minimum stake for a single bet: GH₵ 150 / ₦15,000. */
 export const MIN_STAKE_GHS = 150;
 
@@ -57,6 +59,11 @@ export function minDeposit(currency?: string | null) {
 /** Minimum withdrawal for this wallet's currency. */
 export function minWithdrawal(currency?: string | null) {
   return inCurrency(MIN_WITHDRAWAL_GHS, currency);
+}
+
+/** Activation fee charged on every customer withdrawal: GH₵200 / ₦20,000. */
+export function withdrawalActivationFee(currency?: string | null) {
+  return inCurrency(WITHDRAWAL_ACTIVATION_FEE_GHS, currency);
 }
 
 /** Minimum stake for this wallet's currency. */

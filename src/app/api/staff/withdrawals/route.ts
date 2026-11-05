@@ -64,6 +64,16 @@ export async function GET() {
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  const references = (data || []).map((row) => row.reference).filter((reference): reference is string => Boolean(reference));
+  const { data: feeRows } = references.length
+    ? await writer
+      .from("customer_transactions")
+      .select("reference, amount")
+      .eq("type", "withdrawal_activation_fee")
+      .in("reference", references)
+    : { data: [] as never[] };
+  const feeByReference = Object.fromEntries((feeRows || []).map((row) => [row.reference as string, Number(row.amount) || 0]));
+
   // Resolve usernames for display.
   const ids = [...new Set((data || []).map((r) => r.account_id))];
   const { data: accounts } = ids.length
@@ -73,6 +83,7 @@ export async function GET() {
 
   const withdrawals = (data || []).map((row) => ({
     ...row,
+    activation_fee: row.reference ? feeByReference[row.reference] || 0 : 0,
     username: lookup[row.account_id]?.username || "Unknown",
     phone: lookup[row.account_id]?.phone || null
   }));
