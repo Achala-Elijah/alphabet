@@ -46,12 +46,13 @@ let cacheClientInstance: SupabaseClient | null | undefined;
 
 /** Service-role client for the shared football cache (single source of truth). */
 function cacheClient(): SupabaseClient | null {
-  if (cacheClientInstance !== undefined) return cacheClientInstance;
+  if (cacheClientInstance) return cacheClientInstance;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  cacheClientInstance = url && serviceKey
-    ? createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } })
-    : null;
+  // Only cache a real client — caching null would disable the cache for
+  // the life of the process if env is not ready on the first call.
+  if (!url || !serviceKey) return null;
+  cacheClientInstance = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
   return cacheClientInstance;
 }
 
@@ -229,13 +230,18 @@ async function lastFetchedData(db: SupabaseClient): Promise<SportsMatch[]> {
  */
 export async function fetchApiFootballMatches(): Promise<SportsMatch[]> {
   if (!process.env.API_FOOTBALL_KEY && !process.env.FOOTBALL_API_KEY) return [];
-  const dateKey = `date:${new Date().toISOString().slice(0, 10)}`;
-  const [today, upcoming] = await Promise.all([
-    cachedFetch(dateKey, `${HOST}/fixtures?date=${new Date().toISOString().slice(0, 10)}`, DATE_TTL_MS),
-    cachedFetch("next:100", `${HOST}/fixtures?next=100`, NEXT_TTL_MS)
+  const today = new Date().toISOString().slice(0, 10);
+  // NOTE: the free API-Football plan rejects ?next=100 ("Free plans do not
+  // have access to the Next parameter"), so upcoming fixtures are fetched
+  // by tomorrow's date instead — a permanently failing fetch would retry
+  // on every request and burn the daily quota without ever caching.
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const [todayMatches, tomorrowMatches] = await Promise.all([
+    cachedFetch(`date:${today}`, `${HOST}/fixtures?date=${today}`, DATE_TTL_MS),
+    cachedFetch(`date:${tomorrow}`, `${HOST}/fixtures?date=${tomorrow}`, NEXT_TTL_MS)
   ]);
   const seen = new Set<string>();
-  return [...today, ...upcoming].filter((match) => {
+  return [...todayMatches, ...tomorrowMatches].filter((match) => {
     if (seen.has(match.slug)) return false;
     seen.add(match.slug);
     return true;

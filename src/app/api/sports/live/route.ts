@@ -266,6 +266,19 @@ export async function GET(request: Request) {
     );
   }
 
+  // Admin panel view (?admin=true): staff-only, returns every fixture
+  // including finished/cancelled/stale ones that the customer site hides.
+  const isAdminView = new URL(request.url).searchParams.get("admin") === "true";
+  if (isAdminView) {
+    const authClient = await createSupabaseServerClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
+    const { data: profile } = await authClient.from("profiles").select("role").eq("id", user.id).single();
+    if (!profile || !["admin", "sub_admin"].includes(profile.role)) {
+      return NextResponse.json({ error: "Only staff can view all matches." }, { status: 403 });
+    }
+  }
+
   // Leg-state lookup (open-bets detail ticks) — `?matchIds=a,b,c` returns
   // JUST those fixtures (id + score + status), including finished ones,
   // without the site-wide feed filter that hides decided matches.
@@ -300,12 +313,14 @@ export async function GET(request: Request) {
     let databaseReady = false;
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       const supabase = await createSupabaseServerClient();
-      const { data, error } = await supabase
+      // Admin view: every sport, newest kickoffs first, larger cap so
+      // recently created fixtures are never pushed out by old rows.
+      const baseQuery = supabase
         .from("matches")
-        .select("id,sport,competition,home,away,home_score,away_score,status,kickoff,source,odds,current_minute")
-        .eq("sport", sport)
-        .order("kickoff", { ascending: true })
-        .limit(50);
+        .select("id,sport,competition,home,away,home_score,away_score,status,kickoff,source,odds,current_minute");
+      const { data, error } = isAdminView
+        ? await baseQuery.order("kickoff", { ascending: false }).limit(200)
+        : await baseQuery.eq("sport", sport).order("kickoff", { ascending: true }).limit(50);
       if (error) {
         const missingTable = error.message.includes("Could not find the table") || error.code === "42P01";
         if (!missingTable) console.error("Supabase matches query failed:", error.message);
@@ -358,15 +373,14 @@ export async function GET(request: Request) {
         current_minute: match.current_minute
       })), sport });
     }
-    // Hard rule: finished and cancelled matches are NEVER shown on the
-    // customer site. They only exist in the admin panel and settlement.
-    // This filter runs before featured/live slicing so a finished match
-    // can never leak into any view.
-    // Big fixtures rank first — the site showcases the marquee games.
-    const allMatches = sortByBigness(
-      mergedFixtures
-        .filter((match) => isShownOnSite(match.status, match.status_text, match.time))
-    );
+    // Customer site: finished and cancelled matches are NEVER shown.
+    // Admin view: show everything, soonest kickoff first, so staff can
+    // see and manage finished/stale fixtures too.
+    const allMatches = isAdminView
+      ? [...mergedFixtures].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+      : sortByBigness(
+        mergedFixtures.filter((match) => isShownOnSite(match.status, match.status_text, match.time))
+      );
     const featured = new URL(request.url).searchParams.get("featured") === "true";
     const liveOnly = new URL(request.url).searchParams.get("live") === "true";
 
@@ -379,7 +393,7 @@ export async function GET(request: Request) {
     if (liveOnly) {
       matches = matches.filter((match) => isLiveMatch(match.status, match.status_text));
     }
-    matches = sortByBigness(matches);
+    if (!isAdminView) matches = sortByBigness(matches);
 
     return NextResponse.json({
       matches: featured ? matches.slice(0, 3) : matches,

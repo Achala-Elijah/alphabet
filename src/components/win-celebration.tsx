@@ -120,6 +120,7 @@ export default function WinCelebration({ win, onClose, currency = "GHS" }: { win
         </div>
         <div className="win-celebration-spotlight" aria-hidden="true" />
 
+        <p className="win-eyebrow">Congratulations</p>
         <h2>YOU WON!</h2>
         <strong className="win-celebration-amount">{formatCustomerAmount(win.payout, currency)}</strong>
         <p className="win-celebration-sub">Your winnings have been credited to your wallet.</p>
@@ -267,26 +268,29 @@ export default function WinCelebration({ win, onClose, currency = "GHS" }: { win
 
         <p className="win-verify">Verify Code: <strong>{verifyCode}</strong></p>
 
-        {showDetails && (
+        <div className="win-ticket" aria-label="Winning ticket summary">
+          <p className="win-ticket-title">Winning Ticket</p>
+          <dl className="win-celebration-meta">
+            <div><dt>Stake</dt><dd>{formatCustomerAmount(win.stake, currency)}</dd></div>
+            <div><dt>Total odds</dt><dd>{totalOdds > 0 ? totalOdds.toFixed(2) : "—"}</dd></div>
+            <div className="is-gold"><dt>Total return</dt><dd>{formatCustomerAmount(win.potential_return, currency)}</dd></div>
+            <div><dt>Ticket ID</dt><dd>{win.id.slice(0, 8).toUpperCase()}</dd></div>
+          </dl>
+        </div>
+
+        {showDetails && selections.length > 0 && (
           <div className="win-details">
-            {selections.length > 0 && (
-              <ul className="win-details-list">
-                {selections.map((selection, index) => (
-                  <li key={index}>
-                    <span>
-                      {selection.match || "Selection"}
-                      <small>{selection.option}{selection.market ? ` · ${selection.market}` : ""}</small>
-                    </span>
-                    {selection.odds ? <em>{Number(selection.odds).toFixed(2)}</em> : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <dl className="win-celebration-meta">
-              <div><dt>Stake</dt><dd>{formatCustomerAmount(win.stake, currency)}</dd></div>
-              <div className="is-gold"><dt>Total return</dt><dd>{formatCustomerAmount(win.potential_return, currency)}</dd></div>
-              <div><dt>Bet ID</dt><dd>{win.id.slice(0, 8).toUpperCase()}</dd></div>
-            </dl>
+            <ul className="win-details-list">
+              {selections.map((selection, index) => (
+                <li key={index}>
+                  <span>
+                    {selection.match || "Selection"}
+                    <small>{selection.option}{selection.market ? ` · ${selection.market}` : ""}</small>
+                  </span>
+                  {selection.odds ? <em>{Number(selection.odds).toFixed(2)}</em> : null}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

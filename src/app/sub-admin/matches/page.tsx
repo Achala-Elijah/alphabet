@@ -48,7 +48,7 @@ export default function MatchesPage() {
   }, []);
 
   const loadMatches = async () => {
-    const response = await fetch("/api/sports/live?sport=football", { cache: "no-store" });
+    const response = await fetch("/api/sports/live?sport=football&admin=true", { cache: "no-store" });
     const data = await response.json() as { matches?: AdminMatch[]; error?: string };
     if (!response.ok) throw new Error(data.error || "Unable to load matches.");
     setMatches(data.matches || []);

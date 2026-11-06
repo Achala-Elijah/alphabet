@@ -1863,6 +1863,76 @@ video {
   }
 }
 
+/* ── Winning ticket popup: SportyBet layout, AlphaBet branding ──
+   Dark card, gold trophy, big red win amount, and an always-visible
+   ticket slip. Overrides the earlier green accents in this file. */
+.win-eyebrow {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #f2d06b;
+}
+.win-celebration-card { box-shadow: 0 30px 70px rgba(0,0,0,.8), 0 0 60px rgba(237,23,66,.14); }
+.win-celebration-amount { color: #ff3b5c; text-shadow: 0 0 30px rgba(237,23,66,.45); }
+.win-celebration-spotlight { background: radial-gradient(circle at 50% 34%, rgba(255,255,255,.1), rgba(237,23,66,.06) 42%, transparent 66%); }
+.win-details-list li { border-left-color: #ed1742; }
+.win-details-list li>em { color: #ff3b5c; }
+.win-celebration-meta .is-gold dd { color: #ff3b5c; }
+.win-btn-outline { border-color: #ed1742; }
+.win-btn-text small { color: #ffb3c0; }
+.win-btn-num { color: #ff3b5c; }
+.win-btn-solid { background: #ed1742; border-color: #ed1742; }
+.win-footer strong span { color: #ff3b5c; }
+.win-footer-mark { background: linear-gradient(180deg, #ff3b5c, #b30f2e); color: #fff; box-shadow: 0 0 12px rgba(237,23,66,.45); }
+.win-burst::after { background: radial-gradient(circle,#ffffff 0%,#ffe3e8 26%,rgba(255,120,150,.5) 48%,rgba(237,23,66,0) 72%); }
+.win-burst i { background: #ffe3e8; box-shadow: 0 0 9px #ff5c7a; }
+
+/* Winning ticket slip with perforated edge. */
+.win-ticket {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto 14px;
+  padding: 12px 16px 6px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, #f4f4f6);
+  color: #17181d;
+  text-align: left;
+  box-shadow: 0 10px 26px rgba(0,0,0,.45);
+}
+.win-ticket::before,
+.win-ticket::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0a0a0a;
+  transform: translateY(-50%);
+}
+.win-ticket::before { left: -9px; }
+.win-ticket::after { right: -9px; }
+.win-ticket-title {
+  margin: 0 0 4px;
+  padding-bottom: 8px;
+  border-bottom: 2px dashed #d6d6dc;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #b30f2e;
+  text-align: center;
+}
+.win-ticket .win-celebration-meta { border-top: 0; }
+.win-ticket .win-celebration-meta div { border-bottom-color: #ececf0; min-height: 28px; }
+.win-ticket .win-celebration-meta dt { color: #8a8d94; }
+.win-ticket .win-celebration-meta dd { color: #17181d; }
+.win-ticket .win-celebration-meta .is-gold dd { color: #ed1742; font-size: 13px; }
+
 /* ── Transaction action buttons (Failed / Successful / Pending) ──
    On phones the table scrolls sideways, so pin the Actions column to
    the right edge and make the buttons big, even and easy to tap. */
