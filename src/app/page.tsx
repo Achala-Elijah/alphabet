@@ -11,7 +11,7 @@ import { featuredMatches } from "@/lib/mock-data";
 import LiveScores from "@/components/live-scores";
 import { addSelectionToSlip, readBetSlip, BET_SLIP_UPDATED_EVENT, type BetSlipSelection } from "@/lib/bet-slip";
 
-type FeaturedMatch = (typeof featuredMatches)[number] & { slug?: string };
+type FeaturedMatch = (typeof featuredMatches)[number] & { slug?: string; homeLogo?: string | null; awayLogo?: string | null };
 
 /** The bet slip keys selections by match slug (or a stable name pair when a
  *  placeholder card has no slug yet) — the featured card must use the same. */
@@ -91,7 +91,7 @@ function HomeContent() {
         if (!response.ok) throw new Error("Unable to load featured matches");
         return response.json();
       })
-      .then((data: { matches?: Array<{ home?: string; away?: string; competition?: string; time?: string; odds?: string[]; market_odds?: Record<string, Record<string, string>>; slug?: string }> }) => {
+      .then((data: { matches?: Array<{ home?: string; away?: string; home_logo?: string | null; away_logo?: string | null; competition?: string; time?: string; odds?: string[]; market_odds?: Record<string, Record<string, string>>; slug?: string }> }) => {
         if (cancelled || !Array.isArray(data.matches)) return;
         // Prefer the API's 1X2 from market_odds so featured cards match the
         // odds in the live list — both come from generateAllMarketOdds.
@@ -103,6 +103,8 @@ function HomeContent() {
             league: match.competition || "Football",
             home: match.home || "Home team",
             away: match.away || "Away team",
+            homeLogo: match.home_logo || null,
+            awayLogo: match.away_logo || null,
             homeCode: (match.home || "HT").slice(0, 2).toUpperCase(),
             awayCode: (match.away || "AT").slice(0, 2).toUpperCase(),
             time: date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "TBA",

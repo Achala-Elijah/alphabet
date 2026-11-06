@@ -69,6 +69,7 @@ a{color:inherit;text-decoration:none}
 .team{display:flex;flex-direction:column;align-items:center;gap:9px;color:#aeb0b8;font-size:13px;min-width:0}
 .team span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .team-crest{width:43px;height:48px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 20%,90% 80%,50% 100%,10% 80%,0 20%);background:linear-gradient(145deg,#40c6ad,#135b5b);font-weight:800;color:#fff}
+.team-crest-img{clip-path:none;background:transparent;object-fit:contain;padding:4px}
 .team-crest.alt{background:linear-gradient(145deg,#e35c9e,#68133f)}
 .match-time{display:flex;flex-direction:column;gap:5px;font-size:15px}
 .match-time span{color:#a4a5ad;font-size:13px}
