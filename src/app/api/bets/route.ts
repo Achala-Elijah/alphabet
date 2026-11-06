@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCustomerSession } from "@/lib/custom-auth";
 import { isMatchOver, settleOpenBets } from "@/lib/bets/settlement";
@@ -16,6 +17,17 @@ type BetSelection = {
 };
 
 type CustomerSession = Awaited<ReturnType<typeof getCustomerSession>>;
+
+/** bets/customer_bets have select-only RLS policies — writes go through the
+ *  service-role client after ownership is verified (same as transactions). */
+function writerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    throw new Error("Bet changes are not configured. Add SUPABASE_SERVICE_ROLE_KEY to .env and restart Next.js.");
+  }
+  return createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
+}
 
 /**
  * The UI disables odds on decided matches — the API has to as well, or a
@@ -183,6 +195,70 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Bet placement failed:", error);
     return NextResponse.json({ error: "The bet could not be placed. Please try again." }, { status: 500 });
+  }
+}
+
+/**
+ * Change the pick (option + odd) on one leg of an OPEN bet, e.g. from the
+ * Active Bets detail popup. The potential return is recalculated from the
+ * stake × product of all leg odds. Settled bets are immutable.
+ */
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json() as { id?: string; selections?: BetSelection[] };
+    const selections = Array.isArray(body.selections) ? body.selections : [];
+    if (!body.id || selections.length === 0 || selections.some((selection) => !selection.matchId || !selection.option || !Number.isFinite(Number(selection.odds)) || Number(selection.odds) <= 1)) {
+      return NextResponse.json({ error: "A bet id and valid selections with odds are required." }, { status: 400 });
+    }
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const customer = user ? null : await getCustomerSession();
+    if (!user && !customer) return NextResponse.json({ error: "Sign in to change a bet." }, { status: 401 });
+
+    const table = customer ? "customer_bets" : "bets";
+    const ownerColumn = customer ? "account_id" : "user_id";
+    const ownerId = customer ? customer.account_id : user!.id;
+    // Direct table lookup through the session client is blocked by RLS for
+    // customer-cookie sessions (history uses a security-definer RPC), so
+    // read via service role — ownership is enforced by the owner filter.
+    const writer = writerClient();
+    const { data: bet, error: lookupError } = await writer
+      .from(table)
+      .select("id, stake, status, selections")
+      .eq("id", body.id)
+      .eq(ownerColumn, ownerId)
+      .maybeSingle();
+    if (lookupError) return NextResponse.json({ error: lookupError.message }, { status: 400 });
+    if (!bet) return NextResponse.json({ error: "Bet not found." }, { status: 404 });
+    if (bet.status !== "open") return NextResponse.json({ error: "Only open bets can be changed." }, { status: 400 });
+
+    // A leg whose match is already decided cannot be re-picked.
+    const guard = await guardDecidedMatches(selections);
+    if (guard) return guard;
+
+    const cleanSelections = selections.map((selection) => ({
+      match: selection.match,
+      matchId: selection.matchId,
+      option: selection.option,
+      odds: Number(selection.odds),
+      market: selection.market || "1X2",
+      ...(selection.stake ? { stake: Number(selection.stake) } : {})
+    }));
+    const potentialReturn = Number((Number(bet.stake) * cleanSelections.reduce((total, selection) => total * selection.odds, 1)).toFixed(2));
+
+    // bets/customer_bets have select-only RLS policies — write via service
+    // role (ownership already verified above), like staff transactions.
+    const { data: updated, error } = await writer
+      .from(table)
+      .update({ selections: cleanSelections, potential_return: potentialReturn })
+      .eq("id", body.id)
+      .select("id, stake, potential_return, status, selections, placed_at")
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ bet: updated, potentialReturn });
+  } catch (error) {
+    console.error("Bet update failed:", error);
+    return NextResponse.json({ error: "The bet could not be changed. Please try again." }, { status: 500 });
   }
 }
 

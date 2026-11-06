@@ -144,6 +144,136 @@ function celebrateOnce(ids: string[]) {
   }
 }
 
+type OddsPopupProps = {
+  bet: CustomerBet;
+  selectionIndex: number;
+  onClose: () => void;
+  onChanged: () => void;
+};
+
+/**
+ * Odds picker for one leg of an open bet: tapping a team inside an expanded
+ * bet opens every market for that game; picking an odd re-picks that leg
+ * and the potential return is recalculated server-side.
+ */
+function OddsPopup({ bet, selectionIndex, onClose, onChanged }: OddsPopupProps) {
+  const selection = bet.selections[selectionIndex];
+  const [markets, setMarkets] = useState<Record<string, Record<string, string>> | null>(null);
+  const [matchLabel, setMatchLabel] = useState(selection?.match || "Match");
+  const [finished, setFinished] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMarkets() {
+      // The leg-state lookup only returns scores — full markets need the
+      // regular feed, so find this fixture there (cached server-side).
+      for (const sport of ["football", "tennis", "basketball", "table-tennis"]) {
+        try {
+          const response = await fetch(`/api/sports/live?sport=${sport}`, { cache: "no-store" });
+          if (!response.ok) continue;
+          const data = await response.json() as { matches?: Array<{ slug?: string; home?: string; away?: string; status?: string; status_text?: string; market_odds?: Record<string, Record<string, string>> }> };
+          const found = (data.matches || []).find((match) => match.slug === selection?.matchId);
+          if (found) {
+            if (!cancelled) {
+              setMarkets(found.market_odds || {});
+              setMatchLabel(`${found.home || "Home"} v ${found.away || "Away"}`);
+              const raw = `${found.status_text || found.status || ""}`.toLowerCase();
+              setFinished(raw.includes("full time") || raw === "finished" || raw.includes("cancelled"));
+              setLoading(false);
+            }
+            return;
+          }
+        } catch {
+          // try the next sport
+        }
+      }
+      if (!cancelled) {
+        setError("Odds for this match are not available right now.");
+        setLoading(false);
+      }
+    }
+    void loadMarkets();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selection?.matchId]);
+
+  async function pick(market: string, option: string, odds: string) {
+    if (saving || finished) return;
+    setSaving(true);
+    setError("");
+    try {
+      const nextSelections = bet.selections.map((leg, index) =>
+        index === selectionIndex
+          ? { match: leg.match, matchId: leg.matchId, option, odds: Number(odds), market, ...(leg.stake ? { stake: leg.stake } : {}) }
+          : leg
+      );
+      const response = await fetch("/api/bets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: bet.id, selections: nextSelections })
+      });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error || "Unable to change the odd.");
+      onChanged();
+      onClose();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to change the odd.");
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="odds-popup-overlay" role="dialog" aria-modal="true" aria-label="Change odd" onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="odds-popup-card">
+        <header className="odds-popup-head">
+          <div>
+            <span className="modal-eyebrow">CHANGE THIS PICK</span>
+            <h2>{matchLabel}</h2>
+            <p>Current pick: <strong>{selection?.option || "Selection"} @ {Number(selection?.odds || 0).toFixed(2)}</strong></p>
+          </div>
+          <button type="button" className="odds-popup-close" onClick={onClose} aria-label="Close odds"><X size={18} /></button>
+        </header>
+        {loading && <p className="odds-popup-note">Loading odds…</p>}
+        {!loading && finished && <p className="odds-popup-note">This match is already finished — its odd can no longer be changed.</p>}
+        {!loading && error && <p className="admin-inline-error" role="alert">{error}</p>}
+        {!loading && markets && Object.entries(markets).map(([market, options]) => (
+          <div className="odds-popup-market" key={market}>
+            <h3>{market}</h3>
+            <div className="odds-popup-options">
+              {Object.entries(options).map(([option, odds]) => {
+                const isCurrent = market === (selection?.market || "1X2") && option === selection?.option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    className={isCurrent ? "is-current" : ""}
+                    disabled={saving || finished}
+                    onClick={() => void pick(market, option, odds)}
+                  >
+                    <span>{option}</span>
+                    <strong>{odds}</strong>
+                    {isCurrent && <small>current pick</small>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        <button type="button" className="odds-popup-done" onClick={onClose} disabled={saving}>Done</button>
+      </section>
+    </div>
+  );
+}
+
 export default function CustomerBets({ initialTab = "active" }: { initialTab?: "active" | "history" }) {
   const [tab, setTab] = useState(initialTab);
   const [bets, setBets] = useState<CustomerBet[]>([]);
@@ -154,6 +284,9 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
   // Collapsible cards — collapsed by default, one open at a time.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [legStates, setLegStates] = useState<Record<string, LegState[]>>({});
+  // Odds popup: tapping a team inside an expanded open bet opens all
+  // markets for that game so the pick can be changed.
+  const [oddsTarget, setOddsTarget] = useState<{ bet: CustomerBet; selectionIndex: number } | null>(null);
 
   const money = (value: number) => `${currencySymbol(currency)} ${Number(value || 0).toFixed(2)}`;
 
@@ -229,7 +362,15 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
     const selections = bet.selections || [];
     const isMulti = selections.length > 1;
     const comboOdds = selections.reduce((total, selection) => total * (Number(selection.odds || 1) || 1), 1);
-    const payout = bet.status === "won" ? bet.potential_return : 0;
+    // Potential return = stake × combined odds. Won bets pay the stored
+    // return; lost/void pay nothing; open bets show the calculated total
+    // (falling back to the stored figure when it exists).
+    const calculatedReturn = Number(bet.stake || 0) * comboOdds;
+    const payout = bet.status === "won"
+      ? (Number(bet.potential_return) || calculatedReturn)
+      : bet.status === "open"
+        ? calculatedReturn
+        : 0;
     return (
       <article className={`customer-bet-card is-${bet.status} ${expanded ? "is-expanded" : ""}`} key={bet.id}>
         <button
@@ -276,9 +417,15 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
                 const outcome = state?.outcome || "pending";
                 const hasScore = typeof state?.home === "number" && typeof state?.away === "number";
                 return (
-                  <div className={`customer-bet-selection leg-${outcome}`} key={`${bet.id}-${index}`}>
+                  <button
+                    type="button"
+                    className={`customer-bet-selection leg-${outcome}`}
+                    key={`${bet.id}-${index}`}
+                    onClick={() => { if (bet.status === "open") setOddsTarget({ bet, selectionIndex: index }); }}
+                    aria-label={`Change odd for ${selection.match || "match"}`}
+                  >
                     <strong>{selection.option || "Selection"} <em>@ {Number(selection.odds || 0).toFixed(2)}</em></strong>
-                    <small>{selection.match || "Match"} · {selection.market || "Market"}</small>
+                    <small>{selection.match || "Match"} · {selection.market || "Market"}{bet.status === "open" ? " · tap to change odd" : ""}</small>
                     <div className="leg-meta">
                       <span className={`leg-state leg-state-${outcome}`}>
                         {outcome === "won" ? <Check size={12} /> : outcome === "lost" ? <X size={12} /> : <Hourglass size={12} />}
@@ -291,7 +438,7 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
                         </span>
                       )}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -324,6 +471,7 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
       {!loading && error && <div className="customer-bets-empty customer-bets-error">{error}<button onClick={() => void loadBets()}>Try again</button></div>}
       {!loading && !error && displayedBets.length === 0 && <div className="customer-bets-empty"><Ticket size={27} /><strong>{tab === "active" ? "No active bets" : "No bet history yet"}</strong><span>{tab === "active" ? "Your currently open bets will appear here." : "Settled bets will appear here after your selections are decided."}</span></div>}
       {!loading && !error && displayedBets.map((bet) => renderBetCard(bet))}
+      {oddsTarget && <OddsPopup bet={oddsTarget.bet} selectionIndex={oddsTarget.selectionIndex} onClose={() => setOddsTarget(null)} onChanged={() => void loadBets({ quiet: true })} />}
       {wins.length > 0 && <WinCelebration win={wins[0]} onClose={() => setWins((current) => current.slice(1))} currency={currency} />}
     </section>
   );

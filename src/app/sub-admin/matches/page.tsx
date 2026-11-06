@@ -97,8 +97,6 @@ export default function MatchesPage() {
         body: JSON.stringify({
           home: form.get("home"),
           away: form.get("away"),
-          home_logo: String(form.get("homeLogo") || "").trim() || null,
-          away_logo: String(form.get("awayLogo") || "").trim() || null,
           competition: form.get("competition"),
           time: new Date(String(form.get("time"))).toISOString(),
           odds: ["1.90", "3.20", "2.10"],
@@ -199,8 +197,6 @@ export default function MatchesPage() {
         <label>Kick-off<input name="time" type="datetime-local" required /></label>
         <label>Home team<input name="home" required placeholder="Home team" /></label>
         <label>Away team<input name="away" required placeholder="Away team" /></label>
-        <label>Home team logo URL (optional)<input name="homeLogo" type="url" placeholder="https://…/home-logo.png" /></label>
-        <label>Away team logo URL (optional)<input name="awayLogo" type="url" placeholder="https://…/away-logo.png" /></label>
         <label>Home goals at minutes<input name="homeGoals" placeholder="Example: 18, 72" /></label>
         <label>Away goals at minutes<input name="awayGoals" placeholder="Example: 44, 85" /></label>
       </div>

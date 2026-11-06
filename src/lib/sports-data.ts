@@ -88,16 +88,21 @@ export function isFinishedMatch(status: string, status_text: string): boolean {
 
 /**
  * True when a match should be shown on the customer site.
- * Finished/cancelled are hidden. A "scheduled" row whose kickoff is hours in
- * the past is stale fixture data for a game that has already been played, so
- * it is hidden too instead of appearing as an upcoming match.
+ * Finished/cancelled are hidden. A "scheduled" row whose kickoff has
+ * already passed is a game that has started/been played — it must never
+ * show as "Upcoming", so it is hidden as soon as kickoff is in the past
+ * (small grace window for clock skew). A "live" row whose kickoff was
+ * many hours ago is a stuck feed entry, so it is hidden too.
  */
 export function isShownOnSite(status: string, status_text: string, kickoff?: string | null): boolean {
   const normalized = normalizeStatus(status, status_text).status;
   if (normalized !== "live" && normalized !== "scheduled") return false;
-  if (normalized === "scheduled" && kickoff) {
+  if (kickoff) {
     const start = new Date(kickoff).getTime();
-    if (!Number.isNaN(start) && Date.now() - start > 6 * 60 * 60 * 1000) return false;
+    if (!Number.isNaN(start)) {
+      if (normalized === "scheduled" && Date.now() - start > 15 * 60 * 1000) return false;
+      if (normalized === "live" && Date.now() - start > 4 * 60 * 60 * 1000) return false;
+    }
   }
   return true;
 }
