@@ -34,9 +34,8 @@ export async function proxy(request: NextRequest) {
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     const allowed = profile?.role === "admin" || profile?.role === "sub_admin";
     if (!allowed) return NextResponse.redirect(new URL("/", request.url));
-    if (profile.role === "sub_admin" && pathname.startsWith("/sub-admin/matches")) {
-      return NextResponse.redirect(new URL("/sub-admin", request.url));
-    }
+    // Sub-admins may open Match management to create fixtures; edit/delete
+    // controls are hidden in the UI and refused by the PATCH/DELETE APIs.
   }
 
   return response;

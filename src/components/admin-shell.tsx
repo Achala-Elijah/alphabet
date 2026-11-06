@@ -11,7 +11,7 @@ type NavLink = { label: string; href: string; Icon: LucideIcon; external?: boole
 const adminLinks: NavLink[] = [
   { label: "Dashboard", href: "/sub-admin", Icon: LayoutDashboard },
   { label: "Users", href: "/sub-admin/users", Icon: Users },
-  { label: "Match management", href: "/sub-admin/matches", Icon: CalendarDays },
+  { label: "Manage matches", href: "/sub-admin/matches", Icon: CalendarDays },
   { label: "Open bets", href: "/sub-admin/open-bets", Icon: Ticket },
   { label: "Sales", href: "/sub-admin/transactions", Icon: ArrowLeftRight },
   { label: "Withdrawals", href: "/sub-admin/withdrawals", Icon: ArrowUpCircle },
@@ -24,6 +24,7 @@ const adminLinks: NavLink[] = [
 const subAdminLinks: NavLink[] = [
   { label: "My dashboard", href: "/sub-admin", Icon: LayoutDashboard },
   { label: "Users", href: "/sub-admin/users", Icon: Users },
+  { label: "Manage matches", href: "/sub-admin/matches", Icon: CalendarDays },
   { label: "Open bets", href: "/sub-admin/open-bets", Icon: Ticket },
   { label: "My sales", href: "/sub-admin/transactions", Icon: ArrowLeftRight },
   { label: "Wallet", href: "/sub-admin/wallet", Icon: Wallet },

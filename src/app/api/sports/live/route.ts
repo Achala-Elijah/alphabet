@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { generatedMatches, normalizeStatus, isLiveMatch, isFinishedMatch, isShownOnSite, sortByBigness, generateAllMarketOdds, generateFeaturedOdds, type SportsMatch } from "@/lib/sports-data";
 import { fetchApiFootballMatches } from "@/lib/api-football";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -9,6 +10,20 @@ export const revalidate = 60;
 
 const SUPPORTED_SPORTS = new Set(["football", "tennis", "basketball", "table-tennis"]);
 const runtimeScheduledGoals = new Map<string, Array<{ minute: number; team: "home" | "away" }>>();
+
+/**
+ * matches has no INSERT policy for sub-admins (only admins can manage
+ * matches), so a sub-admin create must go through the service-role client,
+ * which bypasses RLS. Admins keep using their session client.
+ */
+function writerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    throw new Error("Match creation is not configured. Add SUPABASE_SERVICE_ROLE_KEY to .env and restart Next.js.");
+  }
+  return createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
+}
 type MatchOdds = string[] | { values: string[]; scheduled_goals: Array<{ minute: number; team: "home" | "away" }> };
 
 function getOddsValues(odds: MatchOdds | null): string[] {
@@ -509,11 +524,13 @@ export async function POST(request: Request) {
       if (!user) return NextResponse.json({ error: "You must be signed in to create a match." }, { status: 401 });
 
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-      if (profile?.role !== "admin") {
-        return NextResponse.json({ error: "Only admins can create matches." }, { status: 403 });
+      if (!profile || !["admin", "sub_admin"].includes(profile.role)) {
+        return NextResponse.json({ error: "Only staff can create matches." }, { status: 403 });
       }
+      // Sub-admins have no INSERT policy on matches — write via service role.
+      const db = profile.role === "sub_admin" ? writerClient() : supabase;
 
-      const { data: existingMatch } = await supabase
+      const { data: existingMatch } = await db
         .from("matches")
         .select("id,sport,competition,home,away,home_score,away_score,status,kickoff,source,odds,current_minute")
         .eq("sport", sport)
@@ -525,7 +542,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ match: normalizeDatabaseMatch({ ...existingMatch, scheduled_goals: getScheduledGoals(existingMatch.odds) }), source: "Supabase", duplicate: true }, { status: 200 });
       }
 
-      const { data, error } = await supabase.from("matches").insert({
+      const { data, error } = await db.from("matches").insert({
         sport,
         competition: match.competition,
         home: match.home,
