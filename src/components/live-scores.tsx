@@ -15,6 +15,8 @@ import BetPlaced, { type PlacedBetReceipt } from "@/components/bet-placed";
 type SportScoreMatch = {
   home?: string;
   away?: string;
+  home_logo?: string | null;
+  away_logo?: string | null;
   home_score?: number | null;
   away_score?: number | null;
   status?: string;
@@ -92,6 +94,16 @@ const sportNames: Record<string, string> = {
  *  agree on it, or a selection made in one wouldn't highlight in the other. */
 function matchKeyFor(match: SportScoreMatch, index: number): string {
   return match.slug || `${match.home}-${match.away}-${index}`;
+}
+
+/** Team crest when the feed provides one; otherwise initials in a circle. */
+function TeamLogo({ name, logo }: { name?: string; logo?: string | null }) {
+  const [failed, setFailed] = useState(false);
+  if (logo && !failed) {
+    return <img className="team-logo" src={logo} alt={`${name || "Team"} logo`} loading="lazy" onError={() => setFailed(true)} />;
+  }
+  const initials = (name || "?").trim().split(/\s+/).map((word) => word[0]).join("").slice(0, 2).toUpperCase() || "?";
+  return <span className="team-logo team-logo-fallback" aria-hidden="true">{initials}</span>;
 }
 
 /** "Live 67'", "Full time", "Upcoming" — one source of truth for every badge. */
@@ -757,8 +769,8 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
               onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setDetailKey(matchKey); } }}
             >
               <div className="sportscore-team-names">
-                <strong>{match.home || "Home team"}</strong>
-                <strong>{match.away || "Away team"}</strong>
+                <span className="sportscore-team"><TeamLogo name={match.home} logo={match.home_logo} /><strong>{match.home || "Home team"}</strong></span>
+                <span className="sportscore-team"><TeamLogo name={match.away} logo={match.away_logo} /><strong>{match.away || "Away team"}</strong></span>
               </div>
               <div className={`sportscore-score ${flashKey === matchKey ? "is-flash" : ""}`} aria-label={hasScore ? `${match.home_score} to ${match.away_score}` : "Score not available"}>
                 {hasScore ? <><span>{match.home_score}</span><span>:</span><span>{match.away_score}</span></> : <span>—</span>}
@@ -796,11 +808,11 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
                 {detailStatus.isLive && <i />}{detailStatus.label}{detailMinute && <b className="sportscore-minute">{detailMinute}</b>}
               </span>
               <div className="match-detail-teams">
-                <strong>{detailMatch.home || "Home team"}</strong>
+                <span className="sportscore-team sportscore-team-center"><TeamLogo name={detailMatch.home} logo={detailMatch.home_logo} /><strong>{detailMatch.home || "Home team"}</strong></span>
                 <span className={`match-detail-score ${flashKey === detailKey ? "is-flash" : ""}`} aria-label={detailHasScore ? `${detailMatch.home_score} to ${detailMatch.away_score}` : "Score not available"}>
                   {detailHasScore ? <><span>{detailMatch.home_score}</span><span>:</span><span>{detailMatch.away_score}</span></> : <span>—</span>}
                 </span>
-                <strong>{detailMatch.away || "Away team"}</strong>
+                <span className="sportscore-team sportscore-team-center"><TeamLogo name={detailMatch.away} logo={detailMatch.away_logo} /><strong>{detailMatch.away || "Away team"}</strong></span>
               </div>
               <time>{formatKickoff(detailMatch.time)}</time>
             </div>

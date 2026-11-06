@@ -56,6 +56,8 @@ function normalizeMatch(match: SportScoreMatch, sport: string): SportsMatch {
   const base = {
     home: match.home || "Home team",
     away: match.away || "Away team",
+    home_logo: match.home_logo || null,
+    away_logo: match.away_logo || null,
     home_score: typeof match.home_score === "number" ? match.home_score : null,
     away_score: typeof match.away_score === "number" ? match.away_score : null,
     status,
@@ -92,6 +94,11 @@ function normalizeDatabaseMatch(match: {
   scheduled_goals?: Array<{ minute: number; team: "home" | "away" }> | null;
 }): SportsMatch {
   const scheduledGoals = match.scheduled_goals || getScheduledGoals(match.odds);
+  // Manual-match crests ride along in the odds JSONB (no schema change):
+  // odds = { values, scheduled_goals, logos: { home, away } }
+  const storedLogos = (!Array.isArray(match.odds) ? (match.odds as { logos?: { home?: string; away?: string } } | null)?.logos : undefined);
+  const homeLogo = storedLogos?.home || null;
+  const awayLogo = storedLogos?.away || null;
   const kickoffMs = new Date(match.kickoff).getTime();
   const nowMs = Date.now();
   const isStarted = !Number.isNaN(kickoffMs) && nowMs >= kickoffMs;
@@ -110,6 +117,8 @@ function normalizeDatabaseMatch(match: {
     const base = {
       home: match.home,
       away: match.away,
+      home_logo: homeLogo,
+      away_logo: awayLogo,
       home_score: homeScore,
       away_score: awayScore,
       status: match.status === "cancelled" ? "cancelled" : "finished",
@@ -140,6 +149,8 @@ function normalizeDatabaseMatch(match: {
       const base = {
         home: match.home,
         away: match.away,
+        home_logo: homeLogo,
+        away_logo: awayLogo,
         home_score: match.home_score || 0,
         away_score: match.away_score || 0,
         status: "live",
@@ -158,6 +169,8 @@ function normalizeDatabaseMatch(match: {
     const scheduledBase = {
       home: match.home,
       away: match.away,
+      home_logo: homeLogo,
+      away_logo: awayLogo,
       home_score: null,
       away_score: null,
       status: "scheduled",
@@ -182,6 +195,8 @@ function normalizeDatabaseMatch(match: {
   const liveBase = {
     home: match.home,
     away: match.away,
+    home_logo: homeLogo,
+    away_logo: awayLogo,
     home_score: homeScore,
     away_score: awayScore,
     status: "live",
@@ -520,6 +535,8 @@ export async function POST(request: Request) {
     const match: SportsMatch = {
       home: body.home.trim(),
       away: body.away.trim(),
+      home_logo: body.home_logo?.trim() || null,
+      away_logo: body.away_logo?.trim() || null,
       home_score: null,
       away_score: null,
       status: "scheduled",
@@ -563,7 +580,7 @@ export async function POST(request: Request) {
         away: match.away,
         kickoff: match.time,
         source: "AlphaBet",
-        odds: { values: match.odds, scheduled_goals: scheduledGoals },
+        odds: { values: match.odds, scheduled_goals: scheduledGoals, logos: { home: match.home_logo || null, away: match.away_logo || null } },
         created_by: user.id,
       }).select("id,sport,competition,home,away,home_score,away_score,status,kickoff,source,odds,current_minute").single();
       if (error) {

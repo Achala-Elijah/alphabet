@@ -1,6 +1,9 @@
 export type SportsMatch = {
   home: string;
   away: string;
+  /** Team crest URL from the feed (SportScore / API-Football), when available. */
+  home_logo?: string | null;
+  away_logo?: string | null;
   home_score: number | null;
   away_score: number | null;
   status: string;
@@ -129,11 +132,16 @@ export function isBigMatch(match: { competition?: string; home?: string; away?: 
 }
 
 /**
- * Sort matches so big fixtures come first (then soonest kickoff).
- * Live matches always rank ahead of scheduled ones.
+ * Sort matches so manually created fixtures (AlphaBet / BETKIING) always
+ * come first — staff-fixed matches are promoted above feed matches — then
+ * big fixtures (then soonest kickoff). Live matches rank ahead of
+ * scheduled ones within each group.
  */
-export function sortByBigness<T extends { competition?: string; home?: string; away?: string; status?: string; status_text?: string; time?: string }>(matches: T[]): T[] {
+export function sortByBigness<T extends { competition?: string; home?: string; away?: string; status?: string; status_text?: string; time?: string; source?: string }>(matches: T[]): T[] {
+  const manualRank = (match: T) => (match.source === "AlphaBet" || match.source === "BETKIING" ? 0 : 1);
   return [...matches].sort((a, b) => {
+    const manualDiff = manualRank(a) - manualRank(b);
+    if (manualDiff !== 0) return manualDiff;
     const aLive = isLiveMatch(a.status || "", a.status_text || "") ? 0 : 1;
     const bLive = isLiveMatch(b.status || "", b.status_text || "") ? 0 : 1;
     if (aLive !== bLive) return aLive - bLive;

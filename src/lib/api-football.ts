@@ -10,8 +10,8 @@ type ApiFootballFixture = {
   };
   league?: { id?: number; name?: string; country?: string };
   teams?: {
-    home?: { id?: number; name?: string };
-    away?: { id?: number; name?: string };
+    home?: { id?: number; name?: string; logo?: string };
+    away?: { id?: number; name?: string; logo?: string };
   };
   goals?: { home?: number | null; away?: number | null };
 };
@@ -119,6 +119,8 @@ function fixtureToMatch(fixture: ApiFootballFixture): SportsMatch | null {
   const base = {
     home,
     away,
+    home_logo: fixture.teams?.home?.logo || null,
+    away_logo: fixture.teams?.away?.logo || null,
     home_score: isScheduled ? null : scoreValue(fixture.goals?.home),
     away_score: isScheduled ? null : scoreValue(fixture.goals?.away),
     status: resolved.status,

@@ -206,7 +206,12 @@ a{color:inherit;text-decoration:none}
 .sportscore-status i{width:7px;height:7px;box-shadow:none}
 .sportscore-match-teams{display:flex;align-items:center;justify-content:space-between;gap:15px;padding-top:12px}
 .sportscore-team-names{display:flex;flex-direction:column;gap:9px;min-width:0;font-size:13px}
-.sportscore-team-names strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.sportscore-team{display:flex;align-items:center;gap:8px;min-width:0}
+.sportscore-team strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.sportscore-team-center{flex:1 1 0}
+.sportscore-team-center:last-child{justify-content:flex-end}
+.team-logo{width:22px;height:22px;flex-shrink:0;object-fit:contain}
+.team-logo-fallback{display:grid;place-items:center;border-radius:50%;background:#2a2b32;color:#c5c6cb;font-size:9px;font-weight:800;letter-spacing:.5px}
 .sportscore-score{display:flex;align-items:center;gap:9px;min-width:62px;justify-content:flex-end;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
 
 /* ── Live presentation ───────────────────────────────────────── */
@@ -232,6 +237,8 @@ a{color:inherit;text-decoration:none}
 .match-detail-head span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700;color:#b8b9c1}
 .match-detail-scoreboard{display:flex;flex-direction:column;align-items:center;gap:9px;padding:16px 14px 14px;background:linear-gradient(180deg,#1d1e25,#17181d);border-bottom:1px solid #26272e;flex-shrink:0}
 .match-detail-teams{display:flex;align-items:center;gap:10px;width:100%}
+.match-detail-teams .sportscore-team strong{flex:0 1 auto;text-align:left}
+.match-detail-teams .sportscore-team-center:last-child strong{text-align:right}
 .match-detail-teams strong{flex:1 1 0;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .match-detail-teams strong:first-child{text-align:left}
 .match-detail-teams strong:last-child{text-align:right}
