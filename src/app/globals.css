@@ -372,6 +372,7 @@ tbody tr:last-child td{border-bottom:0}
 .danger-button{height:38px;border:1px solid #efb7c5;border-radius:7px;background:#fff1f3;color:#c3344d;display:inline-flex;align-items:center;gap:7px;padding:0 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}.danger-button:hover:not(:disabled){background:#ffe1e7;border-color:#e08a9e}.danger-button:disabled{opacity:.48;cursor:not-allowed}
 .secondary-button.active{background:#ed1742;border-color:#ed1742;color:#fff}
 .withdrawal-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.withdrawal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.withdrawal-actions .primary-button,.withdrawal-actions .secondary-button{min-height:40px}
+.transaction-actions{display:flex;flex-wrap:wrap;gap:6px}.transaction-actions .danger-button,.transaction-actions .primary-button,.transaction-actions .secondary-button{height:34px;min-height:34px;padding:0 10px;font-size:11px;gap:5px}
 .payout-note{display:flex;align-items:flex-start;gap:10px;margin-top:16px;padding:14px 16px;border:1px solid #e6e7ed;border-radius:10px;background:#fff;color:#555762}.payout-note p{margin:0;font-size:11px;line-height:1.6}.payout-note strong{color:#333;display:block;margin-bottom:3px}.muted-text{color:#a1a3ab;font-size:10px}
 .toolbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:17px}
 .search-field{height:38px;max-width:360px;flex:1;background:#fff;border:1px solid #e7e8ec;border-radius:7px;display:flex;align-items:center;gap:8px;padding:0 11px;color:#a1a3ab}
@@ -1859,5 +1860,41 @@ video {
     width: min(560px, calc(100% - 24px));
     transform: translateX(-50%);
     z-index: 30;
+  }
+}
+
+/* ── Transaction action buttons (Failed / Successful / Pending) ──
+   On phones the table scrolls sideways, so pin the Actions column to
+   the right edge and make the buttons big, even and easy to tap. */
+@media (max-width: 700px) {
+  .transaction-actions-cell {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background: #fff;
+    box-shadow: -10px 0 14px -10px rgb(0 0 0 / .25);
+    min-width: 252px;
+  }
+  th.transaction-actions-cell {
+    z-index: 2;
+    background: #fafafb;
+  }
+  .transaction-actions { gap: 6px; }
+  .transaction-actions .danger-button,
+  .transaction-actions .primary-button,
+  .transaction-actions .secondary-button {
+    flex: 1 1 30%;
+    min-height: 44px;
+    height: 44px;
+    padding: 0 8px;
+    font-size: 12px;
+    justify-content: center;
+  }
+}
+@media (max-width: 480px) {
+  .transaction-actions .danger-button,
+  .transaction-actions .primary-button,
+  .transaction-actions .secondary-button {
+    flex: 1 1 calc(50% - 3px);
   }
 }

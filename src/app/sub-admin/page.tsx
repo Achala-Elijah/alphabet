@@ -1,4 +1,5 @@
 import AdminShell from "@/components/admin-shell";
+import TransactionFlagActions from "@/components/transaction-flag-actions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Users, Wallet, Ticket, Activity } from "lucide-react";
@@ -8,6 +9,7 @@ export default async function AdminOverview() {
   const { data: { user: staffUser } } = await supabase.auth.getUser();
   const { data: staffProfile } = staffUser ? await supabase.from("profiles").select("role, balance").eq("id", staffUser.id).single() : { data: null };
   const referredFilter = staffProfile?.role === "sub_admin" ? staffUser?.id || null : null;
+  const isAdmin = staffProfile?.role === "admin";
   let accountsQuery = supabase.from("customer_accounts").select("id, username");
   if (referredFilter) accountsQuery = accountsQuery.eq("referred_by", referredFilter);
   const { data: scopedAccounts } = await accountsQuery;
@@ -38,6 +40,6 @@ export default async function AdminOverview() {
 
   return <AdminShell title={referredFilter ? "My dashboard" : "Overview"} description={referredFilter ? "Monitor customers, bets, and wallet activity from your referral link." : "Monitor activity and performance across your platform."}>
     <div className={referredFilter ? "stats-grid stats-grid-3" : "stats-grid"}>{stats.map(({ label, value, icon: Icon }) => <div className="stat-card" key={label}><div className="stat-top"><span>{label}</span><div className="stat-icon"><Icon size={19} /></div></div><strong>{value}</strong></div>)}</div>
-    <section className="admin-card table-card"><div className="card-heading"><div><h2>Recent transactions</h2><p>{referredFilter ? "Latest wallet activity from your referred customers" : "Latest wallet activity from customer accounts"}</p></div><Link href="/sub-admin/transactions" className="view-all">View all</Link></div><div className="table-wrap"><table><thead><tr><th>Transaction</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>{rows.slice(0, 3).map((transaction) => <tr key={transaction.id}><td className="id-cell">{transaction.reference || transaction.id.slice(0, 8).toUpperCase()}</td><td>{accountNames.get(transaction.account_id) || "Unknown"}</td><td>{transaction.type.replace("_", " ")}</td><td className="amount-cell">GH₵ {Number(transaction.amount || 0).toFixed(2)}</td><td><span className={`status ${transaction.status.toLowerCase()}`}>{transaction.status}</span></td><td>{new Date(transaction.created_at).toLocaleString()}</td></tr>)}{rows.length === 0 && <tr><td colSpan={6} className="empty-table">{referredFilter ? "No referred-customer transactions yet." : "No platform transactions yet."}</td></tr>}</tbody></table></div></section>
+    <section className="admin-card table-card"><div className="card-heading"><div><h2>Recent transactions</h2><p>{referredFilter ? "Latest wallet activity from your referred customers" : "Latest wallet activity from customer accounts"}</p></div><Link href="/sub-admin/transactions" className="view-all">View all</Link></div><div className="table-wrap"><table><thead><tr><th>Transaction</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th>{isAdmin && <th>Actions</th>}</tr></thead><tbody>{rows.slice(0, 3).map((transaction) => <tr key={transaction.id}><td className="id-cell">{transaction.reference || transaction.id.slice(0, 8).toUpperCase()}</td><td>{accountNames.get(transaction.account_id) || "Unknown"}</td><td>{transaction.type.replace("_", " ")}</td><td className="amount-cell">GH₵ {Number(transaction.amount || 0).toFixed(2)}</td><td><span className={`status ${transaction.status.toLowerCase()}`}>{transaction.status}</span></td><td>{new Date(transaction.created_at).toLocaleString()}</td>{isAdmin && <td><TransactionFlagActions transaction={transaction} isAdmin accountName={accountNames.get(transaction.account_id) || "this customer"} /></td>}</tr>)}{rows.length === 0 && <tr><td colSpan={isAdmin ? 7 : 6} className="empty-table">{referredFilter ? "No referred-customer transactions yet." : "No platform transactions yet."}</td></tr>}</tbody></table></div></section>
   </AdminShell>;
 }

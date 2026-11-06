@@ -1,7 +1,7 @@
 "use client";
 
 import AdminShell from "@/components/admin-shell";
-import { Download, Search, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Download, Search, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type Transaction = { id: string; account_id: string; type: string; amount: number; status: string; reference: string | null; created_at: string };
@@ -10,7 +10,7 @@ export default function TransactionsPage() {
   const [rows, setRows] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
-  const [pendingFailure, setPendingFailure] = useState<Transaction | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ transaction: Transaction; action: "failed" | "successful" | "pending" } | null>(null);
   const [flagging, setFlagging] = useState(false);
   const [search, setSearch] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -58,31 +58,46 @@ export default function TransactionsPage() {
       .catch(() => undefined);
   }, []);
   useEffect(() => {
-    if (!pendingFailure) return;
+    if (!pendingAction) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const frame = window.requestAnimationFrame(() => cancelButtonRef.current?.focus());
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setPendingFailure(null); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setPendingAction(null); };
     document.addEventListener("keydown", onKey);
     return () => {
       window.cancelAnimationFrame(frame);
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKey);
     };
-  }, [pendingFailure]);
-  async function flagFailed(transaction: Transaction) {
+  }, [pendingAction]);
+  /** Both flags go through one confirm modal; only admin can open it. */
+  function requestFlag(transaction: Transaction, action: "failed" | "successful" | "pending") {
     setConfirmError("");
-    setPendingFailure(transaction);
+    setPendingAction({ transaction, action });
   }
-  async function confirmFlagFailed() {
-    if (!pendingFailure) return;
+  async function confirmFlag() {
+    if (!pendingAction) return;
     setFlagging(true);
     setConfirmError("");
     try {
-      const response = await fetch("/api/staff/transactions", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: pendingFailure.id, status: "failed" }) });
+      const { transaction, action } = pendingAction;
+      const status = action === "failed"
+        ? "failed"
+        : action === "pending"
+          ? "pending"
+          : (transaction.type === "deposit" || transaction.type === "deposit_bonus" ? "paid" : "completed");
+      
+      const response = await fetch("/api/staff/transactions", { 
+        method: "PATCH", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ id: transaction.id, status }) 
+      });
       const data = await response.json() as { error?: string };
-      if (!response.ok) { setConfirmError(data.error || "Unable to update transaction."); return; }
-      setPendingFailure(null);
+      if (!response.ok) { 
+        setConfirmError(data.error || "Unable to update transaction."); 
+        return; 
+      }
+      setPendingAction(null);
       await load();
     } catch (reason) {
       setConfirmError(reason instanceof Error ? reason.message : "Unable to update transaction.");
@@ -93,7 +108,15 @@ export default function TransactionsPage() {
   return <AdminShell title="Transactions" description="Track deposits, withdrawals, and transaction statuses.">
     <div className="toolbar"><div className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search transactions, users, references..." aria-label="Search transactions" /></div><button className="secondary-button" onClick={exportCsv} disabled={filtered.length === 0}><Download size={17} /> Export</button></div>
     {error && <div className="admin-inline-error">{error}</div>}
-    <section className="admin-card table-card"><div className="table-wrap"><table><thead><tr><th>Transaction ID</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>{filtered.map((transaction) => <tr key={transaction.id}><td className="id-cell">{transaction.reference || transaction.id.slice(0, 8).toUpperCase()}</td><td>{accounts[transaction.account_id] || "Unknown"}</td><td>{transaction.type.replace("_", " ")}</td><td className="amount-cell">GH₵ {Number(transaction.amount || 0).toFixed(2)}</td><td><span className={`status ${transaction.status.toLowerCase()}`}>{transaction.status}</span></td><td>{new Date(transaction.created_at).toLocaleString()}</td><td>{transaction.status.toLowerCase() !== "failed" && isAdmin && <button className="danger-button" onClick={() => void flagFailed(transaction)}><XCircle size={15} /> Flag failed</button>}</td></tr>)}{filtered.length === 0 && <tr><td colSpan={7} className="empty-table">No transactions match “{search.trim() || "your search"}”.</td></tr>}</tbody></table></div></section>
-    {pendingFailure && <div className="match-edit-overlay transaction-confirm-overlay" role="alertdialog" aria-modal="true" aria-labelledby="transaction-confirm-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingFailure(null); }} onKeyDown={(event) => { if (event.key === "Escape") setPendingFailure(null); }} tabIndex={-1}><section className="admin-card match-confirm-card"><div className="confirm-icon"><XCircle size={22} /></div><h2 id="transaction-confirm-title">Flag transaction as failed?</h2><p>This will mark <strong>{pendingFailure.reference || pendingFailure.id.slice(0, 8).toUpperCase()}</strong> as failed for <strong>{accounts[pendingFailure.account_id] || "this customer"}</strong>.</p>{confirmError && <p className="admin-inline-error" role="alert">{confirmError}</p>}<div className="modal-actions"><button ref={cancelButtonRef} type="button" className="secondary-button" onClick={() => setPendingFailure(null)} disabled={flagging}>Cancel</button><button type="button" className="danger-button" onClick={() => void confirmFlagFailed()} disabled={flagging}>{flagging ? "Saving..." : "Yes, flag failed"}</button></div></section></div>}
+    <section className="admin-card table-card"><div className="table-wrap"><table><thead><tr><th>Transaction ID</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th><th className="transaction-actions-cell">Actions</th></tr></thead><tbody>{filtered.map((transaction) => <tr key={transaction.id}><td className="id-cell">{transaction.reference || transaction.id.slice(0, 8).toUpperCase()}</td><td>{accounts[transaction.account_id] || "Unknown"}</td><td>{transaction.type.replace("_", " ")}</td><td className="amount-cell">GH₵ {Number(transaction.amount || 0).toFixed(2)}</td><td><span className={`status ${transaction.status.toLowerCase()}`}>{transaction.status}</span></td><td>{new Date(transaction.created_at).toLocaleString()}</td><td className="transaction-actions-cell"><div className="withdrawal-actions transaction-actions">{isAdmin && <>{!["failed"].includes(transaction.status.toLowerCase()) && <button className="danger-button" onClick={() => requestFlag(transaction, "failed")}><XCircle size={15} /> Failed</button>}{!["paid", "completed", "approved"].includes(transaction.status.toLowerCase()) && <button className="primary-button" onClick={() => requestFlag(transaction, "successful")}><CheckCircle2 size={15} /> Successful</button>}{transaction.status.toLowerCase() !== "pending" && <button className="secondary-button" onClick={() => requestFlag(transaction, "pending")}><Clock size={15} /> Pending</button>}</>}</div></td></tr>)}{filtered.length === 0 && <tr><td colSpan={7} className="empty-table">No transactions match “{search.trim() || "your search"}”.</td></tr>}</tbody></table></div></section>
+    {pendingAction && (() => {
+      const { transaction, action } = pendingAction;
+      const failing = action === "failed";
+      const pending = action === "pending";
+      const actionLabel = failing ? "failed" : pending ? "pending" : "successful";
+      const title = failing ? "Flag transaction as failed?" : pending ? "Mark transaction as pending?" : "Mark transaction as successful?";
+      const confirmLabel = failing ? "Yes, flag failed" : pending ? "Yes, mark pending" : "Yes, mark successful";
+      return <div className="match-edit-overlay transaction-confirm-overlay" role="alertdialog" aria-modal="true" aria-labelledby="transaction-confirm-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingAction(null); }} onKeyDown={(event) => { if (event.key === "Escape") setPendingAction(null); }} tabIndex={-1}><section className="admin-card match-confirm-card"><div className="confirm-icon">{failing ? <XCircle size={22} /> : pending ? <Clock size={22} /> : <CheckCircle2 size={22} />}</div><h2 id="transaction-confirm-title">{title}</h2><p>This will mark <strong>{transaction.reference || transaction.id.slice(0, 8).toUpperCase()}</strong> as <strong>{actionLabel}</strong> for <strong>{accounts[transaction.account_id] || "this customer"}</strong>.</p>{confirmError && <p className="admin-inline-error" role="alert">{confirmError}</p>}<div className="modal-actions"><button ref={cancelButtonRef} type="button" className="secondary-button" onClick={() => setPendingAction(null)} disabled={flagging}>Cancel</button><button type="button" className={failing ? "danger-button" : pending ? "secondary-button" : "primary-button"} onClick={() => void confirmFlag()} disabled={flagging}>{flagging ? "Saving..." : confirmLabel}</button></div></section></div>;
+    })()}
   </AdminShell>;
 }
