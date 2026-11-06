@@ -89,8 +89,22 @@ export default function WithdrawalsPage() {
   });
 
   const pendingCount = rows.filter((r) => r.status === "pending").length;
-  const pendingTotal = rows.filter((r) => r.status === "pending").reduce((t, r) => t + Number(r.amount), 0);
-  const approvedTotal = rows.filter((r) => r.status === "approved").reduce((t, r) => t + Number(r.amount), 0);
+  const pendingByCurrency = rows.filter((r) => r.status === "pending").reduce<Record<string, number>>((totals, row) => {
+    const key = row.currency === "NGN" ? "NGN" : "GHS";
+    totals[key] = (totals[key] || 0) + Number(row.amount || 0);
+    return totals;
+  }, {});
+  const approvedByCurrency = rows.filter((r) => r.status === "approved").reduce<Record<string, number>>((totals, row) => {
+    const key = row.currency === "NGN" ? "NGN" : "GHS";
+    totals[key] = (totals[key] || 0) + Number(row.amount || 0);
+    return totals;
+  }, {});
+  const formatSplit = (totals: Record<string, number>) => {
+    const parts = Object.entries(totals)
+      .filter(([, value]) => value > 0)
+      .map(([currency, value]) => money(value, currency));
+    return parts.length ? parts.join(" + ") : money(0, "GHS");
+  };
 
   return (
     <AdminShell title="Withdrawal requests" description="Review customer withdrawal requests. Approving reserves the payout for manual payment via MoMo / bank transfer — no automatic transfer is sent.">
@@ -102,12 +116,12 @@ export default function WithdrawalsPage() {
         </div>
         <div className="stat-card">
           <div className="stat-top"><span>Pending total</span><div className="stat-icon"><ArrowUpCircle size={19} /></div></div>
-          <strong>GH₵ {pendingTotal.toFixed(2)}</strong>
-          <small>mixed GHS / NGN</small>
+          <strong>{formatSplit(pendingByCurrency)}</strong>
+          <small>split GHS / NGN</small>
         </div>
         <div className="stat-card">
           <div className="stat-top"><span>Approved (awaiting payout)</span><div className="stat-icon"><Banknote size={19} /></div></div>
-          <strong>GH₵ {approvedTotal.toFixed(2)}</strong>
+          <strong>{formatSplit(approvedByCurrency)}</strong>
           <small>pay out, then mark completed</small>
         </div>
       </div>

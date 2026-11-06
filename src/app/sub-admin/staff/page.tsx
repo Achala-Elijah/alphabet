@@ -4,6 +4,7 @@ import AdminShell from "@/components/admin-shell";
 import { Eye } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import { copyText } from "@/lib/clipboard";
 
 type SubAdmin = { id: string; username: string | null; phone: string | null; referral_code: string | null; created_at: string };
 
@@ -17,9 +18,13 @@ export default function StaffPage() {
   const [copiedCode, setCopiedCode] = useState("");
 
   async function copyReferralLink(code: string) {
-    await navigator.clipboard.writeText(`${window.location.origin}/register?ref=${code}`);
-    setCopiedCode(code);
-    window.setTimeout(() => setCopiedCode(""), 1800);
+    try {
+      await copyText(`${window.location.origin}/register?ref=${code}`);
+      setCopiedCode(code);
+      window.setTimeout(() => setCopiedCode(""), 1800);
+    } catch {
+      setNotice("Copying failed — long-press the link to copy it.");
+    }
   }
 
   async function loadSubAdmins() {

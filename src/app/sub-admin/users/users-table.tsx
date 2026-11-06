@@ -18,11 +18,23 @@ export default function UsersTable({ users }: { users: User[] }) {
   const filteredUsers = useMemo(() => users.filter((user) =>
     `${user.username} ${user.email || ""} ${user.phone}`.toLowerCase().includes(query.toLowerCase())
   ), [users, query]);
+  function exportCsv() {
+    const headers = ["id", "username", "email", "phone", "wallet_balance", "status", "joined"];
+    const escape = (value: string | number | null | undefined) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+    const body = filteredUsers.map((user) => [user.id, user.username, user.email || "", user.phone, user.balance, "Active", new Date(user.created_at).toISOString()].map(escape).join(","));
+    const csv = [headers.map(escape).join(","), ...body].join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `users-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   return <>
     <div className="toolbar">
       <div className="search-field"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, email or phone..." /></div>
-      <button type="button" className="secondary-button"><Download size={17} /> Export</button>
+      <button type="button" className="secondary-button" onClick={exportCsv} disabled={filteredUsers.length === 0}><Download size={17} /> Export</button>
     </div>
     <section className="admin-card table-card"><div className="table-wrap"><table><thead><tr><th>User</th><th>Phone</th><th>Wallet balance</th><th>Status</th><th>Joined</th><th>Details</th></tr></thead><tbody>
       {filteredUsers.map((user) => <tr key={user.id} className="user-row-clickable"><td><Link className="user-table-link" href={`/sub-admin/users/${user.id}`}><div className="user-cell"><span className="mini-avatar">{user.username.slice(0, 2).toUpperCase()}</span><div><strong>{user.username}</strong><small>{user.email || "No email added"}</small></div></div></Link></td><td>{user.phone}</td><td className="amount-cell">GH₵ {Number(user.balance || 0).toFixed(2)}</td><td><span className="status active">Active</span></td><td>{new Date(user.created_at).toLocaleDateString()}</td><td><Link className="user-details-link" href={`/sub-admin/users/${user.id}`}><Eye size={14} /> <span>View details</span></Link></td></tr>)}

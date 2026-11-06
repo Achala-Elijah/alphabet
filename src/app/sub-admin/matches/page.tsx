@@ -4,6 +4,12 @@ import AdminShell from "@/components/admin-shell";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarPlus, LoaderCircle, Plus, Search, Save, Trash2, X } from "lucide-react";
 
+function localDateInputValue(value: string | Date) {
+  const date = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 type AdminMatch = {
   slug: string;
   competition: string;
@@ -24,6 +30,7 @@ export default function MatchesPage() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [actionLock, setActionLock] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<AdminMatch | null>(null);
   const [creating, setCreating] = useState(false);
   const detailsRef = useRef<HTMLElement | null>(null);
@@ -39,9 +46,19 @@ export default function MatchesPage() {
   };
 
   useEffect(() => {
-    void loadMatches().catch((err: unknown) => setError(err instanceof Error ? err.message : "Unable to load matches."));
-    const interval = window.setInterval(() => void loadMatches().catch((err: unknown) => setError(err instanceof Error ? err.message : "Unable to refresh matches.")), 15_000);
-    return () => window.clearInterval(interval);
+    let cancelled = false;
+    const refresh = () => {
+      if (document.visibilityState === "hidden") return;
+      void loadMatches().catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Unable to refresh matches.");
+      });
+    };
+    refresh();
+    const interval = window.setInterval(refresh, 15_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -91,7 +108,9 @@ export default function MatchesPage() {
     }
   }
 
-  async function updateMatch(match: AdminMatch, changes: Record<string, number | string | Array<{ minute: number; team: "home" | "away" }>>) {
+  async function updateMatch(match: AdminMatch, changes: Record<string, number | string | Array<{ minute: number; team: "home" | "away" }>>, actionKey?: string) {
+    if (actionKey && actionLock) return false;
+    if (actionKey) setActionLock(actionKey);
     try {
       setError("");
       const response = await fetch("/api/sports/live", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: match.slug, ...changes }) });
@@ -102,6 +121,9 @@ export default function MatchesPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to update match.");
       return false;
+    } finally {
+      // Only clear the lock for the action that took it.
+      if (actionKey) setActionLock((current) => (current === actionKey ? null : current));
     }
   }
 
@@ -171,10 +193,10 @@ export default function MatchesPage() {
       <button type="submit" className="primary-button" disabled={saving || creating}>{saving || creating ? <LoaderCircle className="spin" size={16} /> : <CalendarPlus size={16} />} {saving || creating ? "Creating..." : "Create fixture"}</button>
     </form>}
     <section className="admin-card table-card"><div className="table-wrap"><table><thead><tr><th>Competition</th><th>Home team</th><th>Away team</th><th>Kick-off</th><th>Source</th><th>Status</th><th></th></tr></thead><tbody>
-      {filteredMatches.map((match) => <tr key={match.slug} onClick={() => setSelectedMatch(match)} className="match-row-clickable"><td>{match.competition}</td><td>{match.home}</td><td>{match.away}</td><td>{new Date(match.time).toLocaleString([], { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td><td><span className="status pending">{match.source}</span></td><td><span className={`status ${match.status_text === "Live" ? "live" : "pending"}`}>{match.status_text}</span>{(match.source === "BETKIING" || match.source === "AlphaBet") && <div className="match-score-controls"><strong>{match.home_score ?? 0} - {match.away_score ?? 0} · {match.current_minute ?? 0}'</strong><button type="button" onClick={(event) => { event.stopPropagation(); void updateMatch(match, { current_minute: (match.current_minute || 0) + 1, status: "live" }); }}>+1 min</button><button type="button" onClick={(event) => { event.stopPropagation(); void updateMatch(match, { status: match.status_text === "Live" ? "finished" : "live" }); }}>{match.status_text === "Live" ? "Finish match" : "Start live"}</button></div>}</td><td><button type="button" className="secondary-button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setSelectedMatch(match); }}>Edit</button></td></tr>)}
+      {filteredMatches.map((match) => <tr key={match.slug} onClick={() => setSelectedMatch(match)} className="match-row-clickable"><td>{match.competition}</td><td>{match.home}</td><td>{match.away}</td><td>{new Date(match.time).toLocaleString([], { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td><td><span className="status pending">{match.source}</span></td><td><span className={`status ${match.status_text === "Live" ? "live" : "pending"}`}>{match.status_text}</span>{(match.source === "BETKIING" || match.source === "AlphaBet") && <div className="match-score-controls"><strong>{match.home_score ?? 0} - {match.away_score ?? 0} · {match.current_minute ?? 0}'</strong><button type="button" aria-disabled={actionLock === `minute-${match.slug}`} disabled={actionLock === `minute-${match.slug}`} onClick={(event) => { event.stopPropagation(); void updateMatch(match, { current_minute: (match.current_minute || 0) + 1, status: "live" }, `minute-${match.slug}`); }}>{actionLock === `minute-${match.slug}` ? "Saving…" : "+1 min"}</button><button type="button" aria-disabled={actionLock === `toggle-${match.slug}`} disabled={actionLock === `toggle-${match.slug}`} onClick={(event) => { event.stopPropagation(); void updateMatch(match, { status: match.status_text === "Live" ? "finished" : "live" }, `toggle-${match.slug}`); }}>{actionLock === `toggle-${match.slug}` ? "Saving…" : match.status_text === "Live" ? "Finish match" : "Start live"}</button></div>}</td><td><button type="button" className="secondary-button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setSelectedMatch(match); }}>Edit</button></td></tr>)}
       {filteredMatches.length === 0 && <tr><td colSpan={7} className="empty-table">No matches found.</td></tr>}
     </tbody></table></div></section>
-    {selectedMatch && <div className="match-edit-overlay" role="dialog" aria-modal="true" aria-labelledby="match-edit-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedMatch(null); }}><section ref={detailsRef} className="admin-card match-details-card"><div className="card-heading"><div><span className="modal-eyebrow">FIXTURE EDITOR</span><h2 id="match-edit-title">{selectedMatch.home} <span>vs</span> {selectedMatch.away}</h2><p>Update fixture details and scheduled goals.</p></div><button type="button" className="dots" onClick={() => setSelectedMatch(null)} aria-label="Close details"><X size={18} /></button></div>{selectedMatch.source === "BETKIING" || selectedMatch.source === "AlphaBet" ? <form onSubmit={(event) => void saveEditedMatch(event)}><div className="match-form-grid"><label>Competition<input name="editCompetition" required defaultValue={selectedMatch.competition} /></label><label>Kick-off<input name="editKickoff" required type="datetime-local" defaultValue={new Date(selectedMatch.time).toISOString().slice(0, 16)} /></label><label>Home team<input name="editHome" required defaultValue={selectedMatch.home} /></label><label>Away team<input name="editAway" required defaultValue={selectedMatch.away} /></label><label>Home goal minutes<input name="editHomeGoals" placeholder="18, 72" defaultValue={(selectedMatch.scheduled_goals || []).filter((goal) => goal.team === "home").map((goal) => goal.minute).join(", ")} /></label><label>Away goal minutes<input name="editAwayGoals" placeholder="44, 85" defaultValue={(selectedMatch.scheduled_goals || []).filter((goal) => goal.team === "away").map((goal) => goal.minute).join(", ")} /></label></div><p className="form-help">Use comma-separated minutes. Changes are saved together when you click Update match.</p><div className="modal-actions"><button type="button" className="danger-button" onClick={() => void deleteMatch(selectedMatch)}><Trash2 size={16} /> Delete match</button><div><button type="button" className="secondary-button" onClick={() => setSelectedMatch(null)}>Cancel</button><button type="submit" className="primary-button" disabled={editSaving}>{editSaving ? <LoaderCircle className="spin" size={16} /> : <Save size={16} />} {editSaving ? "Updating..." : "Update match"}</button></div></div></form> : <p>This external fixture is read-only.</p>}</section></div>}
+    {selectedMatch && <div className="match-edit-overlay" role="dialog" aria-modal="true" aria-labelledby="match-edit-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedMatch(null); }}><section ref={detailsRef} className="admin-card match-details-card"><div className="card-heading"><div><span className="modal-eyebrow">FIXTURE EDITOR</span><h2 id="match-edit-title">{selectedMatch.home} <span>vs</span> {selectedMatch.away}</h2><p>Update fixture details and scheduled goals.</p></div><button type="button" className="dots" onClick={() => setSelectedMatch(null)} aria-label="Close details"><X size={18} /></button></div>{selectedMatch.source === "BETKIING" || selectedMatch.source === "AlphaBet" ? <form onSubmit={(event) => void saveEditedMatch(event)}><div className="match-form-grid"><label>Competition<input name="editCompetition" required defaultValue={selectedMatch.competition} /></label><label>Kick-off<input name="editKickoff" required type="datetime-local" defaultValue={localDateInputValue(selectedMatch.time)} /></label><label>Home team<input name="editHome" required defaultValue={selectedMatch.home} /></label><label>Away team<input name="editAway" required defaultValue={selectedMatch.away} /></label><label>Home goal minutes<input name="editHomeGoals" placeholder="18, 72" defaultValue={(selectedMatch.scheduled_goals || []).filter((goal) => goal.team === "home").map((goal) => goal.minute).join(", ")} /></label><label>Away goal minutes<input name="editAwayGoals" placeholder="44, 85" defaultValue={(selectedMatch.scheduled_goals || []).filter((goal) => goal.team === "away").map((goal) => goal.minute).join(", ")} /></label></div><p className="form-help">Use comma-separated minutes. Changes are saved together when you click Update match.</p><div className="modal-actions"><button type="button" className="danger-button" onClick={() => void deleteMatch(selectedMatch)}><Trash2 size={16} /> Delete match</button><div><button type="button" className="secondary-button" onClick={() => setSelectedMatch(null)}>Cancel</button><button type="submit" className="primary-button" disabled={editSaving}>{editSaving ? <LoaderCircle className="spin" size={16} /> : <Save size={16} />} {editSaving ? "Updating..." : "Update match"}</button></div></div></form> : <p>This external fixture is read-only.</p>}</section></div>}
     {deleteTarget && <div className="match-edit-overlay match-confirm-overlay" role="alertdialog" aria-modal="true" aria-labelledby="delete-match-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTarget(null); }} onKeyDown={(event) => { if (event.key === "Escape") setDeleteTarget(null); }} tabIndex={-1}><section className="admin-card match-confirm-card"><div className="confirm-icon"><Trash2 size={22} /></div><h2 id="delete-match-title">Delete this match?</h2><p>This will permanently remove <strong>{deleteTarget.home} vs {deleteTarget.away}</strong>. This action cannot be undone.</p><div className="modal-actions"><button type="button" className="secondary-button" onClick={() => setDeleteTarget(null)} disabled={deleteSaving}>Keep match</button><button type="button" className="danger-button" onClick={() => void confirmDeleteMatch()} disabled={deleteSaving}>{deleteSaving ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={16} />} {deleteSaving ? "Deleting..." : "Yes, delete match"}</button></div></section></div>}
   </AdminShell>;
 }

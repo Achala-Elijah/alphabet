@@ -3,13 +3,16 @@
 import AdminShell from "@/components/admin-shell";
 import { Copy, Link as LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { copyText } from "@/lib/clipboard";
 
 export default function ReferralPage() {
   const [code, setCode] = useState("");
+  const [origin, setOrigin] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    setOrigin(window.location.origin);
     fetch("/api/staff/profile", { cache: "no-store" })
       .then(async (response) => {
         const result = await response.json() as { referral_code?: string; error?: string };
@@ -19,12 +22,16 @@ export default function ReferralPage() {
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load your referral link."));
   }, []);
 
-  const link = code ? `${window.location.origin}/register?ref=${code}` : "";
+  const link = code && origin ? `${origin}/register?ref=${code}` : "";
   async function copyLink() {
     if (!link) return;
-    await navigator.clipboard.writeText(link);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    try {
+      await copyText(link);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setError("Copying failed — long-press the link to copy it.");
+    }
   }
 
   return <AdminShell title="Book & share" description="Share your referral link to bring customers into your sales network.">

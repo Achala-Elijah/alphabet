@@ -3,6 +3,29 @@ import { randomBytes } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+/** Update the signed-in staff member's display name and phone number. */
+export async function PATCH(request: Request) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+
+  let body: { username?: unknown; phone?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const username = typeof body.username === "string" ? body.username.trim() : "";
+  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  if (username.length < 3) return NextResponse.json({ error: "Display name must be at least 3 characters." }, { status: 400 });
+  if (phone.length < 7) return NextResponse.json({ error: "Enter a valid phone number." }, { status: 400 });
+
+  const { error } = await supabase.from("profiles").update({ username, phone }).eq("id", user.id);
+  if (error) return NextResponse.json({ error: `Could not save your profile: ${error.message}` }, { status: 500 });
+  return NextResponse.json({ ok: true, username, phone });
+}
+
 export async function GET() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
