@@ -35,3 +35,6 @@
  GET /api/bets 200 in 1942ms (next.js: 0.8ms, application-code: 1942ms)
  GET /api/sports/live?sport=football&featured=true 200 in 2.8s (next.js: 1.1ms, application-code: 2.8s)
  GET /api/sports/live?sport=football&featured=true 200 in 2.9s (next.js: 1.4ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 0.9ms, application-code: 2.9s)
+ GET /api/bets 200 in 1937ms (next.js: 3ms, application-code: 1934ms)
+ GET /api/sports/live?sport=football 200 in 2.4s (next.js: 3ms, application-code: 2.4s)
