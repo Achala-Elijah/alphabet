@@ -1,5 +1,6 @@
 import { generateAllMarketOdds, type SportsMatch } from "./sports-data";
 import { consumeFootballApiCall } from "./api-football-budget";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 type ApiFootballFixture = {
   fixture?: {
@@ -36,11 +37,23 @@ const DEFAULT_LEAGUES = [
 ];
 
 const DEFAULT_HOST = "https://v3.football.api-sports.io";
+// Hard-coded TTLs (per product decision — not configurable via env):
+// today's fixtures go stale fast, next-100 changes slowly.
 const DATE_TTL_MS = 16 * 60 * 1000;
 const NEXT_TTL_MS = 6 * 60 * 60 * 1000;
 
-type CacheEntry = { at: number; data: SportsMatch[] };
-const cache = new Map<string, CacheEntry>();
+let cacheClientInstance: SupabaseClient | null | undefined;
+
+/** Service-role client for the shared football cache (single source of truth). */
+function cacheClient(): SupabaseClient | null {
+  if (cacheClientInstance !== undefined) return cacheClientInstance;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  cacheClientInstance = url && serviceKey
+    ? createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } })
+    : null;
+  return cacheClientInstance;
+}
 
 function configuredLeagues() {
   const raw = process.env.FOOTBALL_API_LEAGUES;
@@ -127,53 +140,92 @@ function normalizeAndFilter(fixtures: ApiFootballFixture[]) {
 }
 
 /**
- * Two-layer cache:
- * 1. Next's persistent Data Cache (`fetch next.revalidate` + tags) so repeated
- *    requests across pages and server invocations do not re-hit the provider.
- * 2. A process-local backup for stale-on-error, plus a daily invocation cap.
- * The route is read-only, so cached data is safe to share.
+ * Read-through TTL cache, stored in Supabase (`football_api_cache`):
+ *
+ *   request → read the cached row
+ *     · fresh (expires_at in the future) → serve it, no API call, no quota
+ *     · expired / missing → consume one unit of the shared daily quota,
+ *       fetch from API-Football, then rewrite the row with a new expiry
+ *       (the TTL restarts only when someone asks after it lapsed)
+ *   · quota exhausted / provider error → serve the last data fetched (the
+ *     expired row for this key, else the newest row of any key) — the feed
+ *     never goes blank when the daily limit runs out
+ *   · cache unreadable → deny the call, never risk the shared quota.
+ *
+ * Deliberately no process-memory or Next Data Cache layer: neither is shared
+ * across instances/deploys, so the database is the single source of truth.
  */
 async function cachedFetch(cacheKey: string, requestUrl: string, ttlMs: number): Promise<SportsMatch[]> {
-  const now = Date.now();
-  const cached = cache.get(cacheKey);
-  if (cached && now - cached.at < ttlMs) return cached.data;
+  const db = cacheClient();
+  if (!db) return [];
+
+  const { data: row, error: readError } = await db
+    .from("football_api_cache")
+    .select("data, expires_at")
+    .eq("key", cacheKey)
+    .maybeSingle();
+
+  if (readError) {
+    // Table missing (migration not run) — do not burn quota on an uncached path.
+    console.warn("API-Football cache unavailable:", readError.message);
+    return [];
+  }
+
+  const stale = row ? (row.data as SportsMatch[]) : [];
+  if (row && new Date(row.expires_at).getTime() > Date.now()) return stale;
 
   const headers = providerHeaders();
-  if (!headers) {
-    if (!cache.has(cacheKey)) cache.set(cacheKey, { at: 0, data: [] });
-    return cache.get(cacheKey)?.data || [];
-  }
-  // Hard shared quota across every process and user. If the database budget
-  // guard is missing, no API call is made.
-  if (!(await consumeFootballApiCall())) return cached?.data || [];
+  if (!headers) return stale;
+  // Hard shared quota across every process and user. When it is exhausted (or
+  // the guard is unavailable) we never go to the provider — the last data we
+  // fetched is served instead, so the feed never goes blank on a zero-balance
+  // day.
+  if (!(await consumeFootballApiCall())) return stale.length ? stale : await lastFetchedData(db);
 
-  const revalidateSeconds = Math.max(60, Math.floor(ttlMs / 1000));
   try {
-    const response = await fetch(requestUrl, {
-      headers,
-      next: {
-        revalidate: revalidateSeconds,
-        tags: ["api-football", cacheKey.split(":")[0]]
-      }
-    });
+    const response = await fetch(requestUrl, { headers, cache: "no-store" });
     if (!response.ok) throw new Error(`API-Football returned HTTP ${response.status}`);
     const payload = await response.json() as ApiFootballResponse;
     if (payload.errors && Object.keys(payload.errors).length) {
       throw new Error(typeof payload.errors === "string" ? payload.errors : JSON.stringify(payload.errors));
     }
     const data = normalizeAndFilter(Array.isArray(payload.response) ? payload.response : []);
-    cache.set(cacheKey, { at: now, data });
+    const now = new Date();
+    const { error: writeError } = await db.from("football_api_cache").upsert({
+      key: cacheKey,
+      data,
+      fetched_at: now.toISOString(),
+      expires_at: new Date(now.getTime() + ttlMs).toISOString()
+    });
+    if (writeError) console.warn("API-Football cache write failed:", writeError.message);
     return data;
   } catch (error) {
     // Key details stay server-side; keep the UI honest by using stale data.
     console.warn("API-Football unavailable:", error instanceof Error ? error.message : "unknown error");
-    return cached?.data || [];
+    return stale.length ? stale : await lastFetchedData(db);
   }
 }
 
 /**
- * One date response every 16 minutes (≈90 calls/day) + next-100 every 6 hours.
- * About 94 calls/day by design, with a hard in-app cap at 98.
+ * The most recently fetched payload of any key, expiry ignored. Used when the
+ * daily quota is exhausted (or the provider fails) so users always see the
+ * last data we managed to pull — e.g. yesterday's fixtures after the date
+ * key rolls over at midnight.
+ */
+async function lastFetchedData(db: SupabaseClient): Promise<SportsMatch[]> {
+  const { data } = await db
+    .from("football_api_cache")
+    .select("data")
+    .order("fetched_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data ? (data.data as SportsMatch[]) : [];
+}
+
+/**
+ * Today's fixtures refresh every 16 minutes, next-100 every 6 hours — both
+ * lazily, only when a request arrives after the TTL has lapsed. That keeps
+ * usage inside the shared 94-calls/day database cap.
  */
 export async function fetchApiFootballMatches(): Promise<SportsMatch[]> {
   if (!process.env.API_FOOTBALL_KEY && !process.env.FOOTBALL_API_KEY) return [];

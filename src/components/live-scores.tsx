@@ -334,18 +334,19 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
       if (!response.ok) return;
       const data = await response.json() as {
         settled?: Array<{ id: string; status: string; payout: number; stake: number; potential_return: number }>;
-        bets?: Array<{ id: string; status: string; potential_return: number; stake: number }>;
+        bets?: Array<{ id: string; status: string; potential_return: number; stake: number; selections?: WinCelebrationBet["selections"] }>;
         currency?: string;
       };
       if (data.currency) setWalletCurrency(data.currency);
       const celebrated = JSON.parse(window.localStorage.getItem("alphabet_celebrated_wins") || window.localStorage.getItem("betkiing_celebrated_wins") || "[]") as string[];
+      const betRowsById = new Map((data.bets || []).map((bet) => [bet.id, bet]));
       // Exact payout when this very poll settled the bet; otherwise the row's
       // potential return for a win that landed earlier.
       const settledWins = (data.settled || []).filter((bet) => bet.status === "won" && !celebrated.includes(bet.id));
       const rowWins = (data.bets || []).filter((bet) => bet.status === "won" && !celebrated.includes(bet.id));
       const fresh: WinCelebrationBet[] = settledWins.length
-        ? settledWins.map((bet) => ({ id: bet.id, payout: bet.payout, stake: bet.stake, potential_return: bet.potential_return || bet.payout }))
-        : rowWins.map((bet) => ({ id: bet.id, payout: bet.potential_return, stake: bet.stake, potential_return: bet.potential_return }));
+        ? settledWins.map((bet) => ({ id: bet.id, payout: bet.payout, stake: bet.stake, potential_return: bet.potential_return || bet.payout, selections: betRowsById.get(bet.id)?.selections }))
+        : rowWins.map((bet) => ({ id: bet.id, payout: bet.potential_return, stake: bet.stake, potential_return: bet.potential_return, selections: bet.selections }));
       if (fresh.length === 0) return;
       // Persist so we don't greet again on refresh.
       window.localStorage.setItem("alphabet_celebrated_wins", JSON.stringify([...new Set([...celebrated, ...fresh.map((bet) => bet.id)])]));

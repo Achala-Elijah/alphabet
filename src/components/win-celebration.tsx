@@ -1,12 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { formatCustomerAmount } from "@/lib/currency";
+import { copyText } from "@/lib/clipboard";
+
+export type WinSelection = { match?: string; option?: string; odds?: number; market?: string };
 
 export type WinCelebrationBet = {
   id: string;
   payout: number;
   stake: number;
   potential_return: number;
+  /** Winning legs, when the caller has them — shown inside the Details panel. */
+  selections?: WinSelection[] | null;
 };
 
 const CONFETTI = [
@@ -23,14 +29,75 @@ const CONFETTI = [
   { left: "92%", delay: ".9s", color: "#30d47a", width: 6, height: 12, round: false }
 ];
 
-/** Premium celebration popup, styled around AlphaBet's dark-green / gold brand. */
+/** Glowing particles that fly out of the trophy's mouth. */
+const SPARKS = [
+  { tx: "0px", ty: "-86px", delay: "0s" },
+  { tx: "-58px", ty: "-48px", delay: ".35s" },
+  { tx: "54px", ty: "-52px", delay: ".7s" },
+  { tx: "-78px", ty: "10px", delay: "1.05s" },
+  { tx: "74px", ty: "14px", delay: "1.4s" },
+  { tx: "-32px", ty: "-74px", delay: "1.75s" },
+  { tx: "36px", ty: "-26px", delay: "2.05s" }
+];
+
+/**
+ * "YOU WON!" success popup — dark SportyBet-style card: white title, vivid
+ * green amount, gold trophy with a light burst, verify code, and a
+ * Details / Show Off button pair.
+ */
 export default function WinCelebration({ win, onClose, currency = "GHS" }: { win: WinCelebrationBet; onClose: () => void; currency?: string }) {
+  const [showDetails, setShowDetails] = useState(false);
+  const [shareLabel, setShareLabel] = useState("Show Off");
+  const [sharing, setSharing] = useState(false);
+
+  // Escape closes the popup.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const selections = Array.isArray(win.selections) ? win.selections : [];
+  const headline = selections[0]?.match || (selections.length > 1 ? `${selections.length} selections` : "Winning slip");
+  const totalOdds = win.stake > 0 ? win.potential_return / win.stake : 0;
+  // A short, quotable reference support can look up (the bet's ID as a code).
+  const verifyCode = win.id.replaceAll("-", "").slice(0, 12).toUpperCase();
+
+  async function shareWin() {
+    if (sharing) return;
+    setSharing(true);
+    const text = `I won ${formatCustomerAmount(win.payout, currency)} on AlphaBet! Verify code: ${verifyCode}`;
+    const url = window.location.origin;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "AlphaBet win", text, url });
+        setShareLabel("Shared!");
+      } else {
+        throw new Error("no-share");
+      }
+    } catch (reason) {
+      // The user dismissing the native share sheet is not a failure.
+      const dismissed = reason instanceof DOMException && reason.name === "AbortError";
+      if (!dismissed) {
+        try {
+          await copyText(`${text} ${url}`);
+          setShareLabel("Copied!");
+        } catch {
+          setShareLabel("Copy failed");
+        }
+      }
+    } finally {
+      setSharing(false);
+      window.setTimeout(() => setShareLabel("Show Off"), 1900);
+    }
+  }
+
   return (
     <div
       className="win-celebration"
       role="dialog"
       aria-modal="true"
-      aria-label="Bet won"
+      aria-label="You won"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -52,19 +119,17 @@ export default function WinCelebration({ win, onClose, currency = "GHS" }: { win
           ))}
         </div>
         <div className="win-celebration-spotlight" aria-hidden="true" />
-        <div className="win-celebration-noise" aria-hidden="true" />
 
-        <header className="win-celebration-header">
-          <div className="win-celebration-mark" aria-hidden="true">
-            <span>AB</span>
-          </div>
-          <div>
-            <span className="win-celebration-brand">ALPHABET SPORTSBOOK</span>
-            <span className="win-celebration-verified">VERIFIED RESULT</span>
-          </div>
-        </header>
+        <h2>YOU WON!</h2>
+        <strong className="win-celebration-amount">{formatCustomerAmount(win.payout, currency)}</strong>
+        <p className="win-celebration-sub">Your winnings have been credited to your wallet.</p>
 
         <div className="win-celebration-cup-wrap" aria-hidden="true">
+          <div className="win-burst">
+            {SPARKS.map((spark, index) => (
+              <i key={index} style={{ "--tx": spark.tx, "--ty": spark.ty, animationDelay: spark.delay } as React.CSSProperties} />
+            ))}
+          </div>
           <svg className="win-celebration-cup" viewBox="0 0 192 180" aria-hidden="true">
             <defs>
               <linearGradient id="wonGold" x1="0" y1="0" x2="0" y2="1">
@@ -200,20 +265,53 @@ export default function WinCelebration({ win, onClose, currency = "GHS" }: { win
           </svg>
         </div>
 
-        <h2>BET WON!</h2>
-        <p className="win-celebration-sub">Your winnings have been credited to your wallet.</p>
+        <p className="win-verify">Verify Code: <strong>{verifyCode}</strong></p>
 
-        <strong className="win-celebration-amount">{formatCustomerAmount(win.payout, currency)}</strong>
+        {showDetails && (
+          <div className="win-details">
+            {selections.length > 0 && (
+              <ul className="win-details-list">
+                {selections.map((selection, index) => (
+                  <li key={index}>
+                    <span>
+                      {selection.match || "Selection"}
+                      <small>{selection.option}{selection.market ? ` · ${selection.market}` : ""}</small>
+                    </span>
+                    {selection.odds ? <em>{Number(selection.odds).toFixed(2)}</em> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <dl className="win-celebration-meta">
+              <div><dt>Stake</dt><dd>{formatCustomerAmount(win.stake, currency)}</dd></div>
+              <div className="is-gold"><dt>Total return</dt><dd>{formatCustomerAmount(win.potential_return, currency)}</dd></div>
+              <div><dt>Bet ID</dt><dd>{win.id.slice(0, 8).toUpperCase()}</dd></div>
+            </dl>
+          </div>
+        )}
 
-        <dl className="win-celebration-meta">
-          <div><dt>Bet ID</dt><dd>{win.id.slice(0, 8).toUpperCase()}</dd></div>
-          <div><dt>Stake</dt><dd>{formatCustomerAmount(win.stake, currency)}</dd></div>
-          <div className="is-gold"><dt>Total return</dt><dd>{formatCustomerAmount(win.potential_return, currency)}</dd></div>
-        </dl>
+        <div className="win-actions">
+          <button
+            type="button"
+            className="win-btn win-btn-outline"
+            onClick={() => setShowDetails((open) => !open)}
+            aria-expanded={showDetails}
+          >
+            <span className="win-btn-text">
+              <strong>{showDetails ? "Hide details" : "Details"}</strong>
+              <small>{headline}</small>
+            </span>
+            <span className="win-btn-num">{totalOdds > 0 ? totalOdds.toFixed(2) : ""}</span>
+          </button>
+          <button type="button" className="win-btn win-btn-solid" onClick={() => void shareWin()} disabled={sharing}>
+            {shareLabel}
+          </button>
+        </div>
 
-        <button type="button" onClick={onClose}>
-          COLLECT WINNINGS
-        </button>
+        <footer className="win-footer">
+          <span className="win-footer-mark" aria-hidden="true">A</span>
+          <strong>Alpha<span>Bet</span></strong>
+        </footer>
       </section>
     </div>
   );

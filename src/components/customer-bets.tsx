@@ -167,15 +167,16 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
       if (data.currency) setCurrency(data.currency);
       const settled = data.settled || [];
       const celebrated = readCelebratedWins();
+      const betsById = new Map((data.bets || []).map((bet) => [bet.id, bet]));
       const fresh: WinCelebrationBet[] = [
         // Exact payout when this very request settled the bet …
         ...settled
           .filter((bet) => bet.status === "won" && !celebrated.includes(bet.id))
-          .map((bet) => ({ id: bet.id, payout: bet.payout, stake: bet.stake, potential_return: bet.potential_return })),
+          .map((bet) => ({ id: bet.id, payout: bet.payout, stake: bet.stake, potential_return: bet.potential_return, selections: betsById.get(bet.id)?.selections })),
         // … otherwise a win that landed earlier still deserves its moment.
         ...(data.bets || [])
           .filter((bet) => bet.status === "won" && !celebrated.includes(bet.id) && !settled.some((s) => s.id === bet.id))
-          .map((bet) => ({ id: bet.id, payout: bet.potential_return, stake: bet.stake, potential_return: bet.potential_return }))
+          .map((bet) => ({ id: bet.id, payout: bet.potential_return, stake: bet.stake, potential_return: bet.potential_return, selections: bet.selections }))
       ];
       if (fresh.length) {
         celebrateOnce(fresh.map((bet) => bet.id));
