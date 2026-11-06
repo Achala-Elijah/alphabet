@@ -175,7 +175,7 @@ export default function MatchesPage() {
 
   return <AdminShell title="Match management" description="Manage live fixtures, generated games, and betting markets.">
     <div className="toolbar">
-      <div className="search-field"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search matches..." /></div>
+      <div className="search-field"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search matches..." aria-label="Search matches" /></div>
       <button className="primary-button" onClick={() => setShowForm(true)}><Plus size={17} /> Add match</button>
     </div>
     {error && <div className="admin-inline-error">{error}</div>}

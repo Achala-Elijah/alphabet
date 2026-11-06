@@ -137,6 +137,7 @@ export default function AdminShell({ children, title, description }: { children:
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
+          <Link href="/" className="topbar-brand" aria-label="AlphaBet home">Alpha<span>Bet</span></Link>
           <Link href="/sub-admin" className="breadcrumb"><span>Admin</span><span>/</span> <strong>{title}</strong></Link>
           <div className="topbar-actions"><div className="top-avatar" aria-hidden="true">{isAdmin ? "AD" : "SA"}</div></div>
         </header>

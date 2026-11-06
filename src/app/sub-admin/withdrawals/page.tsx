@@ -127,7 +127,7 @@ export default function WithdrawalsPage() {
       </div>
 
       <div className="toolbar">
-        <div className="search-field"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search user, reference, or phone..." /></div>
+        <div className="search-field"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search user, reference, or phone..." aria-label="Search withdrawals" /></div>
         <div className="withdrawal-filters">
           {FILTERS.map((f) => (
             <button key={f} type="button" className={filter === f ? "secondary-button active" : "secondary-button"} onClick={() => setFilter(f)}>

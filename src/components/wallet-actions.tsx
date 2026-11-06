@@ -266,13 +266,12 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
             <span className="activation-icon"><ShieldCheck size={27} /></span>
             <span className="activation-eyebrow">WITHDRAWAL ACTIVATION FEE</span>
             <h3>Activate your withdrawal</h3>
-            <p>{money(activationFee)} is paid separately as the activation fee on every withdrawal. Your wallet is charged only for the withdrawal amount.</p>
+            <p>Pay {money(activationFee)} to activate your withdrawal.</p>
             <dl className="activation-summary">
               <div><dt>Withdrawal from wallet</dt><dd>{money(activationAmount)}</dd></div>
               <div><dt>Activation fee (separate)</dt><dd>{money(activationFee)}</dd></div>
               <div className="activation-total"><dt>Total to pay</dt><dd>{money(activationAmount + activationFee)}</dd></div>
             </dl>
-            <p className="activation-note">After the activation fee is paid, an admin will review and approve your withdrawal before payout.</p>
             <div className="activation-actions">
               <button type="button" className="activation-cancel" onClick={() => setActivationAmount(null)} disabled={busy === "withdrawal"}>Cancel</button>
               <button type="button" className="activation-pay" onClick={() => void submitActivation()} disabled={busy === "withdrawal"}>

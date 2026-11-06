@@ -3,12 +3,14 @@
 import AdminShell from "@/components/admin-shell";
 import { Eye } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { copyText } from "@/lib/clipboard";
 
 type SubAdmin = { id: string; username: string | null; phone: string | null; referral_code: string | null; created_at: string };
 
 export default function StaffPage() {
+  const router = useRouter();
   const [subAdmins, setSubAdmins] = useState<SubAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -74,7 +76,7 @@ export default function StaffPage() {
       {loadError && <div className="admin-inline-error">{loadError}</div>}
       <div className="table-wrap"><table><thead><tr><th>Username</th><th>Phone</th><th>Referral link</th><th>Role</th><th>Created</th><th>Details</th></tr></thead><tbody>
         {loading && <tr><td colSpan={6} className="empty-table">Loading sub-admins...</td></tr>}
-        {!loading && subAdmins.map((subAdmin) => <tr key={subAdmin.id} className="user-row-clickable"><td><Link className="user-table-link" href={`/sub-admin/staff/${subAdmin.id}`}><div className="user-cell"><span className="mini-avatar">{(subAdmin.username || "SA").slice(0, 2).toUpperCase()}</span><strong>{subAdmin.username || "Unnamed sub-admin"}</strong></div></Link></td><td>{subAdmin.phone || "—"}</td><td className="referral-link-cell">{subAdmin.referral_code ? <div className="referral-action"><code>/register?ref={subAdmin.referral_code}</code><button type="button" className="copy-referral-button" onClick={() => void copyReferralLink(subAdmin.referral_code || "")}>{copiedCode === subAdmin.referral_code ? "Copied" : "Copy link"}</button></div> : "Not generated"}</td><td><span className="status active">Sub-admin</span></td><td>{new Date(subAdmin.created_at).toLocaleDateString()}</td><td><Link className="user-details-link" href={`/sub-admin/staff/${subAdmin.id}`}><Eye size={14} /> <span>View details</span></Link></td></tr>)}
+        {!loading && subAdmins.map((subAdmin) => <tr key={subAdmin.id} className="user-row-clickable" onClick={(event) => { if ((event.target as HTMLElement).closest("a, button")) return; router.push(`/sub-admin/staff/${subAdmin.id}`); }}><td><Link className="user-table-link" href={`/sub-admin/staff/${subAdmin.id}`}><div className="user-cell"><span className="mini-avatar">{(subAdmin.username || "SA").slice(0, 2).toUpperCase()}</span><strong>{subAdmin.username || "Unnamed sub-admin"}</strong></div></Link></td><td>{subAdmin.phone || "—"}</td><td className="referral-link-cell">{subAdmin.referral_code ? <div className="referral-action"><code>/register?ref={subAdmin.referral_code}</code><button type="button" className="copy-referral-button" onClick={() => void copyReferralLink(subAdmin.referral_code || "")}>{copiedCode === subAdmin.referral_code ? "Copied" : "Copy link"}</button></div> : "Not generated"}</td><td><span className="status active">Sub-admin</span></td><td>{new Date(subAdmin.created_at).toLocaleDateString()}</td><td><Link className="user-details-link" href={`/sub-admin/staff/${subAdmin.id}`}><Eye size={14} /> <span>View details</span></Link></td></tr>)}
         {!loading && subAdmins.length === 0 && <tr><td colSpan={6} className="empty-table">No sub-admins found.</td></tr>}
       </tbody></table></div>
     </section>
