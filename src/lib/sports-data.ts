@@ -241,12 +241,12 @@ function driftAdjustment(input: MarketOddsInput): number {
   return 1 + homeDiff * 0.12 * timeFactor;
 }
 
-/** Correct-score prices never go under 7.00 (including staff-entered odds). */
+/** Correct-score prices never go under 9.00 (including staff-entered odds). */
 function floorCorrectScoreOdds(source: Record<string, string>) {
   const out: Record<string, string> = {};
   for (const [option, value] of Object.entries(source)) {
     const parsed = Number(value);
-    out[option] = (Number.isFinite(parsed) ? Math.max(7, parsed) : 7).toFixed(2);
+    out[option] = (Number.isFinite(parsed) ? Math.max(9, parsed) : 9).toFixed(2);
   }
   return out;
 }
@@ -291,28 +291,44 @@ export function generateMarketOdds(input: MarketOddsInput, market: string): Reco
   else options = ["1", "X", "2"];
 
   const result: Record<string, string> = {};
+  // Correct-score: price the whole grid first so odds are spread from the
+  // 9.00 floor upward (most likely scoreline ≈ 9–11, long shots much
+  // longer) instead of collapsing onto one flat price.
+  const correctScorePrices: Record<string, number> = {};
+  if (market === "Correct Score") {
+    const exactProbs: Array<{ option: string; prob: number }> = [];
+    for (const option of options) {
+      const m = option.match(/^(\d)-(\d)$/);
+      if (!m) continue;
+      const total = Number(m[1]) + Number(m[2]);
+      const lambda = 2.6;
+      let fact = 1;
+      for (let i = 2; i <= total; i++) fact *= i;
+      let prob = (Math.exp(-lambda) * lambda ** total) / fact;
+      if (Number(m[1]) > Number(m[2])) prob *= 1 + homeEdge;
+      if (Number(m[1]) < Number(m[2])) prob *= 1 - homeEdge;
+      exactProbs.push({ option, prob });
+    }
+    const maxProb = Math.max(...exactProbs.map((entry) => entry.prob), 0.001);
+    // Scale so the likeliest scoreline sits just above the 9.00 floor.
+    const bestProb = 0.105;
+    for (const { option, prob } of exactProbs) {
+      const scaled = (prob / maxProb) * bestProb;
+      correctScorePrices[option] = scaled;
+    }
+    for (const option of options) {
+      if (!(option in correctScorePrices)) correctScorePrices[option] = 0.02 + rand(options.indexOf(option)) * 0.015;
+    }
+  }
   options.forEach((option, index) => {
     // Base implied probability varies by option position and market.
-    let prob = 0.28 + rand(index) * 0.22;
+    let prob = 0.24 + rand(index) * 0.34;
     if (market === "O/U" || market === "Totals" || market === "Total Games" || market === "Total Sets") {
       prob = 0.5 + (rand(index) - 0.5) * 0.2;
     } else if (market === "Correct Score") {
-      // Exact scorelines are long shots — low scores are the likeliest,
-      // so price them off a crude Poisson shape (~2.6 total goals) the way
-      // real correct-score markets do: 1-0/1-1/2-1 short, 4-4 very long.
-      const m = option.match(/^(\d)-(\d)$/);
-      if (m) {
-        const total = Number(m[1]) + Number(m[2]);
-        const lambda = 2.6;
-        let fact = 1;
-        for (let i = 2; i <= total; i++) fact *= i;
-        prob = (Math.exp(-lambda) * lambda ** total) / fact;
-        prob = prob * (1 + rand(index) * 0.35);
-        // Home wins lean the scoreline grid one way, away wins the other.
-        if (Number(m[1]) > Number(m[2])) prob *= 1 + homeEdge;
-        if (Number(m[1]) < Number(m[2])) prob *= 1 - homeEdge;
+      if (correctScorePrices[option] !== undefined) {
+        prob = correctScorePrices[option] * (1 + rand(index) * 0.3);
       } else {
-        // "Any other" buckets collect every scoreline outside 0–4.
         prob = 0.02 + rand(index) * 0.015;
       }
     } else if (market === "1X2") {
@@ -331,7 +347,7 @@ export function generateMarketOdds(input: MarketOddsInput, market: string): Reco
     }
 
     result[option] = market === "Correct Score"
-      ? Math.max(7, Number(toOdds(prob))).toFixed(2)
+      ? Math.max(9, Number(toOdds(prob))).toFixed(2)
       : toOdds(prob);
   });
   return result;

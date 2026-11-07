@@ -7,15 +7,37 @@
 - Local:         http://localhost:3001
 - Network:       http://10.83.109.104:3001
 - Environments: .env
-✓ Ready in 509ms
-✓ Running next.config.ts took 44ms
+✓ Ready in 507ms
+✓ Running next.config.ts took 41ms
 
- GET /sub-admin/login 200 in 3.5s (next.js: 2.9s, proxy.ts: 200ms, application-code: 446ms)
- GET /account?nav=bets 200 in 3.9s (next.js: 2.9s, proxy.ts: 201ms, application-code: 857ms)
- GET /api/auth/customer 200 in 692ms (next.js: 167ms, application-code: 525ms)
- GET /api/auth/customer 200 in 694ms (next.js: 167ms, application-code: 528ms)
- GET /api/auth/customer 200 in 695ms (next.js: 167ms, application-code: 529ms)
- GET /api/bets 200 in 2.4s (next.js: 166ms, application-code: 2.2s)
- GET /api/bets 200 in 2.6s (next.js: 166ms, application-code: 2.4s)
- GET /api/sports/live?matchIds=dfed4f9f-cd82-4931-a827-eebd43e9d860%2C07aaec40-9e24-47aa-a947-4502a7836a20%2C586e9a28-9b7d-4f55-920f-5b4ed90c8c36 200 in 5.0s (next.js: 48ms, application-code: 5.0s)
- GET /api/sports/live?matchIds=dfed4f9f-cd82-4931-a827-eebd43e9d860%2C07aaec40-9e24-47aa-a947-4502a7836a20%2C586e9a28-9b7d-4f55-920f-5b4ed90c8c36 200 in 5.0s (next.js: 48ms, application-code: 5.0s)
+ GET / 200 in 1276ms (next.js: 347ms, application-code: 929ms)
+○ Compiling /api/auth/customer/route ...
+ GET /account 200 in 5.4s (next.js: 3.6s, proxy.ts: 1055ms, application-code: 813ms)
+ GET /api/auth/customer 200 in 1229ms (next.js: 300ms, application-code: 930ms)
+ GET /api/auth/customer 200 in 1472ms (next.js: 300ms, application-code: 1172ms)
+ GET /sub-admin 200 in 6.4s (next.js: 3.0s, proxy.ts: 1640ms, application-code: 1730ms)
+ GET /api/staff/profile 200 in 651ms (next.js: 81ms, application-code: 571ms)
+ GET /api/staff/profile 200 in 675ms (next.js: 81ms, application-code: 595ms)
+ GET /api/staff/profile 200 in 621ms (next.js: 1.0ms, application-code: 620ms)
+ GET /api/staff/profile 200 in 602ms (next.js: 1.8ms, application-code: 600ms)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 299ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football&featured=true 200 in 3.4s (next.js: 299ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 299ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football&featured=true 200 in 3.4s (next.js: 299ms, application-code: 3.1s)
+ GET / 200 in 505ms (next.js: 74ms, application-code: 431ms)
+ GET /api/auth/customer 200 in 552ms (next.js: 4ms, application-code: 547ms)
+ GET /api/auth/customer 200 in 536ms (next.js: 0.9ms, application-code: 535ms)
+ GET /api/auth/customer 200 in 545ms (next.js: 1.3ms, application-code: 543ms)
+ GET /api/staff/profile 200 in 559ms (next.js: 59ms, application-code: 500ms)
+ GET /api/staff/profile 200 in 408ms (next.js: 1.0ms, application-code: 407ms)
+ GET /account 200 in 664ms (next.js: 108ms, proxy.ts: 29ms, application-code: 528ms)
+ GET /api/auth/customer 200 in 494ms (next.js: 2ms, application-code: 492ms)
+ GET /api/auth/customer 200 in 546ms (next.js: 3ms, application-code: 543ms)
+ GET /api/staff/profile 200 in 380ms (next.js: 1.2ms, application-code: 379ms)
+ GET /api/staff/profile 200 in 365ms (next.js: 1.2ms, application-code: 364ms)
+ GET /sub-admin 200 in 1518ms (next.js: 14ms, proxy.ts: 593ms, application-code: 911ms)
+ GET /api/staff/profile 200 in 343ms (next.js: 0.8ms, application-code: 343ms)
+ GET /api/auth/customer 200 in 184ms (next.js: 1.1ms, application-code: 183ms)
+ GET /api/auth/customer 200 in 184ms (next.js: 1.3ms, application-code: 182ms)
+ GET /api/staff/profile 200 in 472ms (next.js: 1.0ms, application-code: 471ms)
+ GET /api/auth/customer 200 in 202ms (next.js: 0.8ms, application-code: 201ms)

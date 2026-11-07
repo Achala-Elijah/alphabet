@@ -27,6 +27,28 @@ function secretKey() {
 }
 
 /**
+ * Per-currency Paystack keys. A merchant account is single-currency by
+ * default (GHS here), so Naira deposits need their own Paystack account
+ * via PAYSTACK_SECRET_KEY_NGN. When that variable is unset, NGN falls
+ * back to the main key (and Paystack will reject it until NGN is enabled
+ * on that account).
+ */
+function keyFor(currency?: Currency | string): string {
+  if (currency === "NGN") {
+    const ngnKey = process.env.PAYSTACK_SECRET_KEY_NGN;
+    if (ngnKey?.startsWith("sk_")) return ngnKey;
+  }
+  return secretKey();
+}
+
+function allSecretKeys(): string[] {
+  const keys = [secretKey()];
+  const ngnKey = process.env.PAYSTACK_SECRET_KEY_NGN;
+  if (ngnKey?.startsWith("sk_") && !keys.includes(ngnKey)) keys.push(ngnKey);
+  return keys;
+}
+
+/**
  * Optional client-side check only. Hosted checkout never needs the public
  * key — calling this at startup fails fast if someone pasted the wrong key.
  */
@@ -47,24 +69,30 @@ function minorUnits(amount: number) {
 }
 
 /**
- * Paystack channel configuration for deposits.
- *
- * Ghana (GHS): card, mobile_money (MTN, Vodafone, AT), bank_transfer
- * Nigeria (NGN): card, bank_transfer, USSD (via bank_transfer channel)
- *
- * Paystack shows the channels it has enabled on the merchant account.
+ * Paystack channel configuration for deposits — the same list for every
+ * currency: card, mobile money (MTN, Vodafone, AT), bank transfer.
+ * Only the currency differs (GHS for cedi accounts, NGN for naira).
  * Make sure Settings > Payments in the Paystack Dashboard has
  * Mobile Money and Bank Transfer enabled for your country.
  */
 export const PAYSTACK_DEPOSIT_CHANNELS = ["card", "mobile_money", "bank_transfer"] as const;
 
-async function paystackFetch(path: string, init?: RequestInit) {
+async function paystackFetch(path: string, init?: RequestInit, key?: string) {
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
-    headers: { Authorization: `Bearer ${secretKey()}`, "Content-Type": "application/json", ...init?.headers }
+    headers: { Authorization: `Bearer ${key || secretKey()}`, "Content-Type": "application/json", ...init?.headers }
   });
   const data = (await response.json().catch(() => null)) as { status?: boolean; message?: string; data?: Record<string, unknown> } | null;
-  if (!response.ok || !data?.status) throw new PaymentError(`Paystack: ${data?.message || response.statusText}`, 502);
+  if (!response.ok || !data?.status) {
+    const message = data?.message || response.statusText;
+    // "Currency not supported by merchant" means the Paystack merchant
+    // account has not enabled that currency (e.g. NGN) yet — it is a
+    // dashboard setting, not a code bug. Point at the exact fix.
+    if (/currency not supported/i.test(message)) {
+      throw new PaymentError("Paystack: Currency not supported by merchant. Naira needs its own Paystack account — add PAYSTACK_SECRET_KEY_NGN to .env (see .env.example), or enable NGN on this merchant in Paystack Dashboard → Settings → Currencies.", 502);
+    }
+    throw new PaymentError(`Paystack: ${message}`, 502);
+  }
   return data.data || {};
 }
 
@@ -125,7 +153,7 @@ export const paystackProvider: PaymentProvider = {
     const data = await paystackFetch("/transaction/initialize", {
       method: "POST",
       body: JSON.stringify(payload)
-    });
+    }, keyFor(input.currency));
     const checkoutUrl = String((data as { authorization_url?: unknown }).authorization_url || "");
     if (!checkoutUrl) {
       throw new PaymentError("Paystack did not return a checkout URL.", 502);
@@ -141,7 +169,7 @@ export const paystackProvider: PaymentProvider = {
     if (!reference) {
       throw new PaymentError("A deposit reference is required.", 400);
     }
-    const data = await paystackFetch(`/transaction/verify/${encodeURIComponent(reference)}`);
+    const data = await paystackFetch(`/transaction/verify/${encodeURIComponent(reference)}`, undefined, keyFor(expected?.currency));
     const payload = data as Record<string, unknown>;
     const status = mapStatus(String(payload.status || ""));
     const amount = typeof payload.amount === "number" ? payload.amount / 100 : undefined;
@@ -156,9 +184,14 @@ export const paystackProvider: PaymentProvider = {
   async parseWebhook(body: string, signature: string | null): Promise<WebhookEvent> {
     if (!body) throw new PaymentError("Empty webhook payload.", 400);
     if (!signature) throw new PaymentError("Missing Paystack signature.", 401);
-    const expected = createHmac("sha512", secretKey()).update(body).digest();
+    // Webhooks can arrive from either merchant account (GHS or NGN) —
+    // accept a signature from any configured key.
     const provided = Buffer.from(signature, "hex");
-    if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
+    const signatureOk = allSecretKeys().some((key) => {
+      const expected = createHmac("sha512", key).update(body).digest();
+      return provided.length === expected.length && timingSafeEqual(provided, expected);
+    });
+    if (!signatureOk) {
       throw new PaymentError("Invalid Paystack signature.", 401);
     }
     let event: { event?: string; data?: { reference?: string; status?: string; amount?: number; currency?: string } };
