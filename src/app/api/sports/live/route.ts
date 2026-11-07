@@ -348,7 +348,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // API-Football is the primary football source when a key is configured.
+    // ESPN is the primary football source (free, no key, with logos).
     const apiFootballMatches = sport === "football" ? await fetchApiFootballMatches() : [];
 
     const sportScoreUrl =
@@ -415,9 +415,9 @@ export async function GET(request: Request) {
       updated: payload.updated ?? null,
       sport,
       source: databaseMatches.length > 0
-        ? "API-Football + SportScore (incl. manually fixed)"
+        ? "ESPN + SportScore (incl. manually fixed)"
         : apiFootballMatches.length > 0
-          ? upstreamMatches.length > 0 ? "API-Football + SportScore" : "API-Football"
+          ? upstreamMatches.length > 0 ? "ESPN + SportScore" : "ESPN"
           : upstreamMatches.length > 0 ? "SportScore" : "SportScore fallback",
       fallback: databaseMatches.length === 0 && apiFootballMatches.length === 0 && upstreamMatches.length === 0,
       databaseReady,
