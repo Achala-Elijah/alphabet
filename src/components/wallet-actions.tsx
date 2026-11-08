@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
 import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, normalizeCurrency, withdrawalActivationFee } from "@/lib/limits";
+import NairaDepositPopup from "@/components/naira-deposit-popup";
 
 /**
  * The single Deposit/Withdraw control used everywhere a wallet appears:
@@ -31,6 +32,8 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
   const [busy, setBusy] = useState<Action | null>(null);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
   const [activationAmount, setActivationAmount] = useState<number | null>(null);
+  // Naira customers pay by manual OPay transfer + screenshot, not Paystack.
+  const [nairaPopupOpen, setNairaPopupOpen] = useState(false);
 
   const isAdmin = layout === "admin";
   const normalized = normalizeCurrency(currency);
@@ -63,6 +66,13 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
     }
     const value = Math.round(parsed * 100) / 100;
     const isDeposit = action === "deposit";
+    // Naira deposits are manual OPay transfers with a screenshot —
+    // show the OPay popup instead of a Paystack checkout.
+    if (isDeposit && mode === "customer" && normalized === "NGN") {
+      setNotice(null);
+      setNairaPopupOpen(true);
+      return;
+    }
     if (mode === "customer" && !isDeposit) {
       if (value < floor) {
         setNotice({ kind: "error", text: `The minimum withdrawal is ${money(floor)}.` });
@@ -280,6 +290,19 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
             </div>
           </div>
         </div>
+      )}
+      {nairaPopupOpen && (
+        <NairaDepositPopup
+          onClose={() => setNairaPopupOpen(false)}
+          onSubmitted={() => {
+            setNairaPopupOpen(false);
+            setAmount("");
+            setNotice({ kind: "success", text: "Deposit claim submitted. The system will automatically verify it and credit your wallet." });
+            window.dispatchEvent(new Event("alphabet:balance-updated"));
+            window.dispatchEvent(new Event("betkiing:balance-updated"));
+            router.refresh();
+          }}
+        />
       )}
     </div>
   );

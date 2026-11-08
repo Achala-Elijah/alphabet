@@ -1940,6 +1940,35 @@ video {
 .win-ticket .win-celebration-meta dt { color: #8a8d94; }
 .win-ticket .win-celebration-meta dd { color: #17181d; }
 .win-ticket .win-celebration-meta .is-gold dd { color: #ed1742; font-size: 13px; }
+.naira-overlay { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; padding: 16px; background: rgba(0,0,0,.78); backdrop-filter: blur(4px); animation: win-fade .18s ease; }
+.naira-card { position: relative; width: min(440px, 100%); max-height: 90dvh; overflow-y: auto; padding: 22px 18px 18px; border: 1px solid #393a42; border-radius: 18px; background: #17181d; color: #fff; box-shadow: 0 24px 60px rgba(0,0,0,.6); animation: win-modal-pop .3s cubic-bezier(.2,1.2,.4,1); }
+.naira-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #33343b; border-radius: 50%; background: rgba(255,255,255,.06); color: #d8dbe0; cursor: pointer; }
+.naira-card .modal-eyebrow { display: block; margin-bottom: 5px; color: #ff3b5c; font-size: 10px; font-weight: 800; letter-spacing: 1.6px; }
+.naira-card h2 { margin: 0 0 8px; font-size: 18px; }
+.naira-card > p { margin: 0 0 14px; font-size: 12px; line-height: 1.6; color: #b6b9be; }
+.naira-note { font-size: 12px; color: #9d9fa8; }
+.naira-opay-box { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 14px; border: 1px solid #33343b; border-radius: 12px; background: #101114; }
+.naira-opay-box div { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; }
+.naira-opay-box span { color: #8a8d94; }
+.naira-opay-box strong { color: #fff; letter-spacing: .5px; }
+.naira-opay-box button { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; border: 1px solid #33343b; border-radius: 8px; background: #24252b; color: #fff; font-size: 11px; font-weight: 700; cursor: pointer; }
+.naira-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 11px; font-weight: 700; color: #c5c6cb; }
+.naira-field input { height: 44px; padding: 0 12px; border: 1px solid #33343b; border-radius: 10px; background: #101114; color: #fff; font-size: 14px; }
+.naira-field input[type="file"] { height: auto; padding: 10px; font-size: 12px; }
+.naira-field small { font-size: 10px; font-weight: 500; color: #8a8d94; }
+.naira-preview { width: 100%; max-height: 220px; object-fit: contain; margin-bottom: 12px; border: 1px solid #33343b; border-radius: 10px; background: #101114; }
+.naira-card .modal-actions { display: flex; gap: 10px; }
+.naira-card .modal-actions button { flex: 1; min-height: 46px; justify-content: center; }
+.naira-claim { padding: 16px 20px; border-top: 1px solid #f0f1f3; }
+.naira-claim-main { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.naira-claim-amount { margin-left: auto; font-size: 16px; color: #17181d; }
+.naira-claim-meta { display: flex; flex-wrap: wrap; gap: 16px; margin: 10px 0 0; }
+.naira-claim-meta div { display: flex; flex-direction: column; gap: 2px; }
+.naira-claim-meta dt { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #92949c; }
+.naira-claim-meta dd { margin: 0; font-size: 11px; color: #33343d; }
+.naira-screenshot-link { display: inline-flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 11px; font-weight: 700; color: #3845a8; text-decoration: none; }
+.naira-screenshot { width: min(320px, 100%); max-height: 240px; object-fit: contain; border: 1px solid #e4e5e9; border-radius: 10px; background: #fafafb; }
+.naira-claim-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .customer-bet-selection { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
 .customer-bet-selection:hover { border-color: #4d5a52; }
 .odds-popup-overlay { position: fixed; inset: 0; z-index: 150; display: grid; place-items: center; padding: 16px; background: rgba(0,0,0,.78); backdrop-filter: blur(4px); animation: win-fade .18s ease; }
