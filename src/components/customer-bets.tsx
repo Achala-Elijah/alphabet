@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock3, History, RefreshCw, Ticket, Check, X, Hourglass, ChevronRight, Trophy } from "lucide-react";
+import { Clock3, History, RefreshCw, Ticket, Check, Lock, X, Hourglass, ChevronRight, Trophy } from "lucide-react";
 import WinCelebration, { type WinCelebrationBet } from "@/components/win-celebration";
 import { currencySymbol } from "@/lib/currency";
 
@@ -255,12 +255,12 @@ function OddsPopup({ bet, selectionIndex, onClose, onChanged }: OddsPopupProps) 
                   <button
                     key={option}
                     type="button"
-                    className={isCurrent ? "is-current" : ""}
+                    className={`${isCurrent ? "is-current" : ""}${finished ? " is-locked" : ""}`}
                     disabled={saving || finished}
                     onClick={() => void pick(market, option, odds)}
                   >
                     <span>{option}</span>
-                    <strong>{odds}</strong>
+                    <strong>{finished ? <Lock size={15} /> : odds}</strong>
                     {isCurrent && <small>current pick</small>}
                   </button>
                 );

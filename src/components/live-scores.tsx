@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, RefreshCw, Ticket, X, Share2, Copy, CheckCheck } from "lucide-react";
+import { Check, Lock, RefreshCw, Ticket, X, Share2, Copy, CheckCheck } from "lucide-react";
 import { readBetSlip, writeBetSlip, serializeBetSlipForCode, deserializeBetSlipFromCode, normalizeBookingCode, isValidBookingCode, formatBookingCode, CODE_LENGTH, ADD_SELECTION_EVENT, type QuickSelection, type BetSlipSelection, type BetSlipMode } from "@/lib/bet-slip";
 import { isShownOnSite } from "@/lib/sports-data";
 import { fuzzyScore } from "@/lib/fuzzy-search";
@@ -124,6 +124,29 @@ function matchStatus(match: SportScoreMatch) {
         ? (match.status_text && /^\d/.test(match.status_text) ? match.status_text : "Live")
         : "Upcoming";
   return { isLive: normalized === "live", isFinished: normalized === "finished" || normalized === "cancelled", label };
+}
+
+/**
+ * True when a single odd's outcome has already occurred live, so the button
+ * must lock even though the match is not finished yet — e.g. Over 2.5 is
+ * already won at 3–0, and Under 2.5 is already lost at 3–0. Totals markets
+ * are decided from the current total; result/handicap markets stay open
+ * until full time because a draw/win can still change.
+ */
+function isOddAlreadyDecided(match: SportScoreMatch, market: string, option: string): boolean {
+  const { isLive } = matchStatus(match);
+  if (!isLive) return false;
+  if (typeof match.home_score !== "number" || typeof match.away_score !== "number") return false;
+  const total = match.home_score + match.away_score;
+  const thresholdMatch = option.match(/(\d+(?:\.\d+)?)/);
+  const threshold = thresholdMatch ? Number(thresholdMatch[1]) : null;
+  if (threshold === null) return false;
+  const lower = option.toLowerCase();
+  if (["o/u", "totals", "total games", "total sets"].includes(market.toLowerCase())) {
+    if (lower.startsWith("over")) return total > threshold; // already won
+    if (lower.startsWith("under")) return total > threshold; // already lost
+  }
+  return false;
 }
 
 /** Market order used by the match detail screen — the classic sportsbook
@@ -781,10 +804,11 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
                 const betKey = `${matchKey}-${market}-${option}`;
                 const selected = Boolean(selectedBets[betKey]);
                 const odds = getOdds(match, market, option);
+                const decided = isFinished || isOddAlreadyDecided(match, market, option);
                 return (
-                  <button key={option} disabled={isFinished} className={selected ? "is-selected" : ""} onClick={() => toggleBet(betKey, match, option, odds)}>
+                  <button key={option} disabled={decided} className={`${selected ? "is-selected" : ""}${decided ? " is-locked" : ""}`} onClick={() => toggleBet(betKey, match, option, odds)}>
                     <span>{option}</span>
-                    <strong>{selected ? <Check size={14} /> : odds}</strong>
+                    <strong>{selected ? <Check size={14} /> : decided ? <Lock size={16} /> : odds}</strong>
                   </button>
                 );
               })}
@@ -831,15 +855,16 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
                         const betKey = `${detailKey}-${marketName}-${option}`;
                         const selected = Boolean(selectedBets[betKey]);
                         const odds = getOdds(detailMatch, marketName, option);
+                        const decided = detailStatus.isFinished || isOddAlreadyDecided(detailMatch, marketName, option);
                         return (
                           <button
                             key={option}
-                            disabled={detailStatus.isFinished}
-                            className={selected ? "is-selected" : ""}
+                            disabled={decided}
+                            className={`${selected ? "is-selected" : ""}${decided ? " is-locked" : ""}`}
                             onClick={() => toggleBet(betKey, detailMatch, option, odds, marketName)}
                           >
                             <span>{option}</span>
-                            <strong>{selected ? <Check size={14} /> : odds}</strong>
+                            <strong>{selected ? <Check size={14} /> : decided ? <Lock size={16} /> : odds}</strong>
                           </button>
                         );
                       })}
