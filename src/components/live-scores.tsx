@@ -134,15 +134,39 @@ function matchStatus(match: SportScoreMatch) {
  * until full time because a draw/win can still change.
  */
 function isOddAlreadyDecided(match: SportScoreMatch, market: string, option: string): boolean {
-  const { isLive } = matchStatus(match);
+  const { isLive, isFinished } = matchStatus(match);
+  if (isFinished) return true;
   if (!isLive) return false;
-  if (typeof match.home_score !== "number" || typeof match.away_score !== "number") return false;
-  const total = match.home_score + match.away_score;
+  const homeScore = match.home_score;
+  const awayScore = match.away_score;
+  const minute = match.current_minute;
+  const marketLower = market.toLowerCase();
+
+  // First-half markets are decided at half-time — once the second half
+  // starts, the outcome has already occurred.
+  if ((marketLower === "1st half o/u" || marketLower === "1st half") && typeof minute === "number" && minute > 45) {
+    return true;
+  }
+
+  if (typeof homeScore !== "number" || typeof awayScore !== "number") return false;
+  const total = homeScore + awayScore;
+
+  // Correct Score: an exact scoreline below the current score can never
+  // happen anymore (goals cannot be un-scored).
+  if (marketLower === "correct score") {
+    const exact = option.match(/^(\d)\s*-\s*(\d)$/);
+    if (exact) return Number(exact[1]) < homeScore || Number(exact[2]) < awayScore;
+    if (option.toLowerCase() === "any other home win") return total > 8;
+    if (option.toLowerCase() === "any other draw") return homeScore > 4 || awayScore > 4;
+    if (option.toLowerCase() === "any other away win") return total > 8;
+    return false;
+  }
+
   const thresholdMatch = option.match(/(\d+(?:\.\d+)?)/);
   const threshold = thresholdMatch ? Number(thresholdMatch[1]) : null;
   if (threshold === null) return false;
   const lower = option.toLowerCase();
-  if (["o/u", "totals", "total games", "total sets"].includes(market.toLowerCase())) {
+  if (["o/u", "totals", "total games", "total sets"].includes(marketLower)) {
     if (lower.startsWith("over")) return total > threshold; // already won
     if (lower.startsWith("under")) return total > threshold; // already lost
   }

@@ -7,38 +7,12 @@
 - Local:         http://localhost:3001
 - Network:       http://10.83.109.104:3001
 - Environments: .env
-✓ Ready in 506ms
-✓ Running next.config.ts took 42ms
+✓ Ready in 2.3s
+✓ Running next.config.ts took 100ms
 
-○ Compiling /api/sports/live/route ...
- GET /api/bets 200 in 907ms (next.js: 371ms, application-code: 536ms)
- GET /api/sports/live?sport=football 200 in 910ms (next.js: 371ms, application-code: 539ms)
- GET / 200 in 933ms (next.js: 371ms, application-code: 562ms)
- GET /sub-admin/naira-deposits 200 in 3.5s (next.js: 1334ms, proxy.ts: 1783ms, application-code: 414ms)
- GET /account 200 in 5.4s (next.js: 2.2s, proxy.ts: 872ms, application-code: 2.3s)
- GET /api/auth/customer 200 in 417ms (next.js: 64ms, application-code: 352ms)
- GET /api/auth/customer 200 in 597ms (next.js: 64ms, application-code: 533ms)
- GET /api/auth/customer 200 in 237ms (next.js: 1.4ms, application-code: 235ms)
- GET /api/staff/profile 200 in 839ms (next.js: 65ms, application-code: 775ms)
- GET /api/staff/profile 200 in 868ms (next.js: 65ms, application-code: 803ms)
- GET /api/auth/customer 200 in 241ms (next.js: 0.9ms, application-code: 240ms)
- GET /api/auth/customer 200 in 218ms (next.js: 1.0ms, application-code: 217ms)
- GET /api/bets 200 in 936ms (next.js: 6ms, application-code: 930ms)
- GET /api/sports/live?sport=football 200 in 1818ms (next.js: 64ms, application-code: 1754ms)
- GET /api/sports/live?sport=football&featured=true 200 in 1819ms (next.js: 64ms, application-code: 1754ms)
- GET /api/sports/live?sport=football 200 in 1819ms (next.js: 64ms, application-code: 1755ms)
- GET /api/sports/live?sport=football&featured=true 200 in 1819ms (next.js: 64ms, application-code: 1755ms)
- GET / 200 in 550ms (next.js: 98ms, application-code: 452ms)
- GET /api/auth/customer 200 in 548ms (next.js: 1.6ms, application-code: 547ms)
- GET /api/auth/customer 200 in 562ms (next.js: 1.8ms, application-code: 560ms)
- GET /api/auth/customer 200 in 710ms (next.js: 0.8ms, application-code: 709ms)
- GET /sub-admin/naira-deposits 200 in 1239ms (next.js: 6ms, proxy.ts: 1178ms, application-code: 54ms)
- GET /api/staff/naira-deposits 200 in 2.9s (next.js: 65ms, application-code: 2.9s)
- GET /api/staff/naira-deposits 200 in 3.0s (next.js: 65ms, application-code: 2.9s)
- GET /api/auth/customer 200 in 562ms (next.js: 0.8ms, application-code: 561ms)
- GET /api/auth/customer 200 in 590ms (next.js: 1.9ms, application-code: 588ms)
- GET /api/auth/customer 200 in 347ms (next.js: 1.1ms, application-code: 346ms)
- GET /api/auth/customer 200 in 341ms (next.js: 0.9ms, application-code: 340ms)
- GET /api/auth/customer 200 in 276ms (next.js: 1.0ms, application-code: 275ms)
- GET /api/staff/profile 200 in 952ms (next.js: 1.1ms, application-code: 951ms)
- GET /api/staff/profile 200 in 1131ms (next.js: 1.2ms, application-code: 1130ms)
+○ Compiling /sub-admin/login/page ...
+ GET /sub-admin/login 200 in 8.5s (next.js: 7.2s, proxy.ts: 940ms, application-code: 372ms)
+ GET /account 200 in 10.7s (next.js: 7.9s, proxy.ts: 242ms, application-code: 2.6s)
+ GET /api/auth/customer 200 in 680ms (next.js: 171ms, application-code: 509ms)
+ GET /api/auth/customer 200 in 1784ms (next.js: 171ms, application-code: 1613ms)
+ GET /api/auth/customer 200 in 1787ms (next.js: 172ms, application-code: 1616ms)
