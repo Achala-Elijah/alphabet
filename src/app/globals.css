@@ -1956,6 +1956,8 @@ video {
 .naira-field input { height: 44px; padding: 0 12px; border: 1px solid #33343b; border-radius: 10px; background: #101114; color: #fff; font-size: 14px; }
 .naira-field input[type="file"] { height: auto; padding: 10px; font-size: 12px; }
 .naira-field small { font-size: 10px; font-weight: 500; color: #8a8d94; }
+.naira-upload { display: block; cursor: pointer; }
+.naira-upload-btn { display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 12px; border: 1px dashed #4a4b54; border-radius: 10px; background: #101114; color: #fff; font-size: 12px; font-weight: 700; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .naira-preview { width: 100%; max-height: 220px; object-fit: contain; margin-bottom: 12px; border: 1px solid #33343b; border-radius: 10px; background: #101114; }
 .naira-card .modal-actions { display: flex; gap: 10px; }
 .naira-card .modal-actions button { flex: 1; min-height: 46px; justify-content: center; }

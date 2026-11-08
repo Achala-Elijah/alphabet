@@ -115,10 +115,14 @@ export default function NairaDepositPopup({ onClose, onSubmitted }: { onClose: (
               <span>Transfer reference (optional)</span>
               <input placeholder="OPay transaction reference" value={reference} onChange={(event) => setReference(event.target.value)} disabled={busy} />
             </label>
-            <label className="naira-field">
-              <span>Screenshot of transfer</span>
-              <input type="file" accept="image/*" onChange={(event) => pickScreenshot(event.target.files?.[0] || null)} disabled={busy} />
-            </label>
+            <div className="naira-field">
+              <span>Upload screenshot of payment</span>
+              <label className="naira-upload">
+                <input type="file" accept="image/*" onChange={(event) => pickScreenshot(event.target.files?.[0] || null)} disabled={busy} hidden />
+                <span className="naira-upload-btn">{screenshot ? screenshot.name : "Upload screenshot of payment"}</span>
+              </label>
+              <small>PNG or JPG screenshot of your OPay transfer, max 2 MB.</small>
+            </div>
             {preview && <img className="naira-preview" src={preview} alt="Transfer screenshot preview" />}
             {error && <p className="admin-inline-error" role="alert">{error}</p>}
             <div className="modal-actions">
