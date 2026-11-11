@@ -24,6 +24,8 @@ export default function NairaDepositsPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Screenshot viewer pop-up — admin clicks the screenshot to open it, X closes.
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
 
   async function load() {
     try {
@@ -38,6 +40,10 @@ export default function NairaDepositsPage() {
   }
 
   useEffect(() => { void load(); }, []);
+
+  async function closeLightbox() {
+    setLightbox(null);
+  }
 
   async function review(deposit: NairaDeposit, action: "approve" | "reject") {
     if (busyId) return;
@@ -85,10 +91,10 @@ export default function NairaDepositsPage() {
           {deposit.reviewed_at && <div><dt>Reviewed</dt><dd>{new Date(deposit.reviewed_at).toLocaleString()}</dd></div>}
         </dl>
         {deposit.screenshot_data && (
-          <a className="naira-screenshot-link" href={deposit.screenshot_data} target="_blank" rel="noreferrer">
+          <button type="button" className="naira-screenshot-link" onClick={() => setLightbox({ src: deposit.screenshot_data!, alt: `Transfer screenshot for ${deposit.id}` })}>
             <img className="naira-screenshot" src={deposit.screenshot_data} alt="Transfer screenshot" loading="lazy" />
             <span>View full screenshot</span>
-          </a>
+          </button>
         )}
         {deposit.status === "pending" && (
           <div className="naira-claim-actions">
@@ -114,6 +120,15 @@ export default function NairaDepositsPage() {
         {reviewed.length === 0 && <p className="empty-table">Nothing reviewed yet.</p>}
         {reviewed.map(renderDeposit)}
       </section>
+
+      {lightbox && (
+        <div className="naira-lightbox" role="dialog" aria-modal="true" aria-label="Transfer screenshot" onClick={(event) => { if (event.target === event.currentTarget) closeLightbox(); }}>
+          <div className="naira-lightbox-inner">
+            <button type="button" className="naira-lightbox-close" onClick={closeLightbox} aria-label="Close"><X size={20} /></button>
+            <img className="naira-lightbox-img" src={lightbox.src} alt={lightbox.alt} />
+          </div>
+        </div>
+      )}
     </AdminShell>
   );
 }

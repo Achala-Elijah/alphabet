@@ -17,7 +17,7 @@ const ESPN_BASE = "https://site.web.api.espn.com/apis/site/v2/sports/soccer";
 // Hard-coded TTLs (per product decision — not configurable via env):
 // today's fixtures go stale fast, tomorrow's changes slowly.
 const DATE_TTL_MS = 16 * 60 * 1000;
-const NEXT_TTL_MS = 6 * 60 * 60 * 1000;
+const NEXT_TTL_MS = 16 * 60 * 1000;
 
 let cacheClientInstance: SupabaseClient | null | undefined;
 
@@ -191,7 +191,7 @@ async function lastFetchedData(db: SupabaseClient): Promise<SportsMatch[]> {
 }
 
 /**
- * Today's fixtures refresh every 16 minutes, tomorrow's every 6 hours —
+ * Today's fixtures and tomorrow's both refresh every 16 minutes —
  * both lazily, only when a request arrives after the TTL has lapsed.
  * ESPN's public API needs no key, so there is no quota to guard.
  */

@@ -1968,7 +1968,15 @@ video {
 .naira-claim-meta div { display: flex; flex-direction: column; gap: 2px; }
 .naira-claim-meta dt { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #92949c; }
 .naira-claim-meta dd { margin: 0; font-size: 11px; color: #33343d; }
-.naira-screenshot-link { display: inline-flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 11px; font-weight: 700; color: #3845a8; text-decoration: none; }
+.naira-screenshot-link { display: inline-flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 11px; font-weight: 700; color: #3845a8; text-decoration: none; cursor: pointer; }
+.naira-screenshot-link button { width: 100%; height: 100%; padding: 0; border: none; background: transparent; color: inherit; font-size: inherit; font-weight: inherit; cursor: pointer; }
+.naira-screenshot-link:focus-visible { outline: 2px solid #3845a8; outline-offset: 2px; }
+
+/* Screenshot lightbox overlay */
+.naira-lightbox { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px; background: rgba(0,0,0,.92); backdrop-filter: blur(6px); animation: win-fade .18s ease; }
+.naira-lightbox-inner { position: relative; max-width: 95vw; max-height: 95vh; }
+.naira-lightbox-close { position: absolute; top: -56px; right: 0; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #33343b; border-radius: 50%; background: rgba(255,255,255,.08); color: #fff; cursor: pointer; }
+.naira-lightbox-img { display: block; max-width: 95vw; max-height: 95vh; object-fit: contain; border-radius: 12px; box-shadow: 0 24px 60px rgba(0,0,0,.6); }
 .naira-screenshot { width: min(320px, 100%); max-height: 240px; object-fit: contain; border: 1px solid #e4e5e9; border-radius: 10px; background: #fafafb; }
 .naira-claim-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .customer-bet-selection { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
