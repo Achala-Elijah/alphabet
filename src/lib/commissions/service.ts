@@ -1,15 +1,29 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { COMMISSION_RATE, normalizeCurrency } from "@/lib/limits";
 
+export type CommissionRow = {
+  id: string;
+  user_id: string;
+  sub_admin_id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  reference: string | null;
+  deposit_reference: string | null;
+  type: string;
+  created_at: string;
+};
+
 /**
  * Commissions service — 65% of every referral deposit goes to the sub-admin.
  *
  * When a customer who joined via a sub-admin's referral link deposits:
  *   - User's wallet is credited 100% of the deposit (in paystack service).
- *   - Sub-admin earns ADDITIONAL 65% of that deposit on top.
+ *   - Sub-admin earns ADDITIONAL 65% of that deposit on top, recorded in the
+ *     commissions ledger (NOT credited to the staff wallet balance).
  *   - The commission is hidden — the user never sees it.
  *
- * Example: referred user deposits GH₵ 100 → user +GH₵ 100, sub-admin +GH₵ 65.
+ * Example: referred user deposits GH₵ 100 → user +GH₵ 100, commission +GH₵ 65 (ledger only).
  *
  * Trigger points:
  *   1. At deposit settle time (`settleDeposit` in payments/service.ts calls
@@ -101,22 +115,9 @@ export async function handleDepositCommission(args: {
     return { amount: 0, subAdminId };
   }
 
-  // Credit the sub-admin staff wallet (additional, hidden).
-  const { data: profile } = await db.from("profiles").select("balance").eq("id", subAdminId).maybeSingle();
-  const balance = Number((profile as { balance: number } | null)?.balance || 0);
-  const next = Math.round((balance + commission) * 100) / 100;
-  const { error: updateError } = await db
-    .from("profiles")
-    .update({ balance: next, updated_at: new Date().toISOString() })
-    .eq("id", subAdminId);
-
-  if (updateError) {
-    // Roll back the commission row so a retry can re-credit.
-    await db.from("commissions").delete().eq("reference", `DEPCOM-${depositReference}`);
-    console.error(`Commission wallet credit failed for ${depositReference}:`, updateError.message);
-    return { amount: 0, subAdminId };
-  }
-
+  // The commission is recorded in the commissions ledger only — it is
+  // intentionally NOT added to the staff wallet balance. The balance is
+  // reserved for in-app activity (betting, deposits, withdrawals, etc.).
   return { amount: commission, subAdminId };
 }
 
@@ -183,16 +184,47 @@ export async function settleAllCommissions(): Promise<{
 }
 
 /** Total deposit commissions earned by a sub-admin. */
-export async function getSubAdminEarnings(subAdminId: string): Promise<{ count: number; total: number }> {
+export async function getSubAdminEarnings(subAdminId: string, from?: string, to?: string): Promise<{ count: number; total: number }> {
   const db = commissionsClient();
-  const { data } = await db
+  let query = db
     .from("commissions")
     .select("amount")
     .eq("sub_admin_id", subAdminId)
     .eq("status", "completed");
+  if (from) query = query.gte("created_at", `${from}T00:00:00`);
+  if (to) query = query.lte("created_at", `${to}T23:59:59.999`);
+  const { data } = await query;
   const rows = (data || []) as Array<{ amount: number }>;
   return {
     count: rows.length,
     total: Math.round(rows.reduce((t, r) => t + Number(r.amount || 0), 0) * 100) / 100
   };
+}
+
+/** Individual commission rows for a sub-admin, with optional date range. */
+export async function getSubAdminCommissionRows(
+  subAdminId: string,
+  from?: string,
+  to?: string
+): Promise<{
+  rows: CommissionRow[];
+  total_count: number;
+  total_amount: number;
+}> {
+  const db = commissionsClient();
+  let query = db
+    .from("commissions")
+    .select(
+      "id, user_id, sub_admin_id, amount, currency, status, reference, deposit_reference, type, created_at"
+    )
+    .eq("sub_admin_id", subAdminId)
+    .eq("status", "completed");
+  if (from) query = query.gte("created_at", `${from}T00:00:00`);
+  if (to) query = query.lte("created_at", `${to}T23:59:59.999`);
+  query = query.order("created_at", { ascending: false });
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  const rows = (data || []) as CommissionRow[];
+  const total = rows.reduce((t, r) => t + Number(r.amount || 0), 0);
+  return { rows, total_count: rows.length, total_amount: Math.round(total * 100) / 100 };
 }

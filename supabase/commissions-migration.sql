@@ -4,14 +4,16 @@
 -- Rule: when a customer who joined via a sub-admin's referral link deposits,
 --   - The user is credited 100% of the deposit (in their own wallet).
 --   - The sub-admin earns an ADDITIONAL 65% of that deposit on top,
---     hidden from the user. The user's balance is never reduced.
+--     hidden from the user. The user's balance is never reduced. The
+--     commission is recorded in this ledger only and is NOT added to the
+--     staff wallet balance (the balance is reserved for in-app activity).
 --
 -- Example: referred user deposits GH₵ 100 → user +GH₵ 100, sub-admin +GH₵ 65.
 --
 -- How it's paid:
 --   - At deposit settle time, `handleDepositCommission()` inserts a row
---     with reference = 'DEPCOM-' || deposit_reference, then credits the
---     sub-admin's staff wallet (profiles.balance).
+--     with reference = 'DEPCOM-' || deposit_reference. No staff wallet
+--     balance is changed.
 --   - The UNIQUE(reference) constraint makes it idempotent: one commission
 --     per deposit, ever. Re-running the sweep is safe.
 --   - Admin backfill sweep: POST /api/staff/commissions pays any pending

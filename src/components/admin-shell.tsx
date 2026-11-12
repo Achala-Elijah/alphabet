@@ -28,6 +28,7 @@ const subAdminLinks: NavLink[] = [
   { label: "Manage matches", href: "/sub-admin/matches", Icon: CalendarDays },
   { label: "Open bets", href: "/sub-admin/open-bets", Icon: Ticket },
   { label: "My sales", href: "/sub-admin/transactions", Icon: ArrowLeftRight },
+  { label: "Commissions", href: "/sub-admin/commissions", Icon: HandCoins },
   { label: "Wallet", href: "/sub-admin/wallet", Icon: Wallet },
   { label: "Book & share", href: "/sub-admin/referral", Icon: LinkIcon }
 ];
