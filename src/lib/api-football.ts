@@ -9,7 +9,14 @@ const DEFAULT_LEAGUES = [
   "fra.1", // France Ligue 1
   "uefa.champions", // UEFA Champions League
   "uefa.europa", // UEFA Europa League
-  "usa.1" // Major League Soccer
+  "usa.1", // Major League Soccer
+  "uefa.nations", // UEFA Nations League — plays during the international break
+  "fifa.friendly", // International friendlies — also play during the break
+  "esp.2", // Spain Segunda División — keeps playing most international windows
+  "esp.copa_del_rey", // Copa del Rey midweek ties
+  "mex.1", // Liga MX
+  "bra.1", // Brasileirão
+  "eng.w.1" // Women's Super League
 ];
 
 const ESPN_BASE = "https://site.web.api.espn.com/apis/site/v2/sports/soccer";
