@@ -2,11 +2,11 @@
 > alphabet-sportsbook@1.0.0 dev
 > next dev --webpack
 
-⚠ Port 3000 is in use by process 12788, using available port 3001 instead.
+⚠ Port 3000 is in use by process 7208, using available port 3001 instead.
 ▲ Next.js 16.4.4 (webpack)
 - Local:         http://localhost:3001
 - Network:       http://10.83.109.104:3001
 - Environments: .env
-✓ Ready in 1023ms
-✓ Running next.config.ts took 78ms
+✓ Ready in 573ms
+✓ Running next.config.ts took 41ms
 

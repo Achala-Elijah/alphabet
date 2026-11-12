@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useEffect, useRef, useState } from "react";
-import { LayoutDashboard, Users, ArrowLeftRight, Menu, X, ArrowLeft, Ticket, UserPlus, Link as LinkIcon, ArrowUpCircle, SlidersHorizontal, CalendarDays, Wallet, HandCoins, Banknote, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Users, ArrowLeftRight, Menu, X, ArrowLeft, Ticket, UserPlus, Link as LinkIcon, ArrowUpCircle, SlidersHorizontal, CalendarDays, Wallet, HandCoins, Banknote, Coins, type LucideIcon } from "lucide-react";
 
 type NavLink = { label: string; href: string; Icon: LucideIcon; external?: boolean };
 
@@ -13,6 +13,7 @@ const adminLinks: NavLink[] = [
   { label: "Users", href: "/sub-admin/users", Icon: Users },
   { label: "Manage matches", href: "/sub-admin/matches", Icon: CalendarDays },
   { label: "Naira Deposits", href: "/sub-admin/naira-deposits", Icon: Banknote },
+  { label: "Naira Withdrawals", href: "/sub-admin/naira-withdrawals", Icon: Coins },
   { label: "Open bets", href: "/sub-admin/open-bets", Icon: Ticket },
   { label: "Sales", href: "/sub-admin/transactions", Icon: ArrowLeftRight },
   { label: "Withdrawals", href: "/sub-admin/withdrawals", Icon: ArrowUpCircle },

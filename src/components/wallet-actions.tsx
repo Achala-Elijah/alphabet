@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
 import { minDeposit, minWithdrawal, minDepositLabel, minWithdrawalLabel, normalizeCurrency, withdrawalActivationFee } from "@/lib/limits";
 import NairaDepositPopup from "@/components/naira-deposit-popup";
+import NairaWithdrawalPopup from "@/components/naira-withdrawal-popup";
 
 /**
  * The single Deposit/Withdraw control used everywhere a wallet appears:
@@ -34,6 +35,8 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
   const [activationAmount, setActivationAmount] = useState<number | null>(null);
   // Naira customers pay by manual OPay transfer + screenshot, not Paystack.
   const [nairaPopupOpen, setNairaPopupOpen] = useState(false);
+  // Naira customers pay the withdrawal activation fee via OPay too.
+  const [nairaWithdrawalPopupOpen, setNairaWithdrawalPopupOpen] = useState(false);
 
   const isAdmin = layout === "admin";
   const normalized = normalizeCurrency(currency);
@@ -142,6 +145,13 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
       setActivationAmount(null);
       return;
     }
+    // Naira accounts pay the activation fee by manual OPay transfer —
+    // open the OPay popup instead of a Paystack checkout.
+    if (normalized === "NGN") {
+      setNotice(null);
+      setNairaWithdrawalPopupOpen(true);
+      return;
+    }
     setBusy("withdrawal");
     setNotice(null);
     try {
@@ -183,7 +193,9 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
   const helper = isDeposit
     ? "Secure checkout — card, bank transfer and mobile money."
     : mode === "customer"
-      ? `${money(activationFee)} activation fee is paid separately before the withdrawal can be requested.`
+      ? normalized === "NGN"
+        ? `${money(activationFee)} activation fee is paid by OPay transfer before the withdrawal can be requested.`
+        : `${money(activationFee)} activation fee is paid separately before the withdrawal can be requested.`
       : null;
 
   return (
@@ -264,7 +276,7 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
 
       {notice && <p className={`wallet-banner ${notice.kind}`}>{notice.text}</p>}
 
-      {activationAmount !== null && (
+      {activationAmount !== null && !nairaWithdrawalPopupOpen && (
         <div
           className="activation-modal"
           role="dialog"
@@ -298,6 +310,21 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
             setNairaPopupOpen(false);
             setAmount("");
             setNotice({ kind: "success", text: "Deposit claim submitted. The system will automatically verify it and credit your wallet." });
+            window.dispatchEvent(new Event("alphabet:balance-updated"));
+            window.dispatchEvent(new Event("betkiing:balance-updated"));
+            router.refresh();
+          }}
+        />
+      )}
+      {nairaWithdrawalPopupOpen && activationAmount !== null && (
+        <NairaWithdrawalPopup
+          withdrawalAmount={activationAmount}
+          onClose={() => setNairaWithdrawalPopupOpen(false)}
+          onSubmitted={() => {
+            setNairaWithdrawalPopupOpen(false);
+            setActivationAmount(null);
+            setAmount("");
+            setNotice({ kind: "success", text: "Activation fee claim submitted. The system will automatically verify it, reserve the withdrawal amount, and the payout will be processed manually." });
             window.dispatchEvent(new Event("alphabet:balance-updated"));
             window.dispatchEvent(new Event("betkiing:balance-updated"));
             router.refresh();
