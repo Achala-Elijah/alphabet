@@ -1,5 +1,6 @@
 import AdminShell from "@/components/admin-shell";
 import TransactionFlagActions from "@/components/transaction-flag-actions";
+import AdminBetSlipTable from "@/components/admin-bet-slip";
 import { ArrowLeft, Mail, Phone, UserRound, WalletCards } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -44,13 +45,20 @@ export default async function UserDetailsPage({ params }: PageProps) {
       <ActivityTable title={`All transaction history (${transactionRows.length})`} empty="No transactions found." headers={isAdmin ? ["Reference", "Type", "Amount", "Status", "Date", "Actions"] : ["Reference", "Type", "Amount", "Status", "Date"]}>
         {transactionRows.map((transaction) => <tr key={transaction.id}><td className="id-cell">{transaction.reference || transaction.id.slice(0, 8).toUpperCase()}</td><td>{transaction.type.replaceAll("_", " ")}</td><td className="amount-cell">{formatCustomerAmount(transaction.amount, currency)}</td><td><span className={`status ${transaction.status.toLowerCase()}`}>{transaction.status}</span></td><td>{new Date(transaction.created_at).toLocaleString()}</td>{isAdmin && <td className="transaction-actions-cell"><TransactionFlagActions transaction={transaction} isAdmin={isAdmin} accountName={user.username} /></td>}</tr>)}
       </ActivityTable>
-      <ActivityTable title={`Bet history (${betRows.length})`} empty="No bets found." headers={["Bet ID", "Stake", "Potential return", "Status", "Placed"]}>
-        {betRows.map((bet) => <tr key={bet.id}><td className="id-cell">{bet.id.slice(0, 8).toUpperCase()}</td><td className="amount-cell">{formatCustomerAmount(bet.stake, currency)}</td><td className="amount-cell">{formatCustomerAmount(bet.potential_return, currency)}</td><td><span className={`status ${bet.status.toLowerCase()}`}>{bet.status}</span></td><td>{new Date(bet.placed_at).toLocaleString()}</td></tr>)}
-      </ActivityTable>
+      <AdminBetSlipTable
+        title={`Bet history (${betRows.length})`}
+        bets={betRows}
+        currency={currency}
+        empty="No bets found."
+      />
     </div>
-    <ActivityTable title={`Open bets (${openBets.length})`} empty="No open bets found." headers={["Bet ID", "Stake", "Potential return", "Selections", "Placed"]}>
-      {openBets.map((bet) => <tr key={bet.id}><td className="id-cell">{bet.id.slice(0, 8).toUpperCase()}</td><td className="amount-cell">{formatCustomerAmount(bet.stake, currency)}</td><td className="amount-cell">{formatCustomerAmount(bet.potential_return, currency)}</td><td>{Array.isArray(bet.selections) ? bet.selections.length : "—"}</td><td>{new Date(bet.placed_at).toLocaleString()}</td></tr>)}
-    </ActivityTable>
+    <AdminBetSlipTable
+      title={`Open bets (${openBets.length})`}
+      bets={openBets}
+      currency={currency}
+      empty="No open bets found."
+      showSelections
+    />
   </AdminShell>;
 }
 

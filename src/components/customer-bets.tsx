@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock3, History, RefreshCw, Ticket, Check, Lock, X, Hourglass, ChevronRight, Trophy } from "lucide-react";
+import { Clock3, History, RefreshCw, Ticket, Check, Lock, X, Hourglass, ChevronRight, Trophy, Trash2, Loader2 } from "lucide-react";
 import WinCelebration, { type WinCelebrationBet } from "@/components/win-celebration";
 import { currencySymbol } from "@/lib/currency";
 
@@ -17,7 +17,7 @@ type CustomerBet = {
 type SettledBet = { id: string; status: string; payout: number; stake: number; potential_return: number };
 
 type LegOutcome = "won" | "lost" | "pending";
-type LegState = { outcome: LegOutcome; home?: number | null; away?: number | null; statusText?: string };
+type LegState = { outcome: LegOutcome; home?: number | null; away?: number | null; statusText?: string; status?: string; started?: boolean };
 type FixtureInfo = { home_score?: number | null; away_score?: number | null; status?: string; status_text?: string; current_minute?: number | null };
 
 function fixtureStatus(fixture: FixtureInfo): "finished" | "cancelled" | "live" | "scheduled" {
@@ -51,11 +51,15 @@ async function fetchLegStates(bets: CustomerBet[]): Promise<Record<string, LegSt
       // Settled bets already have a server verdict — a won bet means every
       // leg landed, so tick them all when the local grader can't read them.
       if (outcome === "pending" && bet.status === "won") outcome = "won";
+      const classification = fixture ? fixtureStatus(fixture) : "scheduled";
+      const started = classification === "live" || classification === "finished";
       return {
         outcome,
         home: typeof fixture?.home_score === "number" ? fixture.home_score : null,
         away: typeof fixture?.away_score === "number" ? fixture.away_score : null,
-        statusText: fixture?.status_text
+        statusText: fixture?.status_text,
+        status: fixture?.status,
+        started
       };
     });
   }
@@ -288,6 +292,10 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
   // markets for that game so the pick can be changed.
   const [oddsTarget, setOddsTarget] = useState<{ bet: CustomerBet; selectionIndex: number } | null>(null);
 
+  // Delete-from-history flag — prevents multiple clicks while the request
+  // is in-flight and shows a spinner on the card.
+  const [deletingBetId, setDeletingBetId] = useState<string | null>(null);
+
   const money = (value: number) => `${currencySymbol(currency)} ${Number(value || 0).toFixed(2)}`;
 
   async function loadBets(options?: { quiet?: boolean }) {
@@ -324,6 +332,24 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
       setError(reason instanceof Error ? reason.message : "Unable to load bets.");
     } finally {
       if (!options?.quiet) setLoading(false);
+    }
+  }
+
+  // SportyBet-style: a settled bet can be removed from history by its owner.
+  // Open bets are never deletable — the server rejects them too.
+  async function removeSettledBet(bet: CustomerBet) {
+    if (deletingBetId === bet.id) return;
+    if (!window.confirm("Delete this settled bet from your history? This cannot be undone.")) return;
+    setDeletingBetId(bet.id);
+    try {
+      const response = await fetch(`/api/bets?id=${encodeURIComponent(bet.id)}`, { method: "DELETE" });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error || "Unable to delete this bet.");
+      setBets((current) => current.filter((b) => b.id !== bet.id));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to delete this bet.");
+    } finally {
+      setDeletingBetId(null);
     }
   }
 
@@ -415,7 +441,9 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
               {selections.map((selection, index) => {
                 const state = legs[index];
                 const outcome = state?.outcome || "pending";
-                const hasScore = typeof state?.home === "number" && typeof state?.away === "number";
+                // A match that has kicked off (live or finished) always shows a
+                // score — never a dash. If the cache has no update yet, 0:0.
+                const started = !!state?.started || (typeof state?.home === "number" && typeof state?.away === "number");
                 return (
                   <button
                     type="button"
@@ -431,9 +459,9 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
                         {outcome === "won" ? <Check size={12} /> : outcome === "lost" ? <X size={12} /> : <Hourglass size={12} />}
                         {outcome === "won" ? "won" : outcome === "lost" ? "lost" : "running"}
                       </span>
-                      {hasScore && (
+                      {started && (
                         <span className={`leg-score ${outcome === "pending" ? "is-live" : ""}`}>
-                          {state?.home} - {state?.away}
+                          {state?.home ?? 0} - {state?.away ?? 0}
                           {outcome !== "pending" ? <em>FT</em> : <em>{state?.statusText || "live"}</em>}
                         </span>
                       )}
@@ -454,6 +482,19 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
               <p className="customer-bet-loss"><X size={13} /> This bet lost — one or more selections did not win.</p>
             )}
             <small className="customer-bet-date">{new Date(bet.placed_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</small>
+            {bet.status !== "open" && tab === "history" && (
+              <div className="customer-bet-delete">
+                <button
+                  type="button"
+                  className="customer-bet-delete-button"
+                  onClick={() => void removeSettledBet(bet)}
+                  disabled={deletingBetId === bet.id}
+                  aria-label={`Delete bet ${bet.id.slice(0, 8).toUpperCase()} from history`}
+                >
+                  {deletingBetId === bet.id ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </article>

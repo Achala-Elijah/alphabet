@@ -758,7 +758,10 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
   const detailMatch = detailMatchIndex >= 0 ? visibleMatches[detailMatchIndex] : null;
   const detailStatus = detailMatch ? matchStatus(detailMatch) : null;
   const detailMinute = detailMatch && detailStatus?.isLive && typeof detailMatch.current_minute === "number" && detailMatch.current_minute > 0 ? `${detailMatch.current_minute}'` : null;
-  const detailHasScore = typeof detailMatch?.home_score === "number" && typeof detailMatch?.away_score === "number";
+  const detailStarted = detailStatus ? detailStatus.isLive || detailStatus.isFinished : false;
+  const detailHasScore = detailStarted || (typeof detailMatch?.home_score === "number" && typeof detailMatch?.away_score === "number");
+  const detailHome = typeof detailMatch?.home_score === "number" ? detailMatch.home_score : 0;
+  const detailAway = typeof detailMatch?.away_score === "number" ? detailMatch.away_score : 0;
   const detailMarketList = detailMatch ? detailMarkets(detailMatch) : [];
 
   return (
@@ -795,7 +798,12 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
         // "Upcoming", "Cancelled" — for every source, including manual ones.
         const { isLive, isFinished, label: statusLabel } = matchStatus(match);
         const minute = isLive && typeof match.current_minute === "number" && match.current_minute > 0 ? `${match.current_minute}'` : null;
-        const hasScore = typeof match.home_score === "number" && typeof match.away_score === "number";
+        // A match that has started (live or finished) always shows its score
+        // — if the cache has no update yet, fall back to 0:0, never a dash.
+        const started = isLive || isFinished;
+        const hasScore = started || (typeof match.home_score === "number" && typeof match.away_score === "number");
+        const displayHome = typeof match.home_score === "number" ? match.home_score : 0;
+        const displayAway = typeof match.away_score === "number" ? match.away_score : 0;
         const matchKey = matchKeyFor(match, index);
         return (
           <article className="sportscore-match" key={matchKey}>
@@ -819,8 +827,8 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
                 <span className="sportscore-team"><TeamLogo name={match.home} logo={match.home_logo} /><strong>{match.home || "Home team"}</strong></span>
                 <span className="sportscore-team"><TeamLogo name={match.away} logo={match.away_logo} /><strong>{match.away || "Away team"}</strong></span>
               </div>
-              <div className={`sportscore-score ${flashKey === matchKey ? "is-flash" : ""}`} aria-label={hasScore ? `${match.home_score} to ${match.away_score}` : "Score not available"}>
-                {hasScore ? <><span>{match.home_score}</span><span>:</span><span>{match.away_score}</span></> : <span>—</span>}
+              <div className={`sportscore-score ${flashKey === matchKey ? "is-flash" : ""}`} aria-label={hasScore ? `${displayHome} to ${displayAway}` : "Score not available"}>
+                {hasScore ? <><span>{displayHome}</span><span>:</span><span>{displayAway}</span></> : <span>—</span>}
               </div>
             </div>
             <div className={`sportscore-odds ${market === "Correct Score" ? "is-score-grid" : ""} ${isFinished ? "is-disabled" : ""}`}>
@@ -857,8 +865,8 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
               </span>
               <div className="match-detail-teams">
                 <span className="sportscore-team sportscore-team-center"><TeamLogo name={detailMatch.home} logo={detailMatch.home_logo} /><strong>{detailMatch.home || "Home team"}</strong></span>
-                <span className={`match-detail-score ${flashKey === detailKey ? "is-flash" : ""}`} aria-label={detailHasScore ? `${detailMatch.home_score} to ${detailMatch.away_score}` : "Score not available"}>
-                  {detailHasScore ? <><span>{detailMatch.home_score}</span><span>:</span><span>{detailMatch.away_score}</span></> : <span>—</span>}
+                <span className={`match-detail-score ${flashKey === detailKey ? "is-flash" : ""}`} aria-label={detailHasScore ? `${detailHome} to ${detailAway}` : "Score not available"}>
+                  {detailHasScore ? <><span>{detailHome}</span><span>:</span><span>{detailAway}</span></> : <span>—</span>}
                 </span>
                 <span className="sportscore-team sportscore-team-center"><TeamLogo name={detailMatch.away} logo={detailMatch.away_logo} /><strong>{detailMatch.away || "Away team"}</strong></span>
               </div>

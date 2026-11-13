@@ -262,6 +262,61 @@ export async function PATCH(request: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const betId = searchParams.get("id");
+    if (!betId) {
+      return NextResponse.json({ error: "Bet ID is required." }, { status: 400 });
+    }
+
+    const authClient = await createSupabaseServerClient();
+    const { data: { user: staffUser } } = await authClient.auth.getUser();
+    const customer = staffUser ? null : await getCustomerSession();
+
+    const writer = writerClient();
+
+    // Determine which table and owner column to use
+    const table = customer ? "customer_bets" : "bets";
+    const ownerColumn = customer ? "account_id" : "user_id";
+    const ownerId = customer ? customer?.account_id : staffUser?.id;
+
+    if (!ownerId) {
+      return NextResponse.json({ error: "Sign in to delete a bet." }, { status: 401 });
+    }
+
+    // Look up the bet, verifying ownership
+    const { data: bet, error: lookupError } = await writer
+      .from(table)
+      .select("id, stake, status, potential_return")
+      .eq("id", betId)
+      .eq(ownerColumn, ownerId)
+      .maybeSingle();
+    if (lookupError) return NextResponse.json({ error: lookupError.message }, { status: 400 });
+    if (!bet) return NextResponse.json({ error: "Bet not found." }, { status: 404 });
+
+    // Only allow deletion of settled bets (won / lost / void)
+    // Open bets must not be deletable — SportyBet-style removal is for history only
+    if (bet.status === "open") {
+      return NextResponse.json({ error: "Only settled bets can be deleted from history." }, { status: 400 });
+    }
+
+    // Delete the bet row
+    const { error: deleteError } = await writer
+      .from(table)
+      .delete()
+      .eq("id", betId);
+
+    if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 400 });
+
+    // Return success with bet details (status, payout info)
+    return NextResponse.json({ id: bet.id, status: bet.status, potential_return: bet.potential_return }, { status: 200 });
+  } catch (error) {
+    console.error("Bet deletion failed:", error);
+    return NextResponse.json({ error: "The bet could not be deleted. Please try again." }, { status: 500 });
+  }
+}
+
 export async function GET() {
   try {
     // Settle anything that has been decided, then report what changed so the
