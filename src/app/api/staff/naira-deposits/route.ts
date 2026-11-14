@@ -37,6 +37,36 @@ export async function GET() {
 }
 
 /**
+ * Delete a reviewed claim entirely (approved or rejected only). Pending
+ * claims cannot be deleted — they must be reviewed first, so the audit
+ * trail only loses entries after a decision has been made. The wallet
+ * credit and ledger rows written on approval are NOT touched.
+ */
+export async function DELETE(request: Request) {
+  const auth = await requireAdmin();
+  if ("error" in auth && auth.error) return auth.error;
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "A deposit id is required." }, { status: 400 });
+  const db = writerClient();
+  const { data: claim } = await db
+    .from("naira_deposits")
+    .select("id, status")
+    .eq("id", id)
+    .maybeSingle();
+  if (!claim) return NextResponse.json({ error: "Deposit claim not found." }, { status: 404 });
+  if (claim.status === "pending") {
+    return NextResponse.json({ error: "This claim is still pending — review it first." }, { status: 409 });
+  }
+  const { error } = await db
+    .from("naira_deposits")
+    .delete()
+    .eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ ok: true, status: claim.status });
+}
+
+/**
  * Review a claim. Approve credits the customer's Naira wallet and writes
  * the wallet ledger history; reject only marks it rejected. Either way the
  * claim leaves "pending", so it can never be reviewed twice.

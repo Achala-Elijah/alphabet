@@ -1,7 +1,7 @@
 "use client";
 
 import AdminShell from "@/components/admin-shell";
-import { Check, X } from "lucide-react";
+import { Check, X, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type NairaDeposit = {
@@ -24,6 +24,7 @@ export default function NairaDepositsPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
   // Screenshot viewer pop-up — admin clicks the screenshot to open it, X closes.
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
 
@@ -67,6 +68,25 @@ export default function NairaDepositsPage() {
     }
   }
 
+  async function removeClaim(deposit: NairaDeposit) {
+    if (busyDeleteId === deposit.id) return;
+    if (!window.confirm("Delete this claim record entirely? This removes the payment upload and claim from the records.")) return;
+    setBusyDeleteId(deposit.id);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/staff/naira-deposits?id=${encodeURIComponent(deposit.id)}`, { method: "DELETE" });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error || "Unable to delete the claim.");
+      setDeposits((current) => current.filter((entry) => entry.id !== deposit.id));
+      setNotice("Claim deleted.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to delete the claim.");
+    } finally {
+      setBusyDeleteId(null);
+    }
+  }
+
   const pending = deposits.filter((deposit) => deposit.status === "pending");
   const reviewed = deposits.filter((deposit) => deposit.status !== "pending");
 
@@ -100,6 +120,20 @@ export default function NairaDepositsPage() {
           <div className="naira-claim-actions">
             <button type="button" className="primary-button" disabled={busyId === deposit.id} onClick={() => void review(deposit, "approve")}><Check size={15} /> Mark successful</button>
             <button type="button" className="danger-button" disabled={busyId === deposit.id} onClick={() => void review(deposit, "reject")}><X size={15} /> Reject</button>
+          </div>
+        )}
+        {deposit.status !== "pending" && (
+          <div className="naira-claim-actions">
+            <button
+              type="button"
+              className="naira-delete-button"
+              disabled={busyDeleteId === deposit.id}
+              onClick={() => void removeClaim(deposit)}
+              aria-label={`Delete claim ${deposit.id.slice(0, 8)}`}
+            >
+              {busyDeleteId === deposit.id ? <Trash2 size={14} className="spin" /> : <Trash2 size={14} />}
+              <span>Delete claim</span>
+            </button>
           </div>
         )}
       </article>
