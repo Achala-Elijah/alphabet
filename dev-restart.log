@@ -242,3 +242,61 @@
  GET /api/bets 200 in 4.8s (next.js: 1.1ms, application-code: 4.8s)
  DELETE /api/staff/naira-deposits?id=00000000-0000-0000-0000-000000000000 401 in 208ms (next.js: 107ms, application-code: 101ms)
  GET /api/staff/naira-deposits 401 in 7ms (next.js: 0.8ms, application-code: 7ms)
+ GET /api/staff/profile 200 in 986ms (next.js: 39ms, application-code: 947ms)
+ GET /account?nav=bets 200 in 2.0s (next.js: 76ms, proxy.ts: 1044ms, application-code: 930ms)
+ GET /api/bets 200 in 2.1s (next.js: 159ms, application-code: 1896ms)
+ GET /api/staff/profile 200 in 501ms (next.js: 0.7ms, application-code: 500ms)
+ GET /api/staff/profile 200 in 512ms (next.js: 1.3ms, application-code: 511ms)
+ GET /api/staff/profile 200 in 517ms (next.js: 0.7ms, application-code: 517ms)
+ GET /api/staff/profile 200 in 503ms (next.js: 1.1ms, application-code: 502ms)
+ GET /api/bets 200 in 2.0s (next.js: 5ms, application-code: 2.0s)
+ GET /api/bets 200 in 2.2s (next.js: 0.7ms, application-code: 2.2s)
+⨯ ./src/components/live-scores.tsx
+Error:   x Expected '</', got ')'
+      ,-[C:\Users\Elijah\Desktop\bet\betkiing-nextjs\src\components\live-scores.tsx:997:1]
+  994 |                     </label>
+  995 |                   )}
+  996 |                 </div>
+  997 |               ))}
+      :                ^
+  998 |               {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
+  999 |             </div>
+ 1000 |             {/* Multiple mode has one stake box for the accumulator. In
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/live-scores.tsx
+./src/app/page.tsx
+⨯ ./src/components/live-scores.tsx
+Error:   x Expression expected
+     ,-[C:\Users\Elijah\Desktop\bet\betkiing-nextjs\src\components\live-scores.tsx:993:1]
+ 990 |                       />
+ 991 |                     </label>
+ 992 |                   )}
+ 993 |                 </div>
+     :                 ^
+ 994 |               ))}
+ 995 |               {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
+ 996 |             </div>
+     `----
+  x Unterminated regexp literal
+     ,-[C:\Users\Elijah\Desktop\bet\betkiing-nextjs\src\components\live-scores.tsx:993:1]
+ 990 |                       />
+ 991 |                     </label>
+ 992 |                   )}
+ 993 |                 </div>
+     :                  ^^^^^
+ 994 |               ))}
+ 995 |               {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
+ 996 |             </div>
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/live-scores.tsx
+./src/app/page.tsx

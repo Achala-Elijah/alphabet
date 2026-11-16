@@ -90,6 +90,7 @@ export default function AdminBetSlipTable({
                   style={{ cursor: "pointer" }}
                   role="button"
                   tabIndex={0}
+                   onMouseDown={(event) => { if (bet.status.toLowerCase() === "won") openWinCelebration(bet); }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();

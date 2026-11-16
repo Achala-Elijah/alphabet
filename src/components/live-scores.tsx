@@ -971,27 +971,31 @@ export default function LiveScores({ sport, market, query = "" }: LiveScoresProp
               >Singles</button>
             </div>
             <div className="betslip-selections">
-              {betslipItems.map(([key, bet]) => (
-                <div className={`betslip-selection ${isSingles ? "has-stake" : ""}`} key={key}>
-                  <span><strong>{bet.option} @ {bet.odds}</strong><small>{bet.match}</small></span>
-                  <button onClick={() => setSelectedBets((current) => { const next = { ...current }; delete next[key]; return next; })} aria-label={`Remove ${bet.match}`}><X size={14} /></button>
-                  {isSingles && (
-                    <label className="betslip-selection-stake">
-                      <span>Stake ({currencySymbol(slipCurrency)})</span>
-                      <input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={bet.stake ?? ""}
-                        placeholder={String(stakeMinimum)}
-                        onChange={(event) => setSelectedBets((current) => ({ ...current, [key]: { ...bet, stake: event.target.value } }))}
-                        aria-label={`Stake for ${bet.match} in ${slipCurrency}`}
-                      />
-                    </label>
-                  )}
-                </div>
-              ))}
+              {betslipItems.map(([key, bet]) => {
+                const matchMatch = visibleMatches.find(m => m.slug === bet.matchId);
+                const kickoff = matchMatch ? formatKickoff(matchMatch.time) : "Time unknown";
+                return (
+                  <div className={`betslip-selection ${isSingles ? "has-stake" : ""}`} key={key}>
+                    <span><strong>{bet.option} @ {bet.odds}</strong><small>{bet.match} • {kickoff}</small></span>
+                    <button onClick={() => setSelectedBets((current) => { const next = { ...current }; delete next[key]; return next; })} aria-label={`Remove ${bet.match}`}><X size={14} /></button>
+                    {isSingles && (
+                      <label className="betslip-selection-stake">
+                        <span>Stake ({currencySymbol(slipCurrency)})</span>
+                        <input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          inputMode="decimal"
+                          value={bet.stake ?? ""}
+                          placeholder={String(stakeMinimum)}
+                          onChange={(event) => setSelectedBets((current) => ({ ...current, [key]: { ...bet, stake: event.target.value } }))}
+                          aria-label={`Stake for ${bet.match} in ${slipCurrency}`}
+                        />
+                      </label>
+                    )}
+                  </div>
+                );
+              })}
               {betslipItems.length === 0 && <p className="betslip-empty">Your bet slip is empty. Select an odd to add it here.</p>}
             </div>
             {/* Multiple mode has one stake box for the accumulator. In
