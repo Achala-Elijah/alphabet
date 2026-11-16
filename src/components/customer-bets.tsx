@@ -17,8 +17,15 @@ type CustomerBet = {
 type SettledBet = { id: string; status: string; payout: number; stake: number; potential_return: number };
 
 type LegOutcome = "won" | "lost" | "pending";
-type LegState = { outcome: LegOutcome; home?: number | null; away?: number | null; statusText?: string; status?: string; started?: boolean };
-type FixtureInfo = { home_score?: number | null; away_score?: number | null; status?: string; status_text?: string; current_minute?: number | null };
+type LegState = { outcome: LegOutcome; home?: number | null; away?: number | null; statusText?: string; status?: string; started?: boolean; time?: string };
+type FixtureInfo = { home_score?: number | null; away_score?: number | null; status?: string; status_text?: string; current_minute?: number | null; time?: string };
+
+function formatKickoff(value?: string) {
+  if (!value) return "Time unavailable";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
 
 function fixtureStatus(fixture: FixtureInfo): "finished" | "cancelled" | "live" | "scheduled" {
   const raw = (fixture.status_text || fixture.status || "").trim().toLowerCase();
@@ -59,7 +66,8 @@ async function fetchLegStates(bets: CustomerBet[]): Promise<Record<string, LegSt
         away: typeof fixture?.away_score === "number" ? fixture.away_score : null,
         statusText: fixture?.status_text,
         status: fixture?.status,
-        started
+        started,
+        time: typeof fixture?.time === "string" ? fixture.time : undefined
       };
     });
   }
@@ -430,6 +438,7 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
           {selections.slice(0, 2).map((selection, index) => (
             <small key={`${bet.id}-preview-${index}`}>
               {selection.option || "Selection"} @ {Number(selection.odds || 0).toFixed(2)} · {selection.match || "Match"}
+              {legStates[bet.id]?.[index]?.time ? ` · ${formatKickoff(legStates[bet.id]![index]!.time)}` : ""}
             </small>
           ))}
           {isMulti && selections.length > 2 && <small>+{selections.length - 2} more</small>}
@@ -453,7 +462,7 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
                     aria-label={`Change odd for ${selection.match || "match"}`}
                   >
                     <strong>{selection.option || "Selection"} <em>@ {Number(selection.odds || 0).toFixed(2)}</em></strong>
-                    <small>{selection.match || "Match"} · {selection.market || "Market"}{bet.status === "open" ? " · tap to change odd" : ""}</small>
+                    <small>{selection.match || "Match"} · {selection.market || "Market"}{bet.status === "open" ? " · tap to change odd" : ""}{state?.time ? ` · ${formatKickoff(state.time)}` : ""}</small>
                     <div className="leg-meta">
                       <span className={`leg-state leg-state-${outcome}`}>
                         {outcome === "won" ? <Check size={12} /> : outcome === "lost" ? <X size={12} /> : <Hourglass size={12} />}

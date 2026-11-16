@@ -300,3 +300,15 @@ Caused by:
 Import trace for requested module:
 ./src/components/live-scores.tsx
 ./src/app/page.tsx
+ GET /account?nav=bets 200 in 3.5s (next.js: 472ms, proxy.ts: 1710ms, application-code: 1283ms)
+ GET /account?nav=bets 200 in 476ms (next.js: 68ms, proxy.ts: 358ms, application-code: 50ms)
+ GET /api/staff/profile 200 in 1154ms (next.js: 148ms, application-code: 1006ms)
+ GET /api/staff/profile 200 in 522ms (next.js: 0.8ms, application-code: 521ms)
+ GET /api/staff/profile 200 in 641ms (next.js: 1.4ms, application-code: 640ms)
+ GET /api/staff/profile 200 in 389ms (next.js: 0.9ms, application-code: 388ms)
+ GET /api/bets 200 in 8.0s (next.js: 148ms, application-code: 7.8s)
+ GET /api/bets 200 in 1845ms (next.js: 1.8ms, application-code: 1843ms)
+ GET /account?nav=bets 200 in 467ms (next.js: 103ms, proxy.ts: 274ms, application-code: 90ms)
+ GET /account?nav=bets 200 in 468ms (next.js: 49ms, proxy.ts: 358ms, application-code: 62ms)
+ GET /account?nav=bets 200 in 352ms (next.js: 50ms, proxy.ts: 241ms, application-code: 61ms)
+ GET /account?nav=bets 200 in 555ms (next.js: 77ms, proxy.ts: 418ms, application-code: 60ms)
