@@ -312,3 +312,1454 @@ Import trace for requested module:
  GET /account?nav=bets 200 in 468ms (next.js: 49ms, proxy.ts: 358ms, application-code: 62ms)
  GET /account?nav=bets 200 in 352ms (next.js: 50ms, proxy.ts: 241ms, application-code: 61ms)
  GET /account?nav=bets 200 in 555ms (next.js: 77ms, proxy.ts: 418ms, application-code: 60ms)
+ GET /api/staff/profile 200 in 1763ms (next.js: 9ms, application-code: 1754ms)
+ GET /api/bets 200 in 4.1s (next.js: 15ms, application-code: 4.0s)
+ GET / 200 in 38ms (next.js: 22ms, application-code: 16ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /api/auth/customer 200 in 766ms (next.js: 88ms, application-code: 678ms)
+ GET /api/staff/profile 200 in 818ms (next.js: 87ms, application-code: 731ms)
+ GET /api/auth/customer 200 in 359ms (next.js: 1.1ms, application-code: 358ms)
+ GET /api/staff/profile 200 in 560ms (next.js: 1.4ms, application-code: 558ms)
+ GET /api/staff/profile 200 in 480ms (next.js: 1.0ms, application-code: 479ms)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.6s (next.js: 88ms, application-code: 2.5s)
+ GET /api/bets 200 in 1994ms (next.js: 6ms, application-code: 1988ms)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 87ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football&featured=true 200 in 1790ms (next.js: 0.8ms, application-code: 1789ms)
+ GET /api/sports/live?sport=football 200 in 1955ms (next.js: 1.0ms, application-code: 1954ms)
+ GET /api/sports/live?sport=football 200 in 2.2s (next.js: 3ms, application-code: 2.2s)
+ GET /api/bets 200 in 1899ms (next.js: 0.9ms, application-code: 1898ms)
+ GET /api/sports/live?sport=football 200 in 4.3s (next.js: 1.8ms, application-code: 4.3s)
+ GET /api/bets 200 in 2.3s (next.js: 0.9ms, application-code: 2.3s)
+ GET /api/sports/live?sport=football 200 in 1668ms (next.js: 0.9ms, application-code: 1667ms)
+ GET /api/sports/live?sport=football 200 in 2.1s (next.js: 1.4ms, application-code: 2.1s)
+ GET /api/bets 200 in 1548ms (next.js: 0.9ms, application-code: 1547ms)
+ GET /api/sports/live?sport=football 200 in 2.0s (next.js: 1.4ms, application-code: 2.0s)
+ GET /api/bets 200 in 2.2s (next.js: 0.9ms, application-code: 2.2s)
+ GET /api/sports/live?sport=football 200 in 2.0s (next.js: 0.8ms, application-code: 2.0s)
+ GET /api/bets 200 in 8.5s (next.js: 0.9ms, application-code: 8.5s)
+ GET /api/bets 200 in 2.0s (next.js: 1.2ms, application-code: 2.0s)
+ GET /api/bets 200 in 2.2s (next.js: 1.2ms, application-code: 2.2s)
+ GET /api/sports/live?sport=football 200 in 2.6s (next.js: 1.8ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 1.0ms, application-code: 3.0s)
+ GET /api/bets 200 in 3.0s (next.js: 1.6ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 1974ms (next.js: 2ms, application-code: 1972ms)
+ GET /api/bets 200 in 2.3s (next.js: 2ms, application-code: 2.3s)
+ GET /api/bets 200 in 5.6s (next.js: 1.2ms, application-code: 5.6s)
+ GET /api/sports/live?sport=football 200 in 5.8s (next.js: 1.3ms, application-code: 5.8s)
+ GET / 200 in 358ms (next.js: 92ms, application-code: 266ms)
+ GET /api/sports/live?sport=football 200 in 401ms (next.js: 1.7ms, application-code: 399ms)
+ GET /api/bets 200 in 444ms (next.js: 16ms, application-code: 428ms)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+ GET /api/auth/customer 401 in 25.6s (next.js: 2ms, application-code: 25.6s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+ GET /api/auth/customer 401 in 25.6s (next.js: 0.8ms, application-code: 25.6s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Supabase matches query failed: TypeError: fetch failed
+Supabase matches query failed: TypeError: fetch failed
+Supabase matches query failed: TypeError: fetch failed
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND sportscore.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'sportscore.com'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND sportscore.com
+      at ignore-listed frames {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'sportscore.com'
+  }
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+ GET /api/auth/customer 401 in 25.5s (next.js: 1.2ms, application-code: 25.5s)
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football&featured=true 200 in 54s (next.js: 1.8ms, application-code: 54s)
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.0ms, application-code: 54s)
+ GET /api/sports/live?sport=football&featured=true 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+ GET /api/auth/customer 401 in 25.5s (next.js: 1.2ms, application-code: 25.5s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/auth/customer 401 in 25.6s (next.js: 1.3ms, application-code: 25.6s)
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.8ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Supabase matches query failed: TypeError: fetch failed
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.9ms, application-code: 54s)
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.1ms, application-code: 54s)
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.0ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.2ms, application-code: 54s)
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.0ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 4ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.5ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.1ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.0ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.3ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 3ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.0ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.2ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 0.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.9ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.5ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.3ms, application-code: 54s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 54s (next.js: 1.3ms, application-code: 54s)
+ GET /api/sports/live?sport=football 200 in 37.1s (next.js: 1.8ms, application-code: 37.1s)
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed

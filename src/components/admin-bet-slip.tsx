@@ -27,7 +27,7 @@ export type AdminBetSlipTableProps = {
 };
 
 /**
- * Renders a table of bet slips with clickable rows well, for admin/sub-admins.
+ * Renders a table of bet slips with clickable rows for admin/sub-admins.
  * Clicking a settled, winning slip opens the WinCelebration popup; open,
  * lost and void slips are clickable but do nothing.
  */
@@ -90,14 +90,13 @@ export default function AdminBetSlipTable({
                   style={{ cursor: "pointer" }}
                   role="button"
                   tabIndex={0}
-                   onMouseDown={(event) => { if (bet.status.toLowerCase() === "won") openWinCelebration(bet); }}
+                  onClick={() => { if (bet.status.toLowerCase() === "won") openWinCelebration(bet); }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      openWinCelebration(bet);
+                      if (bet.status.toLowerCase() === "won") openWinCelebration(bet);
                     }
                   }}
-                  onClick={() => openWinCelebration(bet)}
                   aria-label={`Bet ${bet.id.slice(0, 8).toUpperCase()}: ${bet.status.toUpperCase()}, stake ${formatCustomerAmount(bet.stake, currency)}`}
                 >
                   <td className="id-cell">{bet.id.slice(0, 8).toUpperCase()}</td>
