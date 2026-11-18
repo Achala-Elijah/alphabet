@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { RefreshCw, Ticket } from "lucide-react";
 import { formatCustomerAmount } from "@/lib/currency";
+import { formatKickoff } from "@/lib/kickoff";
 
 type CustomerBet = {
   id: string;
@@ -12,13 +13,6 @@ type CustomerBet = {
   selections: Array<{ match?: string; matchId?: string; option?: string; odds?: number; market?: string }>;
   placed_at: string;
 };
-
-function formatKickoff(value?: string) {
-  if (!value) return "Time unavailable";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-}
 
 export default function MyMatches() {
   const [bets, setBets] = useState<CustomerBet[]>([]);

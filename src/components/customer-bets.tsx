@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Clock3, History, RefreshCw, Ticket, Check, Lock, X, Hourglass, ChevronRight, Trophy, Trash2, Loader2 } from "lucide-react";
 import WinCelebration, { type WinCelebrationBet } from "@/components/win-celebration";
 import { currencySymbol } from "@/lib/currency";
+import { formatKickoff } from "@/lib/kickoff";
 
 type CustomerBet = {
   id: string;
@@ -19,13 +20,6 @@ type SettledBet = { id: string; status: string; payout: number; stake: number; p
 type LegOutcome = "won" | "lost" | "pending";
 type LegState = { outcome: LegOutcome; home?: number | null; away?: number | null; statusText?: string; status?: string; started?: boolean; time?: string };
 type FixtureInfo = { home_score?: number | null; away_score?: number | null; status?: string; status_text?: string; current_minute?: number | null; time?: string };
-
-function formatKickoff(value?: string) {
-  if (!value) return "Time unavailable";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-}
 
 function fixtureStatus(fixture: FixtureInfo): "finished" | "cancelled" | "live" | "scheduled" {
   const raw = (fixture.status_text || fixture.status || "").trim().toLowerCase();
@@ -296,6 +290,7 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
   // Collapsible cards — collapsed by default, one open at a time.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [legStates, setLegStates] = useState<Record<string, LegState[]>>({});
+  const [activeWinCustomer, setActiveWinCustomer] = useState<WinCelebrationBet | null>(null);
   // Odds popup: tapping a team inside an expanded open bet opens all
   // markets for that game so the pick can be changed.
   const [oddsTarget, setOddsTarget] = useState<{ bet: CustomerBet; selectionIndex: number } | null>(null);
@@ -389,6 +384,17 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
     setTab(next);
     setExpandedId(null); // a card from the other tab must not pop open here
   };
+
+  function openWinCelebrationCustomer(bet: CustomerBet) {
+    const selections = bet.selections || [];
+    setActiveWinCustomer({
+      id: bet.id,
+      payout: bet.status === "won" ? (bet.potential_return ?? 0) : 0,
+      stake: bet.stake ?? 0,
+      potential_return: bet.status === "won" ? (bet.potential_return ?? 0) : 0,
+      selections: selections.length > 0 ? selections.map((s) => ({ match: s.match, option: s.option, odds: s.odds, market: s.market })) : [],
+    });
+  }
 
   const renderBetCard = (bet: CustomerBet) => {
     const expanded = expandedId === bet.id;
@@ -485,8 +491,11 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
               <span>{bet.status === "won" ? "Won" : bet.status === "lost" ? "Lost" : bet.status === "void" ? "Refund" : "Potential return"} <strong>{money(payout)}</strong></span>
             </div>
             {bet.status === "won" && (
-              <p className="customer-bet-win"><Trophy size={13} /> You won this bet — winnings credited to your wallet.</p>
-            )}
+  <>
+    <p className="customer-bet-win"><Trophy size={13} /> You won this bet — winnings credited to your wallet.</p>
+    <button type="button" className="customer-bet-view-ticket" onClick={() => openWinCelebrationCustomer(bet)}>View winning ticket</button>
+  </>
+)}
             {bet.status === "lost" && (
               <p className="customer-bet-loss"><X size={13} /> This bet lost — one or more selections did not win.</p>
             )}
@@ -525,6 +534,9 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
       {!loading && !error && displayedBets.map((bet) => renderBetCard(bet))}
       {oddsTarget && <OddsPopup bet={oddsTarget.bet} selectionIndex={oddsTarget.selectionIndex} onClose={() => setOddsTarget(null)} onChanged={() => void loadBets({ quiet: true })} />}
       {wins.length > 0 && <WinCelebration win={wins[0]} onClose={() => setWins((current) => current.slice(1))} currency={currency} />}
+      {activeWinCustomer && (
+        <WinCelebration win={activeWinCustomer} onClose={() => setActiveWinCustomer(null)} currency={currency} />
+      )}
     </section>
   );
 }

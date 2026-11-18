@@ -9,6 +9,7 @@ import { fuzzyScore } from "@/lib/fuzzy-search";
 import { writeSearchQuery } from "@/lib/search-query";
 import { currencySymbol, formatCustomerAmount } from "@/lib/currency";
 import { minStake, minStakeLabel, normalizeCurrency } from "@/lib/limits";
+import { formatKickoff } from "@/lib/kickoff";
 import WinCelebration, { type WinCelebrationBet } from "@/components/win-celebration";
 import BetPlaced, { type PlacedBetReceipt } from "@/components/bet-placed";
 
@@ -45,18 +46,6 @@ type LiveScoresResponse = {
   databaseReady?: boolean;
   setupRequired?: boolean;
 };
-
-function formatKickoff(value?: string) {
-  if (!value) return "Time unavailable";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString([], {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
 
 const marketOptions: Record<string, string[]> = {
   "1X2": ["1", "X", "2"],

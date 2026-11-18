@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { formatBookingCode } from "@/lib/bet-slip";
 import { formatCustomerAmount } from "@/lib/currency";
 import type { BetSlipSelection } from "@/lib/bet-slip";
+import { formatKickoff } from "@/lib/kickoff";
 
 export type PlacedBetReceipt = {
   ids: string[];
@@ -37,6 +38,28 @@ export default function BetPlaced({
   const totalOdds = receipt.selections.reduce((total, selection) => total * Number(selection.odds || 1), 1);
   const isSingles = receipt.mode === "singles";
   const displayCode = receipt.bookingCode ? formatBookingCode(receipt.bookingCode) : "";
+  const [kickoffs, setKickoffs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadKickoffs() {
+      const ids = [...new Set(receipt.selections.map((selection) => selection.matchId).filter(Boolean))];
+      if (ids.length === 0) return;
+      try {
+        const response = await fetch(`/api/sports/live?matchIds=${encodeURIComponent(ids.join(","))}`, { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json() as { matches?: Array<{ slug?: string; time?: string }> };
+        const times: Record<string, string> = {};
+        for (const match of data.matches || []) if (match.slug) times[match.slug] = match.time || "";
+        if (!cancelled) setKickoffs(times);
+      } catch {
+        // Unavailable kickoffs are simply not shown.
+      }
+    }
+    void loadKickoffs();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receipt.selections.map((selection) => selection.matchId).join(",")]);
 
   useEffect(() => {
     setCopied(false);
@@ -121,7 +144,7 @@ export default function BetPlaced({
           {receipt.selections.map((selection, index) => (
             <div key={`${selection.matchId}-${selection.market}-${selection.option}-${index}`}>
               <span>{selection.option} @ {Number(selection.odds).toFixed(2)}</span>
-              <small>{selection.match} · {selection.market}</small>
+              <small>{selection.match} · {selection.market}{kickoffs[selection.matchId] ? ` · ${formatKickoff(kickoffs[selection.matchId])}` : ""}</small>
               {isSingles && selection.stake ? (
                 <em>Stake {formatCustomerAmount(Number(selection.stake), currency)}</em>
               ) : null}

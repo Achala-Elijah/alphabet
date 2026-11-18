@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import WinCelebration, { type WinCelebrationBet } from "@/components/win-celebration";
 import { formatCustomerAmount } from "@/lib/currency";
+import { formatKickoff } from "@/lib/kickoff";
 
 export type AdminBetSlipRow = {
   id: string;
@@ -38,11 +39,39 @@ export default function AdminBetSlipTable({
   empty = "No bets found.",
   showSelections = false,
 }: AdminBetSlipTableProps) {
-  const [activeWin, setActiveWin] = useState<WinCelebrationBet | null>(null);
-
   const headers = showSelections
-    ? ["Bet ID", "Stake", "Potential return", "Selections", "Placed"]
-    : ["Bet ID", "Stake", "Potential return", "Status", "Placed"];
+    ? ["Bet ID", "Stake", "Potential return", "Selections", "Kickoff"]
+    : ["Bet ID", "Stake", "Potential return", "Status", "Kickoff"];
+
+  const [activeWin, setActiveWin] = useState<WinCelebrationBet | null>(null);
+  const [kickoffs, setKickoffs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadKickoffs() {
+      const ids = [...new Set(bets.flatMap((bet) => Array.isArray(bet.selections)
+        ? (bet.selections as Array<{ matchId?: string }>).map((selection) => selection.matchId || "").filter(Boolean)
+        : []))];
+      if (ids.length === 0) {
+        if (!cancelled) setKickoffs({});
+        return;
+      }
+      try {
+        const response = await fetch(`/api/sports/live?matchIds=${encodeURIComponent(ids.join(","))}`, { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json() as { matches?: Array<{ slug?: string; time?: string }> };
+        const times: Record<string, string> = {};
+        for (const match of data.matches || []) {
+          if (match.slug) times[match.slug] = match.time || "";
+        }
+        if (!cancelled) setKickoffs(times);
+      } catch {
+        // Kickoff lookup failed — the cells fall back to "Time unavailable".
+      }
+    }
+    void loadKickoffs();
+    return () => { cancelled = true; };
+  }, [bets]);
 
   function openWinCelebration(bet: AdminBetSlipRow) {
     const normalizedStatus = String(bet.status || "").trim().toLowerCase();
@@ -59,6 +88,15 @@ export default function AdminBetSlipTable({
       potential_return: Number(bet.potential_return) || 0,
       selections,
     });
+  }
+
+  function kickoffText(bet: AdminBetSlipRow) {
+    if (!Array.isArray(bet.selections)) return "Time unavailable";
+    const times = [...new Set((bet.selections as Array<{ matchId?: string }>)
+      .map((selection) => selection.matchId ? kickoffs[selection.matchId] : "")
+      .filter((value): value is string => Boolean(value)))]
+      .map(formatKickoff);
+    return times.length ? times.join(" · ") : "Time unavailable";
   }
 
   return (
@@ -109,10 +147,25 @@ export default function AdminBetSlipTable({
                     {showSelections ? (
                       Array.isArray(bet.selections) ? bet.selections.length : "—"
                     ) : (
-                      <span className={`status ${bet.status.toLowerCase()}`}>{bet.status}</span>
+                      <>
+                        <span className={`status ${bet.status.toLowerCase()}`}>{bet.status}</span>
+                        {bet.status.toLowerCase() === "won" && (
+                          <button
+                            type="button"
+                            className="win-ticket-link"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openWinCelebration(bet);
+                            }}
+                            aria-label={`View winning ticket ${bet.id.slice(0, 8)}`}
+                          >
+                            View ticket
+                          </button>
+                        )}
+                      </>
                     )}
                   </td>
-                  <td>{new Date(bet.placed_at).toLocaleString()}</td>
+                  <td>{kickoffText(bet)}</td>
                 </tr>
               ))
             )}

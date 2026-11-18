@@ -385,7 +385,8 @@ export async function GET(request: Request) {
         away_score: match.away_score,
         status: match.status,
         status_text: match.status_text,
-        current_minute: match.current_minute
+        current_minute: match.current_minute,
+        time: match.time
       })), sport });
     }
     // Customer site: finished and cancelled matches are NEVER shown.
