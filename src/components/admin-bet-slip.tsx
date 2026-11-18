@@ -45,7 +45,10 @@ export default function AdminBetSlipTable({
     : ["Bet ID", "Stake", "Potential return", "Status", "Placed"];
 
   function openWinCelebration(bet: AdminBetSlipRow) {
-    if (bet.status.toLowerCase() !== "won") return;
+    const normalizedStatus = String(bet.status || "").trim().toLowerCase();
+    if (normalizedStatus !== "won") {
+      return;
+    }
     const selections = Array.isArray(bet.selections)
       ? (bet.selections as { match?: string; option?: string; odds?: number; market?: string }[])
       : null;
@@ -90,11 +93,11 @@ export default function AdminBetSlipTable({
                   style={{ cursor: "pointer" }}
                   role="button"
                   tabIndex={0}
-                  onClick={() => { if (bet.status.toLowerCase() === "won") openWinCelebration(bet); }}
+                  onClick={() => openWinCelebration(bet)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      if (bet.status.toLowerCase() === "won") openWinCelebration(bet);
+                      openWinCelebration(bet);
                     }
                   }}
                   aria-label={`Bet ${bet.id.slice(0, 8).toUpperCase()}: ${bet.status.toUpperCase()}, stake ${formatCustomerAmount(bet.stake, currency)}`}

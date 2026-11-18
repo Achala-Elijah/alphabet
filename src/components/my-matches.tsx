@@ -9,14 +9,22 @@ type CustomerBet = {
   stake: number;
   potential_return: number;
   status: string;
-  selections: Array<{ match?: string; option?: string; odds?: number; market?: string }>;
+  selections: Array<{ match?: string; matchId?: string; option?: string; odds?: number; market?: string }>;
   placed_at: string;
 };
+
+function formatKickoff(value?: string) {
+  if (!value) return "Time unavailable";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
 
 export default function MyMatches() {
   const [bets, setBets] = useState<CustomerBet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [kickoffs, setKickoffs] = useState<Record<string, string>>({});
 
   async function loadActiveBets() {
     setLoading(true);
@@ -24,7 +32,20 @@ export default function MyMatches() {
       const response = await fetch("/api/bets", { cache: "no-store" });
       const result = await response.json() as { bets?: CustomerBet[]; error?: string };
       if (!response.ok) throw new Error(result.error || "Unable to load your active bets.");
-      setBets((result.bets || []).filter((bet) => bet.status === "open"));
+      const nextBets = (result.bets || []).filter((bet) => bet.status === "open");
+      setBets(nextBets);
+      const ids = [...new Set(nextBets.flatMap((bet) => (bet.selections || []).map((selection) => selection.matchId || "").filter(Boolean)))];
+      const times: Record<string, string> = {};
+      if (ids.length > 0) {
+        const liveResponse = await fetch(`/api/sports/live?matchIds=${encodeURIComponent(ids.join(","))}`, { cache: "no-store" });
+        if (liveResponse.ok) {
+          const liveData = await liveResponse.json() as { matches?: Array<{ slug?: string; time?: string }> };
+          for (const match of liveData.matches || []) {
+            if (match.slug) times[match.slug] = match.time || "";
+          }
+        }
+      }
+      setKickoffs(times);
       setError("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to load your active bets.");
@@ -64,7 +85,10 @@ export default function MyMatches() {
               <div className="my-match-selection" key={`${bet.id}-${index}`}>
                 <span>
                   <strong>{selection.option || "Selection"} @ {Number(selection.odds || 0).toFixed(2)}</strong>
-                  <small>{selection.match || "Match"} · {selection.market || "Market"}</small>
+                  <small>
+                    {selection.match || "Match"} · {selection.market || "Market"}
+                    {selection.matchId && kickoffs[selection.matchId] ? ` · ${formatKickoff(kickoffs[selection.matchId])}` : ""}
+                  </small>
                 </span>
               </div>
             ))}
@@ -73,7 +97,9 @@ export default function MyMatches() {
             <span>Stake <strong>{formatCustomerAmount(bet.stake)}</strong></span>
             <span>Potential return <strong>{formatCustomerAmount(bet.potential_return)}</strong></span>
           </div>
-          <small className="customer-bet-date">Placed {new Date(bet.placed_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</small>
+          <small className="customer-bet-date">
+            {bet.selections.map((selection, i) => `${selection.match || `Match ${i + 1}`} kicks off ${formatKickoff(selection.matchId ? kickoffs[selection.matchId] : undefined)}`).join("  ·  ")}
+          </small>
         </article>
       ))}
     </section>

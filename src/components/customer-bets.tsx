@@ -490,7 +490,9 @@ export default function CustomerBets({ initialTab = "active" }: { initialTab?: "
             {bet.status === "lost" && (
               <p className="customer-bet-loss"><X size={13} /> This bet lost — one or more selections did not win.</p>
             )}
-            <small className="customer-bet-date">{new Date(bet.placed_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</small>
+            <small className="customer-bet-date">
+              {legs.map((leg, i) => `${selections[i]?.match || `Match ${i + 1}`} kicks off ${formatKickoff(leg?.time)}`).join("  ·  ")}
+            </small>
             {bet.status !== "open" && tab === "history" && (
               <div className="customer-bet-delete">
                 <button
