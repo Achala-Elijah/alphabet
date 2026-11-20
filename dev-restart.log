@@ -1929,3 +1929,71 @@ Match cache unavailable: TypeError: fetch failed
  GET /api/sports/live?matchIds=74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.9s (next.js: 0.7ms, application-code: 2.9s)
   Reload env: .env
  GET /account?nav=bets 200 in 1171ms (next.js: 177ms, proxy.ts: 907ms, application-code: 87ms)
+⨯ ./src/lib/payments/index.ts:3:1
+Module not found: Can't resolve './alphapay'
+  1 | import { manualProvider } from "./manual";
+  2 | import { paystackProvider } from "./paystack";
+> 3 | import { alphapayProvider } from "./alphapay";
+    | ^
+  4 | import { PaymentError, type PaymentProvider } from "./types";
+  5 |
+  6 | /** Registry — add a new gateway by importing it and adding one line here. */
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./src/lib/payments/service.ts
+./src/app/account/page.tsx
+  Reload env: .env
+  Reload env: .env
+  Reload env: .env
+  Reload env: .env
+ GET /account?nav=bets 200 in 4.3s (next.js: 556ms, proxy.ts: 1581ms, application-code: 2.1s)
+ GET /api/staff/profile 200 in 1893ms (next.js: 389ms, application-code: 1503ms)
+ GET /api/staff/profile 200 in 505ms (next.js: 1.8ms, application-code: 503ms)
+ GET /api/staff/profile 200 in 1001ms (next.js: 1.4ms, application-code: 999ms)
+ GET /api/staff/profile 200 in 380ms (next.js: 1.5ms, application-code: 379ms)
+ GET /api/bets 200 in 7.0s (next.js: 389ms, application-code: 6.6s)
+○ Compiling /api/sports/live/route ...
+ GET /api/bets 200 in 5.2s (next.js: 1.3ms, application-code: 5.2s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.6s (next.js: 124ms, application-code: 2.4s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 1846ms (next.js: 1.6ms, application-code: 1845ms)
+ GET /api/bets 200 in 1515ms (next.js: 8ms, application-code: 1507ms)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.3s (next.js: 1.5ms, application-code: 2.3s)
+ GET /api/bets 200 in 2.1s (next.js: 1.1ms, application-code: 2.1s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 1934ms (next.js: 1.4ms, application-code: 1932ms)
+ GET /api/bets 200 in 2.4s (next.js: 1.5ms, application-code: 2.4s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.1s (next.js: 1.3ms, application-code: 2.1s)
+ GET /api/bets 200 in 2.2s (next.js: 1.6ms, application-code: 2.2s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 1831ms (next.js: 1.3ms, application-code: 1830ms)
+ GET /api/bets 200 in 2.4s (next.js: 1.4ms, application-code: 2.4s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 1879ms (next.js: 1.1ms, application-code: 1878ms)
+ GET /api/bets 200 in 2.2s (next.js: 1.3ms, application-code: 2.2s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.1s (next.js: 1.0ms, application-code: 2.1s)
+ GET /api/bets 200 in 2.2s (next.js: 1.2ms, application-code: 2.2s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 1802ms (next.js: 1.2ms, application-code: 1801ms)
+ GET /api/bets 200 in 2.6s (next.js: 1.6ms, application-code: 2.6s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.0s (next.js: 1.6ms, application-code: 2.0s)
+ GET /api/bets 200 in 3.4s (next.js: 2ms, application-code: 3.4s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.1s (next.js: 1.9ms, application-code: 2.1s)
+ GET /api/bets 200 in 4.6s (next.js: 1.3ms, application-code: 4.6s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.2s (next.js: 1.7ms, application-code: 2.2s)
+ GET /api/bets 200 in 2.2s (next.js: 1.4ms, application-code: 2.2s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.3s (next.js: 1.4ms, application-code: 2.3s)
+ GET /api/bets 200 in 2.4s (next.js: 1.8ms, application-code: 2.4s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 1900ms (next.js: 6ms, application-code: 1894ms)
+ GET /api/bets 200 in 2.7s (next.js: 1.4ms, application-code: 2.7s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 1980ms (next.js: 1.2ms, application-code: 1979ms)
+ GET /api/bets 200 in 2.4s (next.js: 1.6ms, application-code: 2.4s)
+ GET /api/sports/live?matchIds=3eddc6f5-c9ea-4cd9-a56e-3e57441c5b2b%2Cf9ca377c-2759-4c39-8dc8-7e508a686eb6%2Cecfd68aa-58c8-4fc8-aa56-cc685b428762%2C74b295bb-c451-4ec1-9f74-49eeb1888d7d%2C5339bb04-cd59-4e80-89ae-0a885081a873%2Cdc6a7c47-dfaf-4d31-b2d8-328040f7da9b%2Ca6021188-3ae2-4c74-8a8a-848f793098ef%2Cda70a6c5-1950-4e31-98b3-6d5142763012%2Cf6a22a49-ad93-4a94-b761-7f3ae89a4ebe%2C1a50c248-1135-4bcf-8fe7-283b28fc24ef%2C0f13bd0b-e65f-4478-a798-d5894cd6d468%2C0efd22f9-5a0f-4ca3-84d5-a5120f6bb0c9%2C148545a9-3ecd-48e5-9f9d-9196dd796fff%2C191c0bb0-703e-4f15-89f9-256841283969 200 in 2.1s (next.js: 1.3ms, application-code: 2.1s)
+ GET /account 200 in 421ms (next.js: 181ms, proxy.ts: 208ms, application-code: 32ms)
+ GET /account 200 in 810ms (next.js: 7ms, proxy.ts: 197ms, application-code: 606ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /api/bets 200 in 2.7s (next.js: 1.1ms, application-code: 2.7s)
+ POST /api/payments/deposit 502 in 2.6s (next.js: 111ms, application-code: 2.5s)
+ GET /account 200 in 1409ms (next.js: 591ms, proxy.ts: 512ms, application-code: 306ms)
+ GET /account 200 in 830ms (next.js: 168ms, proxy.ts: 508ms, application-code: 154ms)
+ GET /account 200 in 866ms (next.js: 152ms, proxy.ts: 576ms, application-code: 139ms)
+ GET /account 200 in 547ms (next.js: 89ms, proxy.ts: 320ms, application-code: 138ms)
+ GET /account 200 in 511ms (next.js: 88ms, proxy.ts: 298ms, application-code: 125ms)
+ GET /account 200 in 616ms (next.js: 122ms, proxy.ts: 329ms, application-code: 165ms)

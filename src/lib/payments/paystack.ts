@@ -165,7 +165,7 @@ export const paystackProvider: PaymentProvider = {
     };
   },
 
-  async verifyDeposit(reference: string, expected?: { amount: number; currency: Currency }): Promise<VerifyDepositResult> {
+  async verifyDeposit(reference: string, expected?: { amount: number; currency: Currency }, providerPayload?: Record<string, unknown> | null): Promise<VerifyDepositResult> {
     if (!reference) {
       throw new PaymentError("A deposit reference is required.", 400);
     }
@@ -181,7 +181,7 @@ export const paystackProvider: PaymentProvider = {
     return { status: mismatched ? "failed" : status, amount, currency, payload };
   },
 
-  async parseWebhook(body: string, signature: string | null): Promise<WebhookEvent> {
+  async parseWebhook(body: string, signature: string | null, headers?: Record<string, string>): Promise<WebhookEvent> {
     if (!body) throw new PaymentError("Empty webhook payload.", 400);
     if (!signature) throw new PaymentError("Missing Paystack signature.", 401);
     // Webhooks can arrive from either merchant account (GHS or NGN) —

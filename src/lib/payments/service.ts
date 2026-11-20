@@ -398,16 +398,36 @@ export async function verifyAndSettle(db: SupabaseClient, reference: string, sub
   const provider = getPaymentProvider();
   let result;
   try {
-    result = await provider.verifyDeposit(reference, { amount: Number(row.amount), currency: row.currency });
+    result = await provider.verifyDeposit(
+      reference,
+      { amount: Number(row.amount), currency: row.currency },
+      row.provider_payload ?? null
+    );
   } catch (reason) {
-    // A Paystack 404 means we don't know this reference — treat as failed
-    // locally only when the provider explicitly says it's abandoned/failed.
-    if (reason instanceof PaymentError) {
+    // Only a definitive "unknown/abandoned reference" from the gateway fails
+    // the deposit. Config or transport errors (503/502) must leave it pending
+    // so it can still settle on a later retry or via the webhook.
+    if (reason instanceof PaymentError && (reason.status === 404 || reason.status === 400)) {
       await markDepositFailed(db, reference);
       return { status: "failed", balance: await getBalance(db, row) };
     }
     throw reason;
   }
+  // Remember gateway identifiers returned by verify (e.g. AlphaPay's TXN
+  // reference) so a later webhook can still be matched to this deposit.
+  if (result.payload) {
+    const extras: Record<string, unknown> = {};
+    for (const key of ["alphaPayReference", "alphaPayTransactionId", "alphaPaySession", "depositReference"]) {
+      if (result.payload[key] !== undefined) extras[key] = result.payload[key];
+    }
+    if (Object.keys(extras).length) {
+      await db.from("deposits").update({
+        provider_payload: { ...(row.provider_payload || {}), ...extras },
+        updated_at: new Date().toISOString()
+      }).eq("reference", reference);
+    }
+  }
+
   if (mismatched(row, result)) {
     await markDepositFailed(db, reference);
     return { status: "failed", balance: await getBalance(db, row) };
@@ -418,6 +438,42 @@ export async function verifyAndSettle(db: SupabaseClient, reference: string, sub
     return { status: "failed", balance: await getBalance(db, row) };
   }
   return { status: "pending", balance: await getBalance(db, row) };
+}
+
+/**
+ * Re-check recent pending deposits when the wallet page loads. This makes the
+ * browser return path sufficient on its own — a webhook is only a backup.
+ */
+export async function verifyPendingDeposits(db: SupabaseClient, subject: DepositSubject) {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  let query = db.from("deposits").select("*")
+    .eq("status", "pending")
+    .eq("provider", getPaymentProvider().name)
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(5);
+  query = subject.type === "staff"
+    ? query.eq("staff_id", subject.staffId)
+    : query.eq("account_id", subject.accountId);
+
+  const { data } = await query;
+  let checked = 0;
+  let settled = 0;
+  let failed = 0;
+  let balance: number | undefined;
+
+  for (const row of (data || []) as DepositRow[]) {
+    try {
+      const result = await verifyAndSettle(db, row.reference, subject);
+      checked += 1;
+      balance = result.balance;
+      if (result.status === "paid") settled += 1;
+      else if (result.status === "failed") failed += 1;
+    } catch (reason) {
+      console.error(`Pending deposit check failed for ${row.reference}:`, reason);
+    }
+  }
+  return { checked, settled, failed, balance };
 }
 
 /**
@@ -432,10 +488,25 @@ export async function settleFromWebhook(db: SupabaseClient, event: WebhookEvent)
   if (!event.reference) {
     throw new PaymentError("Webhook is missing a deposit reference.", 400);
   }
-  const row = await readDeposit(db, event.reference);
+
+  let row = await readDeposit(db, event.reference);
+  if (!row && event.externalReference && event.provider) {
+    // Some gateways (AlphaPay) send their own TXN-... reference in webhooks.
+    // Fall back to a pending deposit whose stored payload contains it.
+    const { data } = await db.from("deposits")
+      .select("*")
+      .eq("provider", event.provider)
+      .eq("status", "pending")
+      .limit(200);
+    row = ((data || []) as DepositRow[]).find(candidate =>
+      JSON.stringify(candidate.provider_payload || {}).includes(event.externalReference!)
+    ) || null;
+  }
   if (!row) {
     throw new PaymentError("Unknown deposit reference.", 404);
   }
+
+  const reference = row.reference;
   if (row.status !== "pending") {
     return {
       status: row.status,
@@ -444,12 +515,12 @@ export async function settleFromWebhook(db: SupabaseClient, event: WebhookEvent)
     };
   }
   if (mismatched(row, event)) {
-    await markDepositFailed(db, event.reference);
+    await markDepositFailed(db, reference);
     return { status: "failed", balance: await getBalance(db, row) };
   }
-  if (event.status === "paid") return settleDeposit(db, event.reference);
+  if (event.status === "paid") return settleDeposit(db, reference);
   if (event.status === "failed") {
-    await markDepositFailed(db, event.reference);
+    await markDepositFailed(db, reference);
     return { status: "failed", balance: await getBalance(db, row) };
   }
   return { status: row.status, balance: await getBalance(db, row) };

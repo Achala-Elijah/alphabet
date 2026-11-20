@@ -9,7 +9,7 @@
  * See README.md in this folder for the full checklist.
  */
 
-export type PaymentProviderName = "manual" | "paystack";
+export type PaymentProviderName = "manual" | "paystack" | "alphapay";
 
 export type Currency = "GHS" | "NGN";
 
@@ -46,11 +46,17 @@ export type VerifyDepositResult = {
 };
 
 export type WebhookEvent = {
+  /** Internal deposit reference (DEP-.../ACT-...), or the gateway reference
+   * when the provider cannot map back to an internal reference. */
   reference: string;
   status: DepositStatus;
   amount?: number;
   currency?: Currency;
   payload?: Record<string, unknown> | null;
+  /** Gateway name — used for fallback lookups by external reference. */
+  provider?: PaymentProviderName;
+  /** The gateway's own transaction reference (e.g. AlphaPay TXN-...). */
+  externalReference?: string;
 };
 
 export interface PaymentProvider {
@@ -62,9 +68,17 @@ export interface PaymentProvider {
    * Implementations should compare `expected` against what the provider
    * actually charged and fail the deposit on any mismatch.
    */
-  verifyDeposit(reference: string, expected?: { amount: number; currency: Currency }): Promise<VerifyDepositResult>;
-  /** Verify authenticity and unpack a provider webhook. Throws when unsupported. */
-  parseWebhook(body: string, signature: string | null): Promise<WebhookEvent>;
+  verifyDeposit(
+    reference: string,
+    expected?: { amount: number; currency: Currency },
+    providerPayload?: Record<string, unknown> | null
+  ): Promise<VerifyDepositResult>;
+  /**
+   * Verify authenticity and unpack a provider webhook. Throws when unsupported.
+   * `headers` carries raw request headers (x-webhook-signature, x-webhook-timestamp, …)
+   * for providers that need them; Paystack uses only the `signature` arg.
+   */
+  parseWebhook(body: string, signature: string | null, headers?: Record<string, string>): Promise<WebhookEvent>;
 }
 
 export class PaymentError extends Error {

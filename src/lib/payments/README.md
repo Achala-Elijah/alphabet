@@ -30,41 +30,55 @@ ledger rows the wallets already read.
 | --- | --- |
 | `types.ts` | `PaymentProvider` interface + shared types (`PaymentError`) |
 | `manual.ts` | Default provider: simulated instant success (no gateway) |
-| `paystack.ts` | Paystack scaffold — inactive until configured |
+| `alphapay.ts` | **Active** AlphaPay hosted checkout (Ghana + Nigeria) |
+| `paystack.ts` | Kept for future use — inactive while the account is under review |
 | `index.ts` | Provider registry, selected by `PAYMENT_PROVIDER` |
 | `service.ts` | Create / verify / settle / webhook orchestration |
 
-## Going live with Paystack (Ghana + Nigeria)
+## Going live with AlphaPay (Ghana + Nigeria)
 
 1. Run `supabase/payments-migration.sql` in the Supabase SQL Editor.
    This creates the `deposits` table used to track every deposit intent.
-   `public.customer_session` also needs `phone` returned — re-running
-   `supabase/customer-auth-migration.sql` updates that function.
-2. Create an account at https://dashboard.paystack.com and grab your keys
-   (Settings -> API Keys & Webhooks). The repo comes pre-populated in
-   `.env` with test keys; for production replace them with live keys.
+2. Create an account at https://app.alphapay.me, complete KYC, and generate an
+   API key. That single key is all hosted checkout needs — AlphaPay does not
+   issue a separate public key for this flow.
 3. Add to `.env` and restart Next.js:
    ```
-   PAYMENT_PROVIDER=paystack
-   PAYSTACK_SECRET_KEY=sk_test_...   # required server-side
-   PAYSTACK_PUBLIC_KEY=pk_test_...   # optional — hosted checkout doesn't need it
+   PAYMENT_PROVIDER=alphapay
+   ALPHAPAY_SECRET_KEY=sk_live_...     # sk_test_... auto-selects the sandbox
+   ALPHAPAY_WEBHOOK_SECRET=...         # optional; see step 4
+   ALPHAPAY_SANDBOX=false              # set true to force sandbox
    ```
-4. Set the webhook URL in the Paystack dashboard to
-   `https://your-domain/api/payments/webhook`. Paystack sends
-   `x-paystack-signature`; the endpoint verifies the HMAC before crediting.
-5. Test with a card/MoMo in test mode (min deposit GH₵ 50 / ₦5,000),
-   confirm the wallet credits, then swap to the live `sk_live_...` key and
-   update the webhook URL to your production domain.
+4. In the AlphaPay dashboard create a webhook pointing to
+   `https://your-domain/api/payments/webhook` and subscribe it to
+   `transaction.success`, `transaction.failed` and `transaction.cancelled`.
+   The dashboard shows a **signing secret** once when the webhook is created —
+   copy it into `ALPHAPAY_WEBHOOK_SECRET` so the endpoint can verify
+   `X-Webhook-Signature` / `X-Webhook-Timestamp` (HMAC-SHA256 of
+   `${timestamp}.${rawBody}`). If you did not copy it, leave the variable blank:
+   webhooks are then re-verified directly against AlphaPay's API before any
+   wallet is credited, and the browser return path still settles deposits.
+5. Test a small deposit (min GH₵ 50 / ₦5,000), confirm the wallet credits, and
+   verify the webhook delivery log in the AlphaPay dashboard.
+
+## Switching back to Paystack later
+
+Set `PAYMENT_PROVIDER=paystack`, restore `PAYSTACK_SECRET_KEY` and
+`PAYSTACK_PUBLIC_KEY`, and point the Paystack webhook at
+`https://your-domain/api/payments/webhook`. No other code changes are needed.
 
 ## Callback flow
 
-- `POST /api/payments/deposit` sets `callback_url` to the caller's wallet:
-  staff -> `/sub-admin/wallet`, customer -> `/account?nav=wallet`.
-- After Paystack checkout, the browser lands back on that page with
-  `?reference=DEP-...&trxref=DEP-...`. The page calls
-  `verifyAndSettle()` which verifies with Paystack and credits the wallet.
+- `POST /api/payments/deposit` sets `return_url` to the caller's wallet:
+  staff -> `/sub-admin/wallet`, customer -> `/account?nav=wallet`, with our
+  `?reference=DEP-...` appended.
+- After AlphaPay checkout the browser returns to that page, which calls
+  `verifyAndSettle()` — this queries the AlphaPay checkout session and credits
+  the wallet only when the session status is `PAID`.
 - The webhook (`POST /api/payments/webhook`) is the backup path — if the
-  browser never returns, the deposit still settles server-to-server.
+  browser never returns, the deposit still settles server-to-server. Our
+  internal `DEP-...` reference is sent in the checkout session `metadata` and
+  description so AlphaPay's `TXN-...` webhook reference can be mapped back.
   `settleDeposit` is idempotent, so verify and webhook can race safely.
 
 To add a different gateway later: create `yourgateway.ts` implementing

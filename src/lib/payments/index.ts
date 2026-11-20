@@ -1,11 +1,13 @@
 import { manualProvider } from "./manual";
 import { paystackProvider } from "./paystack";
+import { alphapayProvider } from "./alphapay";
 import { PaymentError, type PaymentProvider } from "./types";
 
 /** Registry — add a new gateway by importing it and adding one line here. */
 const providers: Record<string, PaymentProvider> = {
   manual: manualProvider,
-  paystack: paystackProvider
+  paystack: paystackProvider,
+  alphapay: alphapayProvider
 };
 
 export function getPaymentProvider(): PaymentProvider {

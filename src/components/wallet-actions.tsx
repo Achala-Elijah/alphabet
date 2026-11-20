@@ -108,7 +108,7 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
         return;
       }
       if (data.checkoutUrl) {
-        // Hosted payment page (Paystack) — navigate away. Keep busy until
+        // Hosted payment page (AlphaPay/Paystack) — navigate away. Keep busy until
         // the browser unloads so the user can't double-submit.
         window.location.href = data.checkoutUrl;
         return;

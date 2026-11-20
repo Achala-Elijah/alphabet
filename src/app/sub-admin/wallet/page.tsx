@@ -31,6 +31,22 @@ export default async function SubAdminWallet({ searchParams }: { searchParams: P
     }
   }
 
+  // A webhook is optional: re-check recent pending deposits on wallet load.
+  if (user) {
+    try {
+      const { paymentsClient, verifyPendingDeposits } = await import("@/lib/payments/service");
+      const pending = await verifyPendingDeposits(paymentsClient(), { type: "staff", staffId: user.id });
+      if (pending.settled > 0 && !paymentNotice) {
+        paymentNotice = {
+          kind: "success",
+          text: `Payment confirmed! GH₵ ${(pending.balance ?? 0).toFixed(2)} is your new balance.`
+        };
+      }
+    } catch (err) {
+      console.error("Pending deposit check failed:", err);
+    }
+  }
+
   const { data: profile } = user ? await supabase.from("profiles").select("username, balance").eq("id", user.id).single() : { data: null };
   const { data: rows } = user
     ? await supabase.from("transactions").select("id, type, amount, status, reference, created_at").eq("user_id", user.id).in("type", ["deposit", "withdrawal"]).order("created_at", { ascending: false }).limit(50)

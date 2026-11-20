@@ -87,6 +87,29 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       }
     }
 
+    // No webhook is required: re-check recent pending deposits on every
+    // wallet load so a missed redirect still gets credited.
+    if (customer || staff) {
+      try {
+        const { paymentsClient, verifyPendingDeposits } = await import("@/lib/payments/service");
+        const subject = customer
+          ? { type: "customer" as const, accountId: customer.account_id }
+          : { type: "staff" as const, staffId: user!.id };
+        const pending = await verifyPendingDeposits(paymentsClient(), subject);
+        if (pending.settled > 0 && !paymentNotice) {
+          currentBalance = pending.balance ?? currentBalance;
+          paymentNotice = {
+            kind: "success",
+            text: `Payment confirmed! ${formatCustomerAmount(pending.balance ?? currentBalance, customer?.currency || "GHS")} is your new balance.`
+          };
+        } else if (pending.balance !== undefined && pending.settled > 0) {
+          currentBalance = pending.balance;
+        }
+      } catch (err) {
+        console.error("Pending deposit check failed:", err);
+      }
+    }
+
     let transactions: Array<{ id: string; type: string; amount: number; status: string; reference: string | null; created_at: string }> = [];
     if (customer) {
       const supabase = await import("@/lib/supabase/server").then((module) => module.createSupabaseServerClient());
