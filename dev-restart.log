@@ -2021,3 +2021,6 @@ Import trace for requested module:
  GET /api/staff/profile 200 in 811ms (next.js: 2.0ms, application-code: 809ms)
  GET /api/staff/profile 200 in 775ms (next.js: 1.9ms, application-code: 773ms)
  GET /api/staff/profile 200 in 943ms (next.js: 6ms, application-code: 937ms)
+ GET /api/sports/live?sport=football 200 in 5.7s (next.js: 425ms, application-code: 5.3s)
+ GET /api/sports/live?sport=football 200 in 4.4s (next.js: 1.2ms, application-code: 4.4s)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.4s (next.js: 1.2ms, application-code: 2.4s)
