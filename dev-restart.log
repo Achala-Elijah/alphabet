@@ -2024,3 +2024,6 @@ Import trace for requested module:
  GET /api/sports/live?sport=football 200 in 5.7s (next.js: 425ms, application-code: 5.3s)
  GET /api/sports/live?sport=football 200 in 4.4s (next.js: 1.2ms, application-code: 4.4s)
  GET /api/sports/live?sport=football&featured=true 200 in 2.4s (next.js: 1.2ms, application-code: 2.4s)
+○ Compiling /login/page ...
+ GET /login 200 in 2.4s (next.js: 1057ms, application-code: 1302ms)
+ POST /api/payments/deposit 401 in 808ms (next.js: 478ms, application-code: 330ms)
