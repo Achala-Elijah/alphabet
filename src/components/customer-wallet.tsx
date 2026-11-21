@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { ArrowDownToLine, ArrowUpFromLine, Clock3, Wallet } from "lucide-react";
 import { formatCustomerAmount } from "@/lib/currency";
-import WalletActions from "@/components/wallet-actions";
+import WalletActions, { type NairaDepositMode } from "@/components/wallet-actions";
 
 const DEBIT_TYPES = new Set(["bet_stake", "withdrawal", "withdrawal_activation_fee"]);
 const TRANSACTION_LABELS: Record<string, string> = {
@@ -29,13 +29,15 @@ export default function CustomerWallet({
   currency,
   initialTransactions,
   title = "My Wallet",
-  paymentNotice
+  paymentNotice,
+  nairaDepositMode = "upload"
 }: {
   balance: number;
   currency?: string | null;
   initialTransactions: WalletTransaction[];
   title?: string;
   paymentNotice?: { kind: "success" | "error"; text: string } | null;
+  nairaDepositMode?: NairaDepositMode;
 }) {
   useEffect(() => {
     if (paymentNotice?.kind === "success") {
@@ -53,7 +55,7 @@ export default function CustomerWallet({
         <strong>{formatCustomerAmount(balance, currency)}</strong>
         <small>Wallet funds available for betting</small>
       </div>
-      <WalletActions mode="customer" currency={currency} layout="wallet" availableBalance={balance} />
+      <WalletActions mode="customer" currency={currency} layout="wallet" availableBalance={balance} nairaDepositMode={nairaDepositMode} />
       <div className="wallet-history-heading"><span><Clock3 size={16} /> Transaction History</span></div>
       {initialTransactions.length === 0 ? <div className="wallet-empty">No transactions yet.</div> : <div className="wallet-transactions">
         {initialTransactions.map((transaction) => <div className="wallet-transaction" key={transaction.id}>

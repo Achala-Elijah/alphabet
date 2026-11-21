@@ -13,6 +13,7 @@ import WalletActions from "@/components/wallet-actions";
 import { formatCustomerAmount } from "@/lib/currency";
 import { minDeposit } from "@/lib/limits";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { nairaDepositMode as getNairaDepositMode } from "@/lib/payments";
 
 type StaffSession = { username: string; balance: number; role: "admin" | "sub_admin" };
 
@@ -36,6 +37,8 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
     }
   }
   const customer = staff ? null : await getCustomerSession();
+  // Decided on the server so no gateway secrets reach the browser.
+  const nairaMode = getNairaDepositMode();
   const nav = (await searchParams).nav;
   const isBets = nav === "bets";
   const isWallet = nav === "wallet" || nav === "transactions";
@@ -117,7 +120,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       transactions = result.data || [];
     }
     return <div className="client-app account-page"><ClientHeader /><main className="account-main">
-      {customer ? <CustomerWallet balance={currentBalance} currency={customer.currency} initialTransactions={transactions} title={nav === "transactions" ? "Transaction History" : "My Wallet"} paymentNotice={paymentNotice} /> : staff ? <div className="customer-bets-empty"><Wallet size={27} /><strong>Staff wallet</strong><span>Your staff balance is {formatCustomerAmount(staff.balance, "GHS")}.</span><WalletActions mode="staff" layout="summary" /><Link href="/sub-admin">Open workspace</Link></div> : <div className="customer-bets-empty"><UserRound size={27} /><strong>Sign in to view your wallet</strong><Link href="/login">Customer sign in</Link></div>}
+      {customer ? <CustomerWallet balance={currentBalance} currency={customer.currency} initialTransactions={transactions} title={nav === "transactions" ? "Transaction History" : "My Wallet"} paymentNotice={paymentNotice} nairaDepositMode={nairaMode} /> : staff ? <div className="customer-bets-empty"><Wallet size={27} /><strong>Staff wallet</strong><span>Your staff balance is {formatCustomerAmount(staff.balance, "GHS")}.</span><WalletActions mode="staff" layout="summary" /><Link href="/sub-admin">Open workspace</Link></div> : <div className="customer-bets-empty"><UserRound size={27} /><strong>Sign in to view your wallet</strong><Link href="/login">Customer sign in</Link></div>}
     </main><Suspense fallback={null}><ClientBottomNav /></Suspense></div>;
   }
   return <div className="client-app account-page"><ClientHeader /><main className="account-main">
@@ -126,7 +129,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
       <h1>{customer?.username || staff?.username}</h1>
       <p>{staff ? (staff.role === "admin" ? "Ghana · Admin account" : "Ghana · Sub-admin account") : "Ghana · Customer account"}</p>
       <strong>{formatCustomerAmount(customer?.balance ?? staff?.balance ?? 0, customer?.currency || "GHS")}</strong>
-      <WalletActions mode={staff ? "staff" : "customer"} currency={customer?.currency || "GHS"} layout="summary" availableBalance={Number(customer?.balance ?? staff?.balance ?? 0)} />
+      <WalletActions mode={staff ? "staff" : "customer"} currency={customer?.currency || "GHS"} layout="summary" availableBalance={Number(customer?.balance ?? staff?.balance ?? 0)} nairaDepositMode={nairaMode} />
     </section> : <section className="account-profile-summary account-profile-guest">
       <span className="profile-summary-avatar"><UserRound size={25} /></span>
       <h1>Welcome to AlphaBet</h1>

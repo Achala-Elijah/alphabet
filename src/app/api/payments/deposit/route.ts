@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCustomerSession } from "@/lib/custom-auth";
 import { PaymentError, type Currency, type DepositSubject } from "@/lib/payments/types";
+import { gatewaySupportsCurrency } from "@/lib/payments";
 import { createDeposit, paymentsClient, verifyAndSettle } from "@/lib/payments/service";
 import { minDeposit, normalizeCurrency } from "@/lib/limits";
 import { formatCustomerAmount } from "@/lib/currency";
@@ -40,6 +41,11 @@ export async function POST(request: Request) {
   try {
     const wallet = await resolveWallet();
     if (!wallet) return NextResponse.json({ error: "Sign in to make a deposit." }, { status: 401 });
+    // NGN only has an automatic gateway when AlphaPay is active. Paystack
+    // deposits must go through the OPay screenshot upload instead.
+    if (!gatewaySupportsCurrency(wallet.currency)) {
+      return NextResponse.json({ error: "Naira deposits use the OPay upload flow while Paystack is active. Open your wallet and upload payment proof." }, { status: 400 });
+    }
 
     let body: { amount?: unknown };
     try {

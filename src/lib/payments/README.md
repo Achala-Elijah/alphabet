@@ -32,8 +32,25 @@ ledger rows the wallets already read.
 | `manual.ts` | Default provider: simulated instant success (no gateway) |
 | `alphapay.ts` | **Active** AlphaPay hosted checkout (Ghana + Nigeria) |
 | `paystack.ts` | Kept for future use — inactive while the account is under review |
-| `index.ts` | Provider registry, selected by `PAYMENT_PROVIDER` |
+| `index.ts` | Provider registry, active-provider helpers and currency routing |
 | `service.ts` | Create / verify / settle / webhook orchestration |
+
+## Currency routing
+
+Routing is decided on the server from the wallet currency and the active
+provider — no country column is needed (`GHS` = Ghana, `NGN` = Nigeria).
+
+| `PAYMENT_PROVIDER` | GHS wallet | NGN wallet |
+| --- | --- | --- |
+| `alphapay` | AlphaPay checkout (`country=GH`) | AlphaPay checkout (`country=NG`, MTN/Airtel mobile money) |
+| `paystack` | Paystack checkout | OPay screenshot upload + admin approval |
+| `manual` | Simulated instant deposit | OPay screenshot upload + admin approval |
+
+The same rule applies to the withdrawal activation fee. The OPay upload UI is
+only shown when the active provider is **not** AlphaPay; the gateway routes
+also reject direct NGN requests in that case so the flow cannot be bypassed.
+AlphaPay NGN deposits go through the normal `deposits` table, verification and
+referral-commission flow.
 
 ## Going live with AlphaPay (Ghana + Nigeria)
 
@@ -65,7 +82,9 @@ ledger rows the wallets already read.
 
 Set `PAYMENT_PROVIDER=paystack`, restore `PAYSTACK_SECRET_KEY` and
 `PAYSTACK_PUBLIC_KEY`, and point the Paystack webhook at
-`https://your-domain/api/payments/webhook`. No other code changes are needed.
+`https://your-domain/api/payments/webhook`. Paystack will be used for GHS
+wallets only; NGN wallets automatically return to the OPay screenshot upload.
+No other code changes are needed.
 
 ## Callback flow
 
