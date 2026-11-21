@@ -333,9 +333,12 @@ export async function GET(request: Request) {
       const baseQuery = supabase
         .from("matches")
         .select("id,sport,competition,home,away,home_score,away_score,status,kickoff,source,odds,current_minute");
+      // Newest kickoffs first for BOTH views. The old customer query sorted
+      // ascending and took only 50 rows, so once the table held 50+ older
+      // fixtures the newest (upcoming) fixed matches were always cut off.
       const { data, error } = isAdminView
         ? await baseQuery.order("kickoff", { ascending: false }).limit(200)
-        : await baseQuery.eq("sport", sport).order("kickoff", { ascending: true }).limit(50);
+        : await baseQuery.eq("sport", sport).order("kickoff", { ascending: false }).limit(200);
       if (error) {
         const missingTable = error.message.includes("Could not find the table") || error.code === "42P01";
         if (!missingTable) console.error("Supabase matches query failed:", error.message);
