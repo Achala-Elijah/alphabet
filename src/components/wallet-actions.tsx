@@ -195,13 +195,13 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
     ? normalized === "NGN"
       ? useNairaUpload
         ? "Transfer to OPay, then upload your payment screenshot. An admin confirms it."
-        : "Pay by MTN or Airtel mobile money on AlphaPay."
+        : "Pay by bank transfer on AlphaPay. AlphaPay adds its fee at checkout."
       : "Secure checkout — card, bank transfer and mobile money."
     : mode === "customer"
       ? useNairaUpload
         ? `${money(activationFee)} activation fee is paid by OPay transfer before the withdrawal can be requested.`
         : normalized === "NGN"
-          ? `${money(activationFee)} activation fee is paid through AlphaPay before the withdrawal can be requested.`
+          ? `${money(activationFee)} activation fee is paid by AlphaPay bank transfer before the withdrawal can be requested.`
           : `${money(activationFee)} activation fee is paid separately before the withdrawal can be requested.`
       : null;
 

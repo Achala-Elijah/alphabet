@@ -42,9 +42,17 @@ provider — no country column is needed (`GHS` = Ghana, `NGN` = Nigeria).
 
 | `PAYMENT_PROVIDER` | GHS wallet | NGN wallet |
 | --- | --- | --- |
-| `alphapay` | AlphaPay checkout (`country=GH`) | AlphaPay checkout (`country=NG`, MTN/Airtel mobile money) |
+| `alphapay` | AlphaPay checkout (`country=GH`) | AlphaPay checkout (`country=NG`, bank transfer / virtual account) |
 | `paystack` | Paystack checkout | OPay screenshot upload + admin approval |
 | `manual` | Simulated instant deposit | OPay screenshot upload + admin approval |
+
+> **AlphaPay NGN route and fee:** this merchant currently has only `allbanks_ng`
+> ("Nigeria – Tous les réseaux bancaires") enabled for payin. `mtn_ng` and
+> `airtel_ng` are in AlphaPay's catalogue but are not routed for this account,
+> so hosted checkout does not offer them. The live rate is **3% `ADD_ON`** —
+> a ₦20,000 deposit displays ₦600 extra, the customer pays ₦20,600, and the
+> customer wallet is credited ₦20,000. That fee is AlphaPay's, not ours; we
+> send the selected amount unchanged.
 
 The same rule applies to the withdrawal activation fee. The OPay upload UI is
 only shown when the active provider is **not** AlphaPay; the gateway routes

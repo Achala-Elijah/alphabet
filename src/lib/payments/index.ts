@@ -26,9 +26,10 @@ export function getPaymentProvider(): PaymentProvider {
 /**
  * How a Nigerian (NGN) wallet pays.
  *
- * AlphaPay preselects NG on its hosted checkout and offers MTN/Airtel mobile
- * money, so NGN can use the normal gateway there. Paystack is GHS-only in this
- * deployment, so NGN falls back to the existing OPay screenshot upload.
+ * AlphaPay preselects NG on its hosted checkout and offers the NG payin routes
+ * enabled for the merchant — currently bank transfer / virtual account, not
+ * MTN/Airtel. Paystack is GHS-only in this deployment, so NGN falls back to the
+ * existing OPay screenshot upload.
  */
 export function nairaDepositMode(): "alphapay" | "upload" {
   return activeProviderName() === "alphapay" ? "alphapay" : "upload";
