@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const intended = Math.round(amount * 100) / 100;
   const currency = normalizeCurrency(customer.currency);
   if (!gatewaySupportsCurrency(currency)) {
-    return NextResponse.json({ error: "Naira activation fees use the OPay upload flow while Paystack is active. Open your wallet and upload payment proof." }, { status: 400 });
+    return NextResponse.json({ error: "Naira activation fees use the OPay upload flow. Open your wallet and upload payment proof." }, { status: 400 });
   }
   const fee = withdrawalActivationFee(currency);
   const minimum = minWithdrawal(currency);

@@ -21,27 +21,26 @@ import NairaWithdrawalPopup from "@/components/naira-withdrawal-popup";
  *
  * mode="customer" withdraws through /api/wallet/withdraw,
  * mode="staff"    withdraws through /api/staff/wallet.
- * Deposits use the active gateway, except NGN while Paystack is active: those
- * go through the existing OPay screenshot upload flow instead.
+ * Deposits use the active gateway for GHS; NGN always uses the OPay screenshot
+ * upload flow, regardless of the active provider.
  */
 type Layout = "wallet" | "summary" | "admin";
 type Action = "deposit" | "withdrawal";
-export type NairaDepositMode = "alphapay" | "upload";
 
-export default function WalletActions({ mode, currency, layout = "wallet", availableBalance, nairaDepositMode = "upload" }: { mode: "customer" | "staff"; currency?: string | null; layout?: Layout; availableBalance?: number; nairaDepositMode?: NairaDepositMode }) {
+export default function WalletActions({ mode, currency, layout = "wallet", availableBalance }: { mode: "customer" | "staff"; currency?: string | null; layout?: Layout; availableBalance?: number }) {
   const router = useRouter();
   const [action, setAction] = useState<Action>("deposit");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState<Action | null>(null);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
   const [activationAmount, setActivationAmount] = useState<number | null>(null);
-  // Only used when NGN has no automatic gateway (Paystack / manual mode).
+  // NGN always uses OPay transfer + screenshot, for every active provider.
   const [nairaPopupOpen, setNairaPopupOpen] = useState(false);
   const [nairaWithdrawalPopupOpen, setNairaWithdrawalPopupOpen] = useState(false);
 
   const isAdmin = layout === "admin";
   const normalized = normalizeCurrency(currency);
-  const useNairaUpload = normalized === "NGN" && nairaDepositMode === "upload";
+  const useNairaUpload = normalized === "NGN";
   const limitsCurrency = isAdmin ? "GHS" : normalized;
   const symbol = currencySymbol(limitsCurrency);
   const money = (value: number) => (isAdmin ? `GH₵ ${value.toFixed(2)}` : formatCustomerAmount(value, normalized));
@@ -71,8 +70,7 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
     }
     const value = Math.round(parsed * 100) / 100;
     const isDeposit = action === "deposit";
-    // NGN uses AlphaPay's NG rails when AlphaPay is active; otherwise fall
-    // back to the OPay transfer + screenshot flow.
+    // NGN always uses the OPay transfer + screenshot flow.
     if (isDeposit && mode === "customer" && useNairaUpload) {
       setNotice(null);
       setNairaPopupOpen(true);
@@ -147,7 +145,7 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
       setActivationAmount(null);
       return;
     }
-    // Same routing for the withdrawal activation fee.
+    // Same rule for the withdrawal activation fee.
     if (useNairaUpload) {
       setNotice(null);
       setNairaWithdrawalPopupOpen(true);
@@ -193,16 +191,12 @@ export default function WalletActions({ mode, currency, layout = "wallet", avail
 
   const helper = isDeposit
     ? normalized === "NGN"
-      ? useNairaUpload
-        ? "Transfer to OPay, then upload your payment screenshot. An admin confirms it."
-        : "Pay by bank transfer on AlphaPay. AlphaPay adds its fee at checkout."
+      ? "Transfer to OPay, then upload your payment screenshot. An admin confirms it."
       : "Secure checkout — card, bank transfer and mobile money."
     : mode === "customer"
-      ? useNairaUpload
+      ? normalized === "NGN"
         ? `${money(activationFee)} activation fee is paid by OPay transfer before the withdrawal can be requested.`
-        : normalized === "NGN"
-          ? `${money(activationFee)} activation fee is paid by AlphaPay bank transfer before the withdrawal can be requested.`
-          : `${money(activationFee)} activation fee is paid separately before the withdrawal can be requested.`
+        : `${money(activationFee)} activation fee is paid separately before the withdrawal can be requested.`
       : null;
 
   return (

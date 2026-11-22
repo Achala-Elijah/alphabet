@@ -37,30 +37,23 @@ ledger rows the wallets already read.
 
 ## Currency routing
 
-Routing is decided on the server from the wallet currency and the active
-provider — no country column is needed (`GHS` = Ghana, `NGN` = Nigeria).
+Routing is decided on the server from the wallet currency — no country column
+is needed (`GHS` = Ghana, `NGN` = Nigeria).
 
 | `PAYMENT_PROVIDER` | GHS wallet | NGN wallet |
 | --- | --- | --- |
-| `alphapay` | AlphaPay checkout (`country=GH`) | AlphaPay checkout (`country=NG`, bank transfer / virtual account) |
+| `alphapay` | AlphaPay checkout (`country=GH`) | OPay screenshot upload + admin approval |
 | `paystack` | Paystack checkout | OPay screenshot upload + admin approval |
 | `manual` | Simulated instant deposit | OPay screenshot upload + admin approval |
 
-> **AlphaPay NGN route and fee:** this merchant currently has only `allbanks_ng`
-> ("Nigeria – Tous les réseaux bancaires") enabled for payin. `mtn_ng` and
-> `airtel_ng` are in AlphaPay's catalogue but are not routed for this account,
-> so hosted checkout does not offer them. The live rate is **3% `ADD_ON`** —
-> a ₦20,000 deposit displays ₦600 extra, the customer pays ₦20,600, and the
-> customer wallet is credited ₦20,000. That fee is AlphaPay's, not ours; we
-> send the selected amount unchanged.
+NGN **never** uses a gateway in this deployment. Nigerian customers transfer
+to the OPay account and upload a screenshot, which staff approve in
+**Naira Account Deposits** before the wallet moves. The same rule applies to
+the withdrawal activation fee. Direct NGN gateway requests are rejected by
+both payment API routes so the flow cannot be bypassed. Manual NGN deposits do
+not create a `deposits` row and do not earn referral commission.
 
-The same rule applies to the withdrawal activation fee. The OPay upload UI is
-only shown when the active provider is **not** AlphaPay; the gateway routes
-also reject direct NGN requests in that case so the flow cannot be bypassed.
-AlphaPay NGN deposits go through the normal `deposits` table, verification and
-referral-commission flow.
-
-## Going live with AlphaPay (Ghana + Nigeria)
+## Going live with AlphaPay (Ghana)
 
 1. Run `supabase/payments-migration.sql` in the Supabase SQL Editor.
    This creates the `deposits` table used to track every deposit intent.
@@ -83,7 +76,7 @@ referral-commission flow.
    `${timestamp}.${rawBody}`). If you did not copy it, leave the variable blank:
    webhooks are then re-verified directly against AlphaPay's API before any
    wallet is credited, and the browser return path still settles deposits.
-5. Test a small deposit (min GH₵ 50 / ₦5,000), confirm the wallet credits, and
+5. Test a small GHS deposit (min GH₵ 50), confirm the wallet credits, and
    verify the webhook delivery log in the AlphaPay dashboard.
 
 ## Switching back to Paystack later
@@ -91,7 +84,7 @@ referral-commission flow.
 Set `PAYMENT_PROVIDER=paystack`, restore `PAYSTACK_SECRET_KEY` and
 `PAYSTACK_PUBLIC_KEY`, and point the Paystack webhook at
 `https://your-domain/api/payments/webhook`. Paystack will be used for GHS
-wallets only; NGN wallets automatically return to the OPay screenshot upload.
+wallets only; NGN wallets stay on the OPay screenshot upload.
 No other code changes are needed.
 
 ## Callback flow

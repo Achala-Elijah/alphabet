@@ -41,10 +41,9 @@ export async function POST(request: Request) {
   try {
     const wallet = await resolveWallet();
     if (!wallet) return NextResponse.json({ error: "Sign in to make a deposit." }, { status: 401 });
-    // NGN only has an automatic gateway when AlphaPay is active. Paystack
-    // deposits must go through the OPay screenshot upload instead.
+    // NGN always uses the OPay screenshot upload, for every active provider.
     if (!gatewaySupportsCurrency(wallet.currency)) {
-      return NextResponse.json({ error: "Naira deposits use the OPay upload flow while Paystack is active. Open your wallet and upload payment proof." }, { status: 400 });
+      return NextResponse.json({ error: "Naira deposits use the OPay upload flow. Open your wallet and upload payment proof." }, { status: 400 });
     }
 
     let body: { amount?: unknown };
