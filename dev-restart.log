@@ -2027,3 +2027,747 @@ Import trace for requested module:
 ○ Compiling /login/page ...
  GET /login 200 in 2.4s (next.js: 1057ms, application-code: 1302ms)
  POST /api/payments/deposit 401 in 808ms (next.js: 478ms, application-code: 330ms)
+ GET /account 200 in 3.1s (next.js: 235ms, proxy.ts: 1101ms, application-code: 1773ms)
+○ Compiling /api/staff/profile/route ...
+ GET /api/staff/profile 200 in 2.1s (next.js: 173ms, application-code: 1908ms)
+ GET /api/staff/profile 200 in 803ms (next.js: 3ms, application-code: 800ms)
+ GET /api/staff/profile 200 in 644ms (next.js: 2ms, application-code: 642ms)
+ GET /api/staff/profile 200 in 699ms (next.js: 3ms, application-code: 697ms)
+ GET / 200 in 769ms (next.js: 240ms, application-code: 529ms)
+○ Compiling /api/sports/live/route ...
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+ GET /api/auth/customer 401 in 1426ms (next.js: 120ms, application-code: 1306ms)
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+ GET /api/auth/customer 401 in 1439ms (next.js: 120ms, application-code: 1318ms)
+ GET /api/auth/customer 401 in 20ms (next.js: 1.3ms, application-code: 19ms)
+ GET /api/auth/customer 401 in 15ms (next.js: 1.8ms, application-code: 13ms)
+ GET /api/auth/customer 401 in 14ms (next.js: 1.8ms, application-code: 12ms)
+ GET /api/auth/customer 401 in 15ms (next.js: 1.4ms, application-code: 14ms)
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+Error [AuthApiError]: Invalid Refresh Token: Refresh Token Not Found
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 400,
+  code: 'refresh_token_not_found'
+}
+ GET /api/sports/live?sport=football 200 in 6.1s (next.js: 120ms, application-code: 5.9s)
+ GET /api/sports/live?sport=football&featured=true 200 in 6.2s (next.js: 121ms, application-code: 6.1s)
+ GET /api/sports/live?sport=football 200 in 6.4s (next.js: 121ms, application-code: 6.3s)
+ GET /api/sports/live?sport=football&featured=true 200 in 6.5s (next.js: 120ms, application-code: 6.4s)
+ GET /api/sports/live?sport=football 200 in 3.6s (next.js: 1.8ms, application-code: 3.6s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 3ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.5s (next.js: 1.9ms, application-code: 3.5s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 1.2ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.3s (next.js: 3ms, application-code: 3.3s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 1.7ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 3.7s (next.js: 2ms, application-code: 3.7s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 2.0ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 1.8ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 3ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.6s (next.js: 3ms, application-code: 3.5s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 3ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 2ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.5s (next.js: 3ms, application-code: 3.5s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 4ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 3.3s (next.js: 4ms, application-code: 3.3s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 4ms, application-code: 3.4s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 2.0ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 1.9ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 4ms, application-code: 2.8s)
+ GET /api/sports/live?sport=football 200 in 3.3s (next.js: 1.9ms, application-code: 3.3s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 3ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 3ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 3ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 1.3ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 2ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.6s (next.js: 2.0ms, application-code: 3.6s)
+ GET /api/sports/live?sport=football 200 in 5.5s (next.js: 1.0ms, application-code: 5.5s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 1.1ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 1.5ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 3ms, application-code: 3.4s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 3ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 2ms, application-code: 2.8s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 2ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 5ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 4.1s (next.js: 1.8ms, application-code: 4.1s)
+ GET /api/sports/live?sport=football 200 in 3.3s (next.js: 3ms, application-code: 3.3s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 3ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 2ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 3.5s (next.js: 3ms, application-code: 3.5s)
+ GET /api/sports/live?sport=football 200 in 3.6s (next.js: 4ms, application-code: 3.6s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 2ms, application-code: 3.4s)
+ GET /api/sports/live?sport=football 200 in 3.5s (next.js: 1.4ms, application-code: 3.5s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 1.9ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 2ms, application-code: 2.8s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 1.9ms, application-code: 3.4s)
+ GET /api/sports/live?sport=football 200 in 5.0s (next.js: 4ms, application-code: 5.0s)
+ GET /api/sports/live?sport=football 200 in 3.7s (next.js: 3ms, application-code: 3.7s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 2ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 6ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 3.3s (next.js: 1.7ms, application-code: 3.3s)
+ GET /api/sports/live?sport=football 200 in 3.6s (next.js: 3ms, application-code: 3.6s)
+ GET /api/sports/live?sport=football 200 in 4.2s (next.js: 2ms, application-code: 4.2s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 3ms, application-code: 2.8s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 3ms, application-code: 3.4s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 1.6ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 4.6s (next.js: 1.7ms, application-code: 4.6s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 1.9ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 2ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 3.2s (next.js: 4ms, application-code: 3.2s)
+ GET /api/sports/live?sport=football 200 in 3.3s (next.js: 2ms, application-code: 3.3s)
+ GET /api/sports/live?sport=football 200 in 12.1s (next.js: 4ms, application-code: 12.1s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 2ms, application-code: 2.8s)
+ GET /api/sports/live?sport=football 200 in 4.0s (next.js: 1.6ms, application-code: 4.0s)
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 102s (next.js: 3ms, application-code: 102s)
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 78s (next.js: 4ms, application-code: 78s)
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 61s (next.js: 2ms, application-code: 61s)
+Supabase matches query failed: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+Match cache unavailable: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 50s (next.js: 1.5ms, application-code: 50s)
+Supabase matches query failed: TypeError: fetch failed
+ GET /api/sports/live?sport=football 200 in 3.0min (next.js: 2ms, application-code: 3.0min)
+ GET /api/sports/live?sport=football 200 in 2.2min (next.js: 4ms, application-code: 2.2min)
+ GET /api/sports/live?sport=football 200 in 76s (next.js: 3ms, application-code: 76s)
+ GET /api/sports/live?sport=football 200 in 16.8s (next.js: 4ms, application-code: 16.8s)
+ GET /api/sports/live?sport=football 200 in 6.1s (next.js: 7ms, application-code: 6.0s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 2ms, application-code: 3.4s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.1ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 0.9ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 0.9ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 2.6s (next.js: 3ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 2ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 1.1ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.0ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.6s (next.js: 0.9ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 0.9ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.6s (next.js: 1.8ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football 200 in 3.3s (next.js: 1.0ms, application-code: 3.3s)
+ GET /api/sports/live?sport=football 200 in 4.0s (next.js: 1.0ms, application-code: 4.0s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.9ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 1.6ms, application-code: 2.8s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 1.0ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.3s (next.js: 1.2ms, application-code: 2.3s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.5ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.9ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 5.5s (next.js: 1.1ms, application-code: 5.5s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.5ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.3ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 6.2s (next.js: 1.2ms, application-code: 6.2s)
+ GET /api/sports/live?sport=football 200 in 19.7s (next.js: 1.5ms, application-code: 19.7s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 0.9ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.2s (next.js: 1.3ms, application-code: 2.2s)
+ GET /api/sports/live?sport=football 200 in 2.4s (next.js: 1.5ms, application-code: 2.4s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 1.1ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.6s (next.js: 1.2ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 0.8ms, application-code: 3.0s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.2ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 84s (next.js: 1.8ms, application-code: 84s)
+ GET /api/sports/live?sport=football 200 in 24.5s (next.js: 0.9ms, application-code: 24.5s)
+ GET /api/sports/live?sport=football 200 in 6.5s (next.js: 2ms, application-code: 6.5s)
+ GET /api/sports/live?sport=football 200 in 3.8s (next.js: 0.8ms, application-code: 3.8s)
+ GET /api/sports/live?sport=football 200 in 4.9s (next.js: 1.5ms, application-code: 4.9s)
+ GET /api/sports/live?sport=football 200 in 2.7s (next.js: 1.0ms, application-code: 2.7s)
+ GET /api/sports/live?sport=football 200 in 2.3s (next.js: 1.8ms, application-code: 2.3s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 1.0ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 1.2ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.9s (next.js: 0.8ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 0.9ms, application-code: 2.8s)
+ GET /api/sports/live?sport=football 200 in 3.4s (next.js: 0.9ms, application-code: 3.4s)
+ GET /api/sports/live?sport=football 200 in 3.1s (next.js: 1.0ms, application-code: 3.1s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 1.4ms, application-code: 2.5s)
+ GET /admin/login 200 in 963ms (next.js: 233ms, proxy.ts: 35ms, application-code: 695ms)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 3ms, application-code: 2.8s)
+ GET /subadmin/login 404 in 3.3s (next.js: 3.2s, application-code: 186ms)
+ GET / 200 in 58ms (next.js: 36ms, application-code: 22ms)
+ GET /subadmin/login 404 in 34ms (next.js: 3ms, application-code: 30ms)
+ GET /sub-admin/login 200 in 109ms (next.js: 11ms, proxy.ts: 8ms, application-code: 90ms)
+ GET /sub-admin 200 in 1789ms (next.js: 27ms, proxy.ts: 476ms, application-code: 1286ms)
+ GET /sub-admin 200 in 469ms (next.js: 50ms, proxy.ts: 356ms, application-code: 63ms)
+ GET /api/staff/profile 200 in 801ms (next.js: 46ms, application-code: 756ms)
+ GET /api/staff/profile 200 in 804ms (next.js: 46ms, application-code: 758ms)
+ GET /sub-admin/wallet 200 in 4.2s (next.js: 2.7s, proxy.ts: 487ms, application-code: 1010ms)
+ GET /sub-admin/wallet 200 in 1096ms (next.js: 4ms, proxy.ts: 516ms, application-code: 576ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /api/staff/profile 200 in 352ms (next.js: 2ms, application-code: 349ms)
+ GET /api/staff/profile 200 in 360ms (next.js: 0.7ms, application-code: 359ms)
+ GET / 200 in 21ms (next.js: 4ms, application-code: 17ms)
+ GET /api/auth/customer 200 in 678ms (next.js: 88ms, application-code: 590ms)
+ GET /api/auth/customer 200 in 691ms (next.js: 88ms, application-code: 604ms)
+ GET /api/staff/profile 200 in 876ms (next.js: 1.2ms, application-code: 874ms)
+ GET /api/staff/profile 200 in 904ms (next.js: 2ms, application-code: 901ms)
+ GET /api/staff/profile 200 in 374ms (next.js: 0.8ms, application-code: 373ms)
+ GET / 200 in 58ms (next.js: 31ms, application-code: 27ms)
+ GET /api/staff/profile 200 in 426ms (next.js: 0.9ms, application-code: 425ms)
+ GET /api/sports/live?sport=football 200 in 3.0s (next.js: 88ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football&featured=true 200 in 3.0s (next.js: 88ms, application-code: 2.9s)
+ GET /api/sports/live?sport=football&featured=true 200 in 3.8s (next.js: 88ms, application-code: 3.7s)
+ GET /account 200 in 3.3s (next.js: 2.4s, proxy.ts: 257ms, application-code: 575ms)
+ GET /account 200 in 525ms (next.js: 5ms, proxy.ts: 297ms, application-code: 223ms)
+ GET /api/sports/live?sport=football 200 in 5.3s (next.js: 88ms, application-code: 5.2s)
+ GET /api/staff/profile 200 in 492ms (next.js: 1.1ms, application-code: 491ms)
+ GET /api/staff/profile 200 in 508ms (next.js: 0.7ms, application-code: 507ms)
+ GET /api/staff/profile 200 in 530ms (next.js: 1.9ms, application-code: 528ms)
+ GET /api/bets 200 in 1919ms (next.js: 97ms, application-code: 1823ms)
+ GET /account 200 in 843ms (next.js: 3ms, proxy.ts: 318ms, application-code: 522ms)
+ GET /account 200 in 646ms (next.js: 4ms, proxy.ts: 235ms, application-code: 407ms)
+ GET /sub-admin/login 200 in 614ms (next.js: 15ms, proxy.ts: 395ms, application-code: 203ms)
+ GET /sub-admin 200 in 1563ms (next.js: 6ms, proxy.ts: 481ms, application-code: 1076ms)
+ GET /api/staff/profile 200 in 349ms (next.js: 1.8ms, application-code: 347ms)
+ GET /api/staff/profile 200 in 458ms (next.js: 0.9ms, application-code: 457ms)
+ GET / 200 in 17ms (next.js: 3ms, application-code: 14ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /api/auth/customer 200 in 606ms (next.js: 0.7ms, application-code: 606ms)
+ GET /api/auth/customer 200 in 666ms (next.js: 5ms, application-code: 661ms)
+ GET /api/staff/profile 200 in 804ms (next.js: 1.0ms, application-code: 803ms)
+ GET /api/staff/profile 200 in 801ms (next.js: 0.8ms, application-code: 800ms)
+ GET /api/staff/profile 200 in 356ms (next.js: 0.6ms, application-code: 355ms)
+ GET /api/staff/profile 200 in 404ms (next.js: 0.7ms, application-code: 403ms)
+ GET /api/sports/live?sport=football 200 in 2.4s (next.js: 0.7ms, application-code: 2.4s)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.5s (next.js: 0.8ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.6s (next.js: 1.3ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football 200 in 2.8s (next.js: 5ms, application-code: 2.8s)
+ GET /account 200 in 745ms (next.js: 2ms, proxy.ts: 175ms, application-code: 567ms)
+ GET /api/staff/profile 200 in 411ms (next.js: 0.6ms, application-code: 411ms)
+ GET /api/staff/profile 200 in 416ms (next.js: 0.8ms, application-code: 416ms)
+ GET /api/staff/profile 200 in 423ms (next.js: 1.0ms, application-code: 422ms)
+ GET /api/bets 200 in 1696ms (next.js: 1.2ms, application-code: 1694ms)
+ GET /account?nav=account 200 in 727ms (next.js: 4ms, proxy.ts: 312ms, application-code: 411ms)
+ GET /sub-admin/settings 200 in 3.2s (next.js: 2.8s, proxy.ts: 371ms, application-code: 29ms)
+ GET /sub-admin/settings 200 in 414ms (next.js: 13ms, proxy.ts: 363ms, application-code: 38ms)
+ GET /api/staff/profile 200 in 471ms (next.js: 4ms, application-code: 467ms)
+ GET /api/staff/profile 200 in 547ms (next.js: 1.0ms, application-code: 546ms)
+ GET /api/staff/profile 200 in 543ms (next.js: 0.7ms, application-code: 542ms)
+ GET /api/staff/profile 200 in 720ms (next.js: 0.7ms, application-code: 720ms)
+ GET / 200 in 19ms (next.js: 4ms, application-code: 15ms)
+ GET /api/auth/customer 200 in 487ms (next.js: 4ms, application-code: 484ms)
+ GET /api/auth/customer 200 in 483ms (next.js: 0.7ms, application-code: 483ms)
+ GET /api/staff/profile 200 in 377ms (next.js: 1.8ms, application-code: 375ms)
+ GET /api/staff/profile 200 in 749ms (next.js: 1.6ms, application-code: 747ms)
+ GET /api/staff/profile 200 in 559ms (next.js: 0.7ms, application-code: 559ms)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.3s (next.js: 3ms, application-code: 2.3s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 2ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 1.8ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.6s (next.js: 0.7ms, application-code: 2.6s)
+ GET /api/bets 200 in 1672ms (next.js: 5ms, application-code: 1667ms)
+ GET /account 200 in 798ms (next.js: 7ms, proxy.ts: 256ms, application-code: 535ms)
+ GET /api/staff/profile 200 in 469ms (next.js: 0.7ms, application-code: 469ms)
+ GET /api/staff/profile 200 in 482ms (next.js: 0.8ms, application-code: 481ms)
+ GET /api/staff/profile 200 in 479ms (next.js: 0.8ms, application-code: 478ms)
+ GET /account?nav=account 200 in 951ms (next.js: 6ms, proxy.ts: 401ms, application-code: 543ms)
+ GET /sub-admin/settings 200 in 659ms (next.js: 9ms, proxy.ts: 627ms, application-code: 23ms)
+ GET /api/staff/profile 200 in 529ms (next.js: 0.8ms, application-code: 528ms)
+ GET /api/staff/profile 200 in 568ms (next.js: 0.9ms, application-code: 567ms)
+ GET /api/staff/profile 200 in 595ms (next.js: 0.7ms, application-code: 594ms)
+ GET /api/staff/profile 200 in 600ms (next.js: 0.8ms, application-code: 599ms)
+ GET /login 200 in 258ms (next.js: 50ms, application-code: 208ms)
+ POST /api/auth/customer 400 in 435ms (next.js: 6ms, application-code: 428ms)
+ POST /api/auth/customer 200 in 392ms (next.js: 1.0ms, application-code: 390ms)
+ GET / 200 in 94ms (next.js: 4ms, application-code: 89ms)
+ GET /api/auth/customer 200 in 465ms (next.js: 2ms, application-code: 463ms)
+ GET /api/auth/customer 200 in 614ms (next.js: 0.8ms, application-code: 613ms)
+ GET /api/staff/profile 200 in 510ms (next.js: 3ms, application-code: 507ms)
+ GET /api/staff/profile 200 in 515ms (next.js: 1.1ms, application-code: 513ms)
+ GET /api/staff/profile 200 in 511ms (next.js: 0.7ms, application-code: 510ms)
+ GET /api/staff/profile 200 in 860ms (next.js: 0.9ms, application-code: 859ms)
+ GET /api/sports/live?sport=football 200 in 8.0s (next.js: 3ms, application-code: 8.0s)
+ GET /api/bets 200 in 6.3s (next.js: 5ms, application-code: 6.3s)
+ GET /api/sports/live?sport=football 200 in 7.9s (next.js: 0.7ms, application-code: 7.9s)
+ GET /api/sports/live?sport=football&featured=true 200 in 7.9s (next.js: 0.8ms, application-code: 7.9s)
+ GET /api/sports/live?sport=football&featured=true 200 in 7.9s (next.js: 0.9ms, application-code: 7.9s)
+ GET / 200 in 72ms (next.js: 0.8ms, application-code: 71ms)
+ GET /api/auth/customer 200 in 550ms (next.js: 1.0ms, application-code: 549ms)
+ GET /api/auth/customer 200 in 574ms (next.js: 0.9ms, application-code: 573ms)
+ GET /api/staff/profile 200 in 500ms (next.js: 1.0ms, application-code: 499ms)
+ GET /api/staff/profile 200 in 509ms (next.js: 1.6ms, application-code: 508ms)
+ GET /api/staff/profile 200 in 579ms (next.js: 0.9ms, application-code: 578ms)
+ GET /api/staff/profile 200 in 589ms (next.js: 1.4ms, application-code: 588ms)
+ GET /api/sports/live?sport=football 200 in 2.6s (next.js: 0.8ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.6s (next.js: 0.7ms, application-code: 2.6s)
+ GET /api/bets 200 in 1667ms (next.js: 1.6ms, application-code: 1666ms)
+ GET /api/sports/live?sport=football&featured=true 200 in 3.6s (next.js: 1.2ms, application-code: 3.6s)
+ GET /api/sports/live?sport=football 200 in 3.6s (next.js: 1.8ms, application-code: 3.6s)
+ GET /account 200 in 911ms (next.js: 10ms, proxy.ts: 374ms, application-code: 527ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /api/staff/profile 200 in 447ms (next.js: 0.9ms, application-code: 446ms)
+ GET /api/staff/profile 200 in 501ms (next.js: 0.8ms, application-code: 501ms)
+ GET /api/staff/profile 200 in 562ms (next.js: 0.9ms, application-code: 562ms)
+ GET /sub-admin 200 in 2.1s (next.js: 506ms, proxy.ts: 443ms, application-code: 1157ms)
+ GET /api/staff/profile 200 in 472ms (next.js: 0.8ms, application-code: 471ms)
+ GET /api/staff/profile 200 in 509ms (next.js: 4ms, application-code: 505ms)
+ GET /sub-admin/login 200 in 34ms (next.js: 6ms, proxy.ts: 8ms, application-code: 20ms)
+ GET /sub-admin/login 200 in 33ms (next.js: 4ms, proxy.ts: 6ms, application-code: 23ms)
+ GET /login 200 in 103ms (next.js: 3ms, application-code: 100ms)
+ POST /api/auth/customer 200 in 340ms (next.js: 3ms, application-code: 337ms)
+ GET / 200 in 63ms (next.js: 3ms, application-code: 60ms)
+ GET /api/auth/customer 200 in 346ms (next.js: 1.9ms, application-code: 344ms)
+ GET /api/auth/customer 200 in 325ms (next.js: 0.7ms, application-code: 324ms)
+ GET /api/auth/customer 200 in 235ms (next.js: 0.8ms, application-code: 234ms)
+ GET /api/auth/customer 200 in 239ms (next.js: 1.2ms, application-code: 238ms)
+ GET /api/auth/customer 200 in 278ms (next.js: 1.0ms, application-code: 277ms)
+ GET /api/bets 200 in 1757ms (next.js: 5ms, application-code: 1752ms)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 9ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football 200 in 2.5s (next.js: 0.8ms, application-code: 2.5s)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.6s (next.js: 0.8ms, application-code: 2.6s)
+ GET /api/sports/live?sport=football&featured=true 200 in 2.6s (next.js: 1.3ms, application-code: 2.6s)
+ GET /api/auth/customer 200 in 249ms (next.js: 0.8ms, application-code: 249ms)
+ GET /api/auth/customer 200 in 256ms (next.js: 0.9ms, application-code: 255ms)
+ GET /account 200 in 459ms (next.js: 36ms, proxy.ts: 5ms, application-code: 418ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /api/auth/customer 200 in 249ms (next.js: 1.4ms, application-code: 247ms)
+ GET /api/auth/customer 200 in 341ms (next.js: 1.4ms, application-code: 339ms)
+ GET /api/auth/customer 200 in 350ms (next.js: 0.8ms, application-code: 350ms)
+ GET /api/sports/live?sport=football 200 in 2.4s (next.js: 1.1ms, application-code: 2.4s)
+ GET /account?nav=account 200 in 347ms (next.js: 3ms, proxy.ts: 6ms, application-code: 338ms)
+ GET /account?nav=account 200 in 141ms (next.js: 69ms, proxy.ts: 11ms, application-code: 61ms)
+ PATCH /api/account 200 in 685ms (next.js: 55ms, application-code: 630ms)
+ GET /account?nav=account 200 in 251ms (next.js: 10ms, proxy.ts: 11ms, application-code: 229ms)
+ GET /account 200 in 340ms (next.js: 3ms, proxy.ts: 6ms, application-code: 332ms)
+ GET /account 200 in 445ms (next.js: 3ms, proxy.ts: 7ms, application-code: 434ms)
+ GET /api/auth/customer 200 in 224ms (next.js: 4ms, application-code: 219ms)
+ GET /api/auth/customer 200 in 276ms (next.js: 0.6ms, application-code: 276ms)
+ GET /api/auth/customer 200 in 284ms (next.js: 1.1ms, application-code: 283ms)
+ GET /account 200 in 101ms (next.js: 38ms, proxy.ts: 5ms, application-code: 57ms)
+ POST /api/payments/deposit 200 in 1944ms (next.js: 39ms, application-code: 1905ms)
+ GET /account 200 in 618ms (next.js: 4ms, proxy.ts: 10ms, application-code: 604ms)
+ GET /api/auth/customer 200 in 225ms (next.js: 5ms, application-code: 220ms)
+ GET /api/auth/customer 200 in 316ms (next.js: 0.9ms, application-code: 315ms)
+ GET /api/auth/customer 200 in 321ms (next.js: 1.1ms, application-code: 320ms)
+ GET /account 200 in 342ms (next.js: 247ms, proxy.ts: 5ms, application-code: 90ms)
+ GET /account 200 in 198ms (next.js: 112ms, proxy.ts: 9ms, application-code: 77ms)
+ POST /api/payments/deposit 200 in 2.6s (next.js: 243ms, application-code: 2.4s)
+ GET /account 200 in 517ms (next.js: 4ms, proxy.ts: 9ms, application-code: 504ms)
+[browser] Uncaught Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+      <LoadingBoundary name="account/" loading={null}>
+        <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+          <RedirectBoundary>
+            <RedirectErrorBoundary router={{...}}>
+              <InnerLayoutRouter url="/account" tree={[...]} params={{}} renderTree={{...}} segmentPath={[...]} ...>
+                <SegmentViewNode type="page" pagePath="account/pa...">
+                  <SegmentTrieNode>
+                  <AccountPage>
+                    <div className="client-app...">
+                      <ClientHeader>
+                      <main className="account-main">
+                        <section className="account-pr...">
+                          <span>
+                          <h1>
+                          <p>
+                          <strong>
+                          <WalletActions mode="customer" currency="NGN" layout="summary" availableBalance={632265} ...>
+                            <div className="wallet-she...">
+                              <div>
+                              <label>
+                              <div>
+                              <p>
+                              <button>
+                              <p className="wallet-helper">
+                                <ShieldCheck>
++                               Pay by MTN or Airtel mobile money on AlphaPay.
+-                               Pay by bank transfer on AlphaPay. AlphaPay adds its fee at checkout.
+                        ...
+                      ...
+                ...
+              ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at p (<anonymous>)
+    at WalletActions (src\components\wallet-actions.tsx:278:9)
+    at AccountPage (src\app\account\page.tsx:132:7)
+  276 |
+  277 |       {helper && (
+> 278 |         <p className="wallet-helper">
+      |         ^
+  279 |           {isDeposit ? <ShieldCheck size={13} /> : <Clock3 size={13} />}
+  280 |           {helper}
+  281 |         </p>
+ GET /api/auth/customer 200 in 460ms (next.js: 37ms, application-code: 423ms)
+ GET /api/auth/customer 200 in 641ms (next.js: 37ms, application-code: 604ms)
+ GET /api/auth/customer 200 in 653ms (next.js: 37ms, application-code: 616ms)
+⚠ ./src/app/account/page.tsx
+Attempted import error: 'nairaDepositMode' is not exported from '@/lib/payments' (imported as 'getNairaDepositMode').
+
+Import trace for requested module:
+./src/app/account/page.tsx
+⨯ TypeError: (0 , _lib_payments__WEBPACK_IMPORTED_MODULE_15__.nairaDepositMode) is not a function
+    at AccountPage (src\app\account\page.tsx:41:40)
+  39 |   const customer = staff ? null : await getCustomerSession();
+  40 |   // Decided on the server so no gateway secrets reach the browser.
+> 41 |   const nairaMode = getNairaDepositMode();
+     |                                        ^
+  42 |   const nav = (await searchParams).nav;
+  43 |   const isBets = nav === "bets";
+  44 |   const isWallet = nav === "wallet" || nav === "transactions"; {
+  digest: '1850164458'
+}
+ GET /account 200 in 1076ms (next.js: 687ms, proxy.ts: 21ms, application-code: 369ms)
+⚠ ./src/app/account/page.tsx
+Attempted import error: 'nairaDepositMode' is not exported from '@/lib/payments' (imported as 'getNairaDepositMode').
+
+Import trace for requested module:
+./src/app/account/page.tsx
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ TypeError: (0 , _lib_payments__WEBPACK_IMPORTED_MODULE_15__.nairaDepositMode) is not a function
+    at AccountPage (src\app\account\page.tsx:41:40)
+  39 |   const customer = staff ? null : await getCustomerSession();
+  40 |   // Decided on the server so no gateway secrets reach the browser.
+> 41 |   const nairaMode = getNairaDepositMode();
+     |                                        ^
+  42 |   const nav = (await searchParams).nav;
+  43 |   const isBets = nav === "bets";
+  44 |   const isWallet = nav === "wallet" || nav === "transactions"; {
+  digest: '1205050378'
+}
+ GET /account 500 in 1520ms (next.js: 83ms, proxy.ts: 9ms, application-code: 1428ms)
+⚠ ./src/app/account/page.tsx
+Attempted import error: 'nairaDepositMode' is not exported from '@/lib/payments' (imported as 'getNairaDepositMode').
+
+Import trace for requested module:
+./src/app/account/page.tsx
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ TypeError: (0 , _lib_payments__WEBPACK_IMPORTED_MODULE_15__.nairaDepositMode) is not a function
+    at AccountPage (src\app\account\page.tsx:41:40)
+  39 |   const customer = staff ? null : await getCustomerSession();
+  40 |   // Decided on the server so no gateway secrets reach the browser.
+> 41 |   const nairaMode = getNairaDepositMode();
+     |                                        ^
+  42 |   const nav = (await searchParams).nav;
+  43 |   const isBets = nav === "bets";
+  44 |   const isWallet = nav === "wallet" || nav === "transactions"; {
+  digest: '1205050378'
+}
+ GET /account 500 in 1213ms (next.js: 86ms, proxy.ts: 14ms, application-code: 1113ms)
+⚠ ./src/app/account/page.tsx
+Attempted import error: 'nairaDepositMode' is not exported from '@/lib/payments' (imported as 'getNairaDepositMode').
+
+Import trace for requested module:
+./src/app/account/page.tsx
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ TypeError: (0 , _lib_payments__WEBPACK_IMPORTED_MODULE_15__.nairaDepositMode) is not a function
+    at AccountPage (src\app\account\page.tsx:41:40)
+  39 |   const customer = staff ? null : await getCustomerSession();
+  40 |   // Decided on the server so no gateway secrets reach the browser.
+> 41 |   const nairaMode = getNairaDepositMode();
+     |                                        ^
+  42 |   const nav = (await searchParams).nav;
+  43 |   const isBets = nav === "bets";
+  44 |   const isWallet = nav === "wallet" || nav === "transactions"; {
+  digest: '1205050378'
+}
+ GET /account 500 in 683ms (next.js: 68ms, proxy.ts: 7ms, application-code: 608ms)
+⚠ ./src/app/account/page.tsx
+Attempted import error: 'nairaDepositMode' is not exported from '@/lib/payments' (imported as 'getNairaDepositMode').
+
+Import trace for requested module:
+./src/app/account/page.tsx
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ TypeError: (0 , _lib_payments__WEBPACK_IMPORTED_MODULE_15__.nairaDepositMode) is not a function
+    at AccountPage (src\app\account\page.tsx:41:40)
+  39 |   const customer = staff ? null : await getCustomerSession();
+  40 |   // Decided on the server so no gateway secrets reach the browser.
+> 41 |   const nairaMode = getNairaDepositMode();
+     |                                        ^
+  42 |   const nav = (await searchParams).nav;
+  43 |   const isBets = nav === "bets";
+  44 |   const isWallet = nav === "wallet" || nav === "transactions"; {
+  digest: '1205050378'
+}
+ GET /account 500 in 519ms (next.js: 60ms, proxy.ts: 10ms, application-code: 449ms)
+⚠ ./src/app/account/page.tsx
+Attempted import error: 'nairaDepositMode' is not exported from '@/lib/payments' (imported as 'getNairaDepositMode').
+
+Import trace for requested module:
+./src/app/account/page.tsx
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ TypeError: (0 , _lib_payments__WEBPACK_IMPORTED_MODULE_15__.nairaDepositMode) is not a function
+    at AccountPage (src\app\account\page.tsx:41:40)
+  39 |   const customer = staff ? null : await getCustomerSession();
+  40 |   // Decided on the server so no gateway secrets reach the browser.
+> 41 |   const nairaMode = getNairaDepositMode();
+     |                                        ^
+  42 |   const nav = (await searchParams).nav;
+  43 |   const isBets = nav === "bets";
+  44 |   const isWallet = nav === "wallet" || nav === "transactions"; {
+  digest: '1205050378'
+}
+ GET /account 500 in 759ms (next.js: 81ms, proxy.ts: 20ms, application-code: 658ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: getNairaDepositMode is not defined
+    at AccountPage (src\app\account\page.tsx:40:21)
+  38 |   const customer = staff ? null : await getCustomerSession();
+  39 |   // Decided on the server so no gateway secrets reach the browser.
+> 40 |   const nairaMode = getNairaDepositMode();
+     |                     ^
+  41 |   const nav = (await searchParams).nav;
+  42 |   const isBets = nav === "bets";
+  43 |   const isWallet = nav === "wallet" || nav === "transactions"; {
+  digest: '2124697425'
+}
+ GET /account 500 in 592ms (next.js: 62ms, proxy.ts: 9ms, application-code: 522ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: nairaMode is not defined
+    at AccountPage (src\app\account\page.tsx:129:200)
+  127 |       <p>{staff ? (staff.role === "admin" ? "Ghana · Admin account" : "Ghana · Sub-admin account") : "Ghana · Customer account"}</p>
+  128 |       <strong>{formatCustomerAmount(customer?.balance ?? staff?.balance ?? 0, customer?.currency || "GHS")}</strong>
+> 129 |       <WalletActions mode={staff ? "staff" : "customer"} currency={customer?.currency || "GHS"} layout="summary" availableBalance={Number(customer?.balance ?? staff?.balance ?? 0)} nairaDepositMode={nairaMode} />
+      |                                                                                                                                                                                                        ^
+  130 |     </section> : <section className="account-profile-summary account-profile-guest">
+  131 |       <span className="profile-summary-avatar"><UserRound size={25} /></span>
+  132 |       <h1>Welcome to AlphaBet</h1> {
+  digest: '3162263629'
+}
+ GET /account 500 in 492ms (next.js: 69ms, proxy.ts: 10ms, application-code: 413ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+⨯ ReferenceError: nairaMode is not defined
+    at AccountPage (src\app\account\page.tsx:129:200)
+  127 |       <p>{staff ? (staff.role === "admin" ? "Ghana · Admin account" : "Ghana · Sub-admin account") : "Ghana · Customer account"}</p>
+  128 |       <strong>{formatCustomerAmount(customer?.balance ?? staff?.balance ?? 0, customer?.currency || "GHS")}</strong>
+> 129 |       <WalletActions mode={staff ? "staff" : "customer"} currency={customer?.currency || "GHS"} layout="summary" availableBalance={Number(customer?.balance ?? staff?.balance ?? 0)} nairaDepositMode={nairaMode} />
+      |                                                                                                                                                                                                        ^
+  130 |     </section> : <section className="account-profile-summary account-profile-guest">
+  131 |       <span className="profile-summary-avatar"><UserRound size={25} /></span>
+  132 |       <h1>Welcome to AlphaBet</h1> {
+  digest: '1957522917'
+}
+ GET /account 500 in 761ms (next.js: 64ms, proxy.ts: 8ms, application-code: 689ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /account 200 in 779ms (next.js: 66ms, proxy.ts: 6ms, application-code: 707ms)
+ GET /api/auth/customer 200 in 534ms (next.js: 248ms, application-code: 285ms)
+ GET /api/auth/customer 200 in 728ms (next.js: 249ms, application-code: 479ms)
+ GET /api/auth/customer 200 in 933ms (next.js: 249ms, application-code: 684ms)
+ GET /account 200 in 183ms (next.js: 91ms, proxy.ts: 6ms, application-code: 86ms)
+ GET /account 200 in 193ms (next.js: 74ms, proxy.ts: 7ms, application-code: 112ms)
+ GET /account 200 in 50ms (next.js: 5ms, proxy.ts: 6ms, application-code: 40ms)
+ GET /account 200 in 68ms (next.js: 10ms, proxy.ts: 15ms, application-code: 43ms)
+ GET /account 200 in 47ms (next.js: 4ms, proxy.ts: 6ms, application-code: 37ms)
+ POST /api/payments/deposit 401 in 88ms (next.js: 39ms, application-code: 49ms)
+ GET /login 200 in 259ms (next.js: 30ms, application-code: 228ms)
+ GET /account 200 in 278ms (next.js: 228ms, proxy.ts: 7ms, application-code: 43ms)
+ GET /account 200 in 1470ms (next.js: 6ms, proxy.ts: 910ms, application-code: 554ms)
+ GET /api/staff/profile 200 in 738ms (next.js: 51ms, application-code: 687ms)
+ GET /api/staff/profile 200 in 395ms (next.js: 3ms, application-code: 393ms)
+ GET /api/staff/profile 200 in 430ms (next.js: 0.9ms, application-code: 429ms)
+ GET /api/staff/profile 200 in 384ms (next.js: 1.4ms, application-code: 382ms)
+ GET /account 200 in 623ms (next.js: 48ms, proxy.ts: 9ms, application-code: 565ms)
+ GET /api/auth/customer 200 in 332ms (next.js: 32ms, application-code: 299ms)
+ GET /api/auth/customer 200 in 194ms (next.js: 1.3ms, application-code: 193ms)
+ GET /api/auth/customer 200 in 173ms (next.js: 1.6ms, application-code: 172ms)
+ GET /api/naira-deposits 200 in 927ms (next.js: 79ms, application-code: 848ms)
+ GET /api/naira-deposits 200 in 370ms (next.js: 1.2ms, application-code: 369ms)
+ GET /api/staff/profile 200 in 1431ms (next.js: 7ms, application-code: 1424ms)
+ GET /account 200 in 1038ms (next.js: 79ms, proxy.ts: 11ms, application-code: 948ms)
+ GET /api/auth/customer 200 in 262ms (next.js: 8ms, application-code: 254ms)
+ GET /api/auth/customer 200 in 584ms (next.js: 0.8ms, application-code: 584ms)
+ GET /api/auth/customer 200 in 678ms (next.js: 1.4ms, application-code: 677ms)
+ GET /account 200 in 1363ms (next.js: 3ms, proxy.ts: 696ms, application-code: 664ms)
+ GET /api/staff/profile 200 in 423ms (next.js: 0.9ms, application-code: 422ms)
+ GET /api/staff/profile 200 in 478ms (next.js: 3ms, application-code: 475ms)
+ GET /api/staff/profile 200 in 489ms (next.js: 1.5ms, application-code: 487ms)
+ GET /api/staff/profile 200 in 643ms (next.js: 1.6ms, application-code: 642ms)
+ GET /api/naira-deposits 200 in 354ms (next.js: 1.5ms, application-code: 352ms)
+ GET /api/naira-deposits 200 in 364ms (next.js: 1.8ms, application-code: 362ms)
