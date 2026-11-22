@@ -58,9 +58,8 @@ export function paymentsClient(): SupabaseClient {
   return client;
 }
 
-function newReference(purpose?: "withdrawal_activation_fee") {
-  const prefix = purpose === "withdrawal_activation_fee" ? "ACT-" : "DEP-";
-  return `${prefix}${Date.now().toString(36).toUpperCase()}${randomBytes(4).toString("hex").toUpperCase()}`;
+function newReference() {
+  return `DEP-${Date.now().toString(36).toUpperCase()}${randomBytes(4).toString("hex").toUpperCase()}`;
 }
 
 function tableHint(error: { message: string }) {
@@ -308,7 +307,7 @@ export async function createDeposit(args: CreateDepositArgs) {
 
   const db = paymentsClient();
   const provider = getPaymentProvider();
-  const reference = newReference(args.purpose);
+  const reference = newReference();
 
   let result;
   try {

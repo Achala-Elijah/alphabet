@@ -46,8 +46,8 @@ export type VerifyDepositResult = {
 };
 
 export type WebhookEvent = {
-  /** Internal deposit reference (DEP-.../ACT-...), or the gateway reference
-   * when the provider cannot map back to an internal reference. */
+  /** Internal DEP-... reference (legacy ACT-... is still accepted), or the
+   * gateway reference when the provider cannot map back to ours. */
   reference: string;
   status: DepositStatus;
   amount?: number;

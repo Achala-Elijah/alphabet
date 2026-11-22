@@ -85,7 +85,7 @@ function asString(value: unknown): string | undefined {
   return typeof value === "string" && value ? value : undefined;
 }
 
-/** Find our internal DEP-/ACT- reference anywhere inside an AlphaPay payload. */
+/** Find our internal DEP- reference (or legacy ACT-) inside an AlphaPay payload. */
 function findInternalReference(value: unknown, depth = 0): string | undefined {
   if (depth > 5 || value === null || value === undefined) return undefined;
   if (typeof value === "string") {
